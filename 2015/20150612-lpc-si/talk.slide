@@ -1,0 +1,356 @@
+Concurrency in HEP
+LPC-SI, 2015/06/12
+
+Sebastien Binet
+CNRS/IN2P3
+
+* Ma vie, mon oeuvre
+
+- 2002-2006: Thesis in ATLAS, LPC-Clermont-Fd
+- 2006-2009: Post-doc in ATLAS, LBL-Berkeley
+- 2009-2011: Post-doc in ATLAS, LAL-Orsay
+- 2011-2015: IR, LAL-Orsay (ATLAS,LHCb,LSST)
+- 2015-....: IR, LPC-Clermont-Fd (LSST,Alice)
+
+* ATLAS
+
+
+* ATLAS detector (44m x 25m)
+
+.image _figs/atlas-detector.gif 600 800
+
+* Main steps of data analysis/massaging
+
+#Monte-Carlo techniques
+
+- *Generation:* production of a single physics event (_e.g.:_ a collision and its decay products)
+- *Simulation:* modelling interactions between particles and detector material
+- *Reconstruction:* building physics objects (electrons, photons, ...) from the detector signals (energy deposits)
+- *Analysis:* testing hypotheses against the reconstruction output
+
+.image _figs/schema-general-flux-all-en.png 300 300
+
+* Software in HEP - some numbers
+
+An LHC experiment (_e.g._ ATLAS, CMS) is ~3000 physicists but only a
+fraction of those is developing code.
+
+Reconstruction frameworks grew from ~3M SLOC to ~5M
+
+Summing over all HEP software stack for e.g. ATLAS:
+
+- event generators: ~1.4M SLOC (C++, FORTRAN-77)
+- I/O libraries ~1.7M SLOC (C++)
+- simulation libraries ~1.2M SLOC (C++)
+- reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [[http://acode-browser.usatlas.bnl.gov/lxr/source/][ATLAS code]]? [[https://github.com/cms-sw/cmssw][CMS code]]?)
+
+
+
+
+*GCC:* ~7M SLOC
+
+*Linux* *kernel* *3.6:* 15.9M SLOC
+
+
+* Software development cycle
+
+VCS (CVS, then SVN. GIT: not yet)
+
+Nightlies (Jenkins or homegrown solution)
+
+- need a sizeable cluster of build machines (distcc, ccache, ...)
+- builds the framework stack in ~8h
+- produces ~2000 shared libraries
+- installs them on AFS (also creates RPMs and tarballs)
+
+Devs can then test and develop off the nightly _via_ AFS
+
+Every 6 months or so a new production release is cut, validated (then patched) and deployed on the World Wide LHC Computing Grid (WLCG).
+
+Release size: *~5Gb*
+
+- binaries, libraries (externals+framework stack)
+- extra data (sqlite files, physics processes' modelisation data, ...)
+
+
+* Software runtime ?
+
+Big science, big data, big software, big numbers
+
+- ~1min to initialize the application
+- loading >500 shared libraries
+- connecting to databases (detector description, geometry, ...)
+- instantiating ~2000 C++ components
+- 2Gb/4Gb memory footprint per process
+
+* ATLAS, General context
+
+Data analysis for publication
+- collect and massage raw data from detector (ADC, currents, ...)
+- transform into physical quantities (energy deposits, positions, ...)
+- transform into physics objects (electrons, photons, ...)
+
+Reconstruction software: `Athena`
+
+.image _figs/data-flux-summary-all.png 300 600
+
+* Athena: a sophisticated framework
+
+- multi-language (`C++`, `python`, `FORTRAN`, `Java`)
+- ~300 recurrent developers,
+- ~1000 "one-time" developers
+- 2000 packages & 5000 components
+
+.image _figs/athena-component-model.png 300 600
+
+* Athena@ATLAS
+
+Worked on `PyAthena`, a `CPython` interface layer to `Athena`:
+
+- write algorithms in `python`
+- faster to prototype, slower to execute
+
+Worked on `perfmon`, a performance (`CPU`, `VMem`, `I/O`) monitor for `Athena`:
+
+- minimal overhead (compared to `cachegrind`)
+- "turn-key" solution for physicists
+- debug `C++` performance issues and memory leaks
+
+.image _figs/fullmon-rdotoesd-perfmon.png 200 500
+
+* Software development in HEP
+
+- `C++`: *slow* (very slow?) to compile/develop, *fast* to execute
+- `python`: *fast* development cycle (no compilation), *slow* to execute
+# (can be mitigated if leveraging/rewriting(parts in) `C++`. more work)
+
+.image _figs/xkcd-compiling.png 400 400
+
+Are those our only options ?
+
+* Moore's law
+
+.image _figs/cpu-free-lunch.png 550 550
+
+* Moore's law
+
+- Moore's law still observed at the hardware level
+- *However* the _effective_ perceived computing power is mitigated
+
+_"Easy_ _life"_ during the last 20-30 years:
+
+- Moore's law transleted into *doubling* compute capacity every ~18 months (_via_ clock frequency)
+- *Concurrency* and *parallelism* necessary to efficiently harness the compute power of our new multi-core CPU architectures.
+
+_But_ our current software isn't prepared for parallel/concurrent environments.
+
+* AthenaMP@ATLAS
+
+Worked on `AthenaMP`: a multi-process/multi-core version of `Athena`.
+
+- master process `fork()` `n` sub-processes
+- shares memory _via_ `Copy-On-Write` (`COW`)
+- uses `n` cores of your multi-core machine
+
+.image _figs/athena-mp-seq.png 300 600
+
+* Interlude: concurrency & parallelism
+
+* Interlude: concurrency & parallelism
+
+- *Concurrency* is about _dealing_ with lots of things at once.
+- *Parallelism* is about _doing_ lots of things at once.
+- Not the same, but related.
+- Concurrency is about _structure_, parallelism is about _execution_.
+
+.image _figs/conc-para.png 200 600
+
+Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
+Communication is the means to coordinate the independent executions.
+
+* Concurrency in HEP software
+
+.image _figs/conc-level.png 600 400
+
+* Concurrency in HEP software - II
+
+.image _figs/levels-of-conc.png
+
+# Graal of concurrent software:
+
+.image _figs/gaudi-hive-2.png 250 350
+
+* 
+
+.image _figs/conc-para-mt-mp.png 600 1000
+
+
+* Time for a new language ?
+
+.image _figs/new-lang.png 600 800
+
+* Candidates
+
+- python/pypy
+- FORTRAN-2008
+- Vala
+- Swift
+- Rust
+- Go
+- Chapel
+- Scala
+- Haskell
+- Clojure
+
+* Why not Go ?
+
+# .image _figs/hello-go.png 600 900
+
+.play _code/hello.go
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+* Go in a nutshell
+
+[[https://golang.org][Go]] is a new, general-purpose programming language.
+
+- Compiled
+- Statically typed
+- Concurrent
+- Simple
+- Productive
+
+"Go is a wise, clean, insightful, fresh thinking approach to the greatest-hits subset of the well understood."
+- Michael T. Jones
+
+
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 250 contributors join the project
+- Version 1.0 release in March 2012
+- Version 1.1 release in May 2013
+- Version 1.2 release in December 2013
+- Version 1.3 release in June 2014
+- Version 1.4 release in December 2014
+
+
+* Elements of Go
+
+- Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+* Concurrency
+
+* Goroutines
+
+- The _go_ statement launches a function call as a goroutine
+	go f()
+	go f(x, y, ...)
+
+- A goroutine runs concurrently (but not necessarily in parallel)
+- A goroutine has its own (growable/shrinkable) stack
+
+
+* A simple example
+
+.code _code/concurrency1.go /f START/,/f END/
+
+Function f is launched as 3 different goroutines, all running concurrently:
+
+.play _code/concurrency1.go /main START/,/main END/
+
+* go in HEP
+
+* go in HEP
+
+- Created an `Athena` like concurrent framework,
+- Built `fads` on top of it: a [[https://github.com/go-hep/fads]["FAst Detector Simulation"]] toolkit
+
+Designed with concurrency in mind (`CPU` and `I/O`)
+
+Results very encouraging:
+
+- Compared with a [[https://root.cern.ch][ROOT]] -based `C++` fast simulation tool ([[https://cp3.irmp.ucl.ac.be/projects/delphes][Delphes]])
+
+* Results - testbenches
+
+- Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
+- MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
+- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+
+* Linux (40 cores) testbench: memory
+
+.image _figs/lhcb3-rss.png 550 800
+
+* Linux (40 cores) testbench: CPU
+
+.image _figs/lhcb3-cpu.png 550 800
+
+* Linux (40 cores) testbench: event throughput
+
+.image _figs/lhcb3-hz.png 550 800
+
+* Conclusions
+
+[[https://golang.org][Go]] is really nice and can address the challenges of multicore machines.
+
+Can't wait to see it take `HEP` (and astro/cosmo) by storm.
+
+Working on providing useful software stacks for these communities:
+
+- [[https://go-hep.github.io][go-hep]]
+- [[https://github.com/astrogo][astrogo]]
+
+[[https://golang.org][Go]] is also a nice platform for DevOps: [[https://docker.io][Docker]] and [[https://coreos.com][CoreOS]]
+
+(_but_ _that's_ _for_ _next_ _time..._)
+
+* Backup
+
+* Communication via channels
+
+A channel type specifies a channel value type (and possibly a communication direction):
+
+	chan int
+	chan<- string  // send-only channel
+	<-chan T       // receive-only channel
+
+A channel is a variable of channel type:
+
+	var ch chan int
+	ch := make(chan int)  // declare and initialize with newly made channel
+
+A channel permits _sending_ and _receiving_ values:
+
+	ch <- 1   // send value 1 on channel ch
+	x = <-ch  // receive a value from channel ch (and assign to x)
+
+Channel operations synchronize the communicating goroutines.
+
+* Communicating goroutines
+
+Each goroutine sends its results via channel ch:
+
+.code _code/concurrency2.go /f START/,/f END/
+
+The main goroutine receives (and prints) all results from the same channel:
+
+.play _code/concurrency2.go /main START/,/main END/
+
+
