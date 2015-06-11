@@ -292,7 +292,7 @@ Results very encouraging:
 
 - Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
 - MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
-- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 100GB RAM, 40 cores
 
 * Linux (40 cores) testbench: memory
 
