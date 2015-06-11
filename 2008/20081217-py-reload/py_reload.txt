@@ -1,0 +1,58 @@
+.. include:: beamerdefs.txt
+
+PyAthena py_reload
+~~~~~~~~~~~~~~~~~~
+
+.. :Author: Sebastien Binet
+
+
+Introduction
+============
+
+prompted by RD who was playing with the interactive PyAthena tutorial:
+https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PyAthenaTutorialCERN140210#Interactive_athena_with_PyAthena
+
+He was complaining about the fact that one had to modify the class in 2 different places:
+
+#. in the usual 'PyComps.MyKlass:execute'
+#. in the add-hoc 'somefile:execute'
+
+
+Implementation
+==============
+
+I added in recent 15.0.0 nightlies::
+  PyAthena.py_reload
+to overcome that fact.
+
+Examples of usage::
+
+   athena> theApp.nextEvent()
+   athena> theApp.seek(0)
+   athena> # modify PyComps.py and MyAlg.execute
+   athena> # fetch the algorithm instance:
+   athena> alg = PyAthena.algs.myalg
+   athena> # reload the class and object
+   athena> PyAthena.py_reload (alg)
+   athena> theApp.nextEvent(10)
+
+   athena> theApp.seek(0)
+   athena> # modify again MyAlg.execute
+   athena> # reload only that method
+   athena> PyAthena.py_reload (alg.execute)
+   athena> theApp.nextEvent(10)
+
+   athena> theApp.seek (0)
+   athena> # modify many classes
+   athena> # reload many objects
+   athena> PyAthena.py_reload(alg1, alg2)
+   athena> theApp.nextEvent(10)
+
+Prospects
+=========
+
+I want to also ease adding new histograms during this modify-tweak-run iterative process:
+   #. new histograms would be added to the THistSvc
+   #. old histograms would not be re-added but 'Reset()'
+
+
