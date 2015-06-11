@@ -139,7 +139,7 @@ Are those our only options ?
 
 _"Easy_ _life"_ during the last 20-30 years:
 
-- Moore's law transleted into *doubling* compute capacity every ~18 months (_via_ clock frequency)
+- Moore's law translated into *doubling* compute capacity every ~18 months (_via_ clock frequency)
 - *Concurrency* and *parallelism* necessary to efficiently harness the compute power of our new multi-core CPU architectures.
 
 _But_ our current software isn't prepared for parallel/concurrent environments.
