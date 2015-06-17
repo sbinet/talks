@@ -1,0 +1,142 @@
+=====================
+``AthenaMP`` update
+=====================
+
+:Author: Sebastien Binet <binet@cern.ch>
+:Institute: LAL/IN2P3
+:Date: 2009-02-12
+
+.. image:: lal-logo.eps
+     :scale: 20
+     :align: center
+     :alt: LAL logo
+
+.. contents::
+
+Status & news
+=============
+
+- update to ``python-multiprocessing`` version ``2.6.1.1``
+  http://pypi.python.org/pypi/multiprocessing
+
+- status of ``Athena-MP`` in current ``-dev`` nightlies
+
+  - all patches to allow *out-of-the-box* running are in.
+    ``Athena-15.0.0`` will be multiprocess friendly.
+
+  - most painful task wasn't making ``athena`` multiprocess-aware but
+    to merge the output ``POOL`` files.
+    
+    - intra-files links are working.
+
+    - inter-files links not yet tested (assume they are broken).
+
+    - still problems w/ ``meta-data`` merging (need more specific code)
+
+  - **HUGE** ``if-hell`` script duplicating a lot of decoding logic from
+    ``C++``
+    
+    - violates ``D.R.Y`` and ``S.P.O.T.`` principles
+
+  - possible fallback solution:
+  
+    - don't try to merge ``POOL`` files *out-of-framework*
+    
+    - let ``athena`` *dedicated* jobs to handle the merging
+    
+    - less efficient memory/cpu wise (P->T->P)
+
+    - more efficient manpower-wise
+    
+    - began to write that script
+
+Current & Future issues
+=======================
+
+- occasional dead-lock (?): parent process is waiting for children (which
+  have already finished and ``defunct`` -ed)
+
+::
+
+  binet    29468 29467  1  00:01:19 athena.py ./mp-rdotoesdnotrigger.py
+  binet    30386 29468 74  01:00:24 [python] <defunct>
+  binet    30387 29468 75  01:00:38 [python] <defunct>
+  binet    30388 29468 75  01:00:45 [python] <defunct>
+  binet    30389 29468 74  01:00:23 [python] <defunct>
+
+  0x00a9cc1f sem_wait
+  0xf7f4bb07 PyThread_acquire_lock
+  0xf7f50393 ?
+  0xf7ed84fa PyCFunction_Call
+  0xf7f216f0 PyEval_EvalFrameEx
+
+- the ``multiprocessing.tests`` do dead-lock in some occasions during the nightly builds...
+
+Current & Future issues - II
+=============================
+
+
+- need to chase people directly ``open`` -ing (and writting) files
+  (``std::ofstream`` and ``C/C++`` friends but also ``TFile::Open``)
+
+  - shall write an interposed library to log and detect these calls
+
+- still need to correctly handle ``seeds`` and ``random number streams``
+  for proper reproducibility (and debugging)
+
+  - doesn't look that easy.
+
+
+Current developments and improvements
+=====================================
+
+- new ``GAUDI`` final state machine "just" in
+
+  - will try to use the ``start/connect`` step to "eagerly" pre-load
+    a bunch of persistency-related dictionaries:
+
+    - inspect input and output item lists
+
+    - derive ``GAUDI`` class-id, ``Reflex`` typenames
+
+    - infer ``T/P`` converters libraries
+
+  - expect improving sharing of memory
+
+  - although callback-loaded libraries and objects won't be captured
+
+Current developments and improvements - II
+==========================================
+
+- tried to pre-load some dict. libraries and the persistent types to reduce the amount of memory *unshared* after writting first event.
+
+- slightly better, but **no joy**::
+
+	before:
+	private:   1.68750 MB | shared: 541.3789062 MB
+	private:   5.59375 MB | shared: 549.9921875 MB
+	private: 688.50390 MB | shared: 584.8593750 MB
+
+	after:
+	private:   1.69921 MB | shared: 576.1328125 MB
+	private:   4.75000 MB | shared: 583.2460937 MB
+	private: 674.58593 MB | shared: 606.5234375 MB
+
+- need to reperform the tests by varying the number of output ``TBranches`` *& co* + disentangle from conditions' data access
+
+Current developments and improvements - III
+===========================================
+
+- started work on inter-operability with ``PBS/Torque``
+
+  - simple shell script to book a certain number of cores on a node.
+
+  - percolate through ``MPI`` scheduling policy.
+
+  - number of slots is then passed to ``athena-mp`` to prevent overbooking
+
+  - mickey-mouse tests (on my laptop) OK **apart** from not reaped off 
+    forked children under certain conditions (to be digged deeper)
+
+
+
