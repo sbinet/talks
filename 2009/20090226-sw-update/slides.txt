@@ -1,0 +1,221 @@
+======================
+software update report
+======================
+
+
+.. image:: lal-logo.eps
+     :scale: 20
+     :align: center
+     :alt: LAL logo
+
+:Author: Sebastien Binet <binet@cern.ch>
+:Institute: LAL/IN2P3
+:Date: 2009-02-26
+
+:Title: Software update - toward release 15
+
+Event Data Model summary
+========================
+
+- ESD/AOD merger complete
+
+  - some ESD object in AOD (``tracks``, ``CaloCell``)
+
+- Transient/Persistent (T/P) separation fully in place (except for ``RDO``)
+
+  - **read** speed-up factor 2-3
+
+    - good but not enough (spread from >10 Mb/s to ~<5 Mb/s)
+
+  - facilitated (or made possible) major schema evolution
+
+    - release 13 ESD/AOD files still readable with 15
+    - AOD stats (December 2008): >25% of containers used some migration::
+
+      `p5` :  2 containers
+      `p4` :  4 containers
+      `p3` :  1 container
+      `p2` : 11 containers
+      `p1` : 46 containers
+
+- for `rel-15`:
+  
+  - improved ``I4Momentum`` implementation
+
+  - *maybe* error matrices for ``I4Momentum`` (first in ``egamma``)
+
+AOD size (MC)
+=============
+.. image:: drousseau_talk/p03.eps
+     :scale: 44
+     :align: center
+
+CPU/Memory
+==========
+Experience with large cosmics reprocessing
+
+- for `CPU`, within 15 kSi2K budget (for cosmic repro as well as for `[MC]` collision reco)
+  
+  - at **zero luminosity** : need more work to for pile-up
+
+- for memory: **dangerously close** but below 2 Gb of `RSS`
+
+  - **memory still the highest priority issue**
+
+- 2 tasks:
+
+  - how to **prevent** CPU/memory to increase (due to uncontrolled dev.)
+  - how to **reduce** current memory usage (CPU to a lesser extend)
+
+------------
+
+recurrent problem:
+
+	  CPU/memory performance plots are made/assembled *by hand* (from `PerfMon` data)
+
+Monitoring
+===========================
+.. image:: drousseau_talk/p09.eps
+     :scale: 44
+     :align: center
+
+Reducing memory footprint
+=========================
+
+- ``Gaudi``/ ``Athena`` architecture relies on shared libraries
+- ``OK`` for flexibility but some overhead involved too
+   
+   - *over-designed*, *over-the-top granularity*, ...
+
+- could recoup some memory by lumping together some libraries
+- new tool to visualize dependencies b/w ``.so``:
+  dlldep_
+
+.. _dlldep: http://atlas-project-trigger-release-validation.web.cern.ch/atlas-project-trigger-release-validation/www/dlldep
+
+- major clean-up started in ID/tracking
+
+  - recipes on ``WiKi`` page
+
+::
+    
+ twiki.cern.ch/twiki/bin/view/Atlas/ImprovingSoftware
+
+ex: libJetEvent
+===============
+.. image:: figs/libJetEvent.so.dot.eps 
+     :scale: 55
+     :align: center
+
+ex: libegammaEvent
+==================
+.. image:: figs/libegammaEvent.so.dot.eps
+     :scale: 15
+     :align: center
+
+Reducing memory footprint - II
+==============================
+
+- inspect common ``jobOptions`` for instances of components (``AlgTool``, ``Algorithm`` or ``Service``) of same type with *same* configuration
+
+- identically configured components could be lumped to save memory
+
+- ``find_cfg_dups RecExCommon/rdotoesdnotrigger.py``
+
+::
+
+ Py:CfgMerger   INFO stats of nbr of diffs b/w 'dups':
+ Py:CfgMerger   INFO #diffs: 0 => #cfgs: 144
+ Py:CfgMerger   INFO #diffs: 1 => #cfgs: 121
+ Py:CfgMerger   INFO #diffs: 2 => #cfgs: 192
+
+- 144 cases of 2 tools being configured identically
+
+Reducing memory footprint - III
+===============================
+
+- components' memory usage is the sum of
+
+  - library (.so)
+
+    - avoid statics
+    - avoid templates
+    - minimize dependencies
+
+  - tools
+
+    - share tools' instances with other components
+    - avoid multiple instances doing the same thing
+
+  - internal caches (LUT, `floats`/ `doubles`,...)
+  - temporary objects
+  - EDM
+  - calibration data (`floats`/ `doubles`, granularity,...)
+
+- dynamic memory load balancing
+
+  - drop/shrink (parts of) a component once used 
+  - *e.g.* ``GeoModelSvc``
+
+- ideas for improvements
+
+  - dropping ``python`` configuration after loading (~70 Mb)
+  - dropping/tuning libraries for persistency (~250Mb)
+  - chasing multiple template instantiations
+  - optimization of library size (removing spurious symbols)
+  - spotting and getting rid of **heap fragmentation**
+
+Memory fragmentation
+====================
+.. image:: drousseau_talk/p14.eps
+     :scale: 45
+     :align: left
+
+Performance Management Board
+============================
+
+mandate:
+  The PMB is responsible for ensuring that the CPU and memory usage of ATLAS jobs is compatible with the processing requirements and the production system constraints.
+  This compatibility should be maintained throughout ATLAS detector commissioning, initial collisions, and design luminosity involving pile-up and cavern backgrounds.
+
+- builds on previous work from ``Sw Performance Task Force``
+- development and integration of monitoring+diagnostic tools
+- development of generic techniques for perf. optimizations
+- optimizations of the ``Athena`` framework and services that apply such optimizations techniques
+
+----------------
+
+::
+
+ Produce regular reports on the CPU and memory usage for typical production jobs, at least for every release and production caches (patch releases.)
+
+
+``AthenaMP`` update
+===================
+
+- in release 15 - as promised
+- consolidation
+
+  - ``rdotoesdnotrigger`` and ``rdotoesd`` are working
+
+- improved merging script of output ``POOL`` files
+
+  - improved robustness
+  - handles more cases (``ESD``, ``AOD`` and now ``DPD``, ``+MetaData``)
+
+- working on version 2:
+
+  - integration with a ``linux`` kernel module (KSM) to improve memory sharing
+  
+    - would be able to *overcommit* memory by ~300%
+    - "only" gotcha: module is not (yet?) part of SLC5 - but LCG is lobbying...
+
+  - slowly started the interactive analysis part of ``AthenaMP``
+
+    - working together with ``LHCb/Gaudi`` on the api
+    - settling down on the features to be provided (and how)
+
+- next steps:
+
+  - more ``PR`` (probably next PAT meeting to get physics users)
+  - tests, tests, etc...
