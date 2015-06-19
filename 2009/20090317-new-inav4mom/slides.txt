@@ -1,0 +1,106 @@
+================
+INav4Mom updates
+================
+
+
+.. image:: lal-logo.eps
+     :scale: 20
+     :align: center
+     :alt: LAL logo
+
+:Author: Sebastien Binet <binet@cern.ch>
+:Institute: LAL/IN2P3
+:Date: 2009-03-17
+
+:Title: INav4Mom updates
+
+`INav4Mom` updates
+========================
+
+- in ``15.0.0``: changed the inheritance tree of many EDM classes
+
+- **why ?**
+
+  - removes the double diamond of death inheritance tree
+
+  - also speeds up access to ``DataVector<T>`` elements
+
+  - migrated classes also get a non-dummy implementation of ``IAthenaBarCode``
+ 
+- virtual inheritance tree:
+
+.. image:: figs/inav4mom-tree.eps
+     :scale: 35
+     :align: center
+
+INav4Mom updates - II
+=====================
+
+- migrated ``egamma``, ``Photon``, ``Electron``, ``Muon``, and ``TauJet``
+
+  - ``Jet``, ``CompositeParticle`` and ``TruthParticle`` were already migrated
+
+  - ``T/P`` separation also taken care of
+
+- recap of the 'new ``INav4Mom``' migration (2 years ago)
+
+  - instead of having a class inheriting from many little concrete classes
+
+  - have a templated class inheriting from the virtual one
+ 
+  - each template argument is supposed to provide implementation for the ``Ixyz`` interfaces
+
+  - ``ParticleImpl<Nav_t, Mom_t, Part_t>``:
+
+::
+
+ typedef NavigableTerminalNode egammaNavigation;
+ class egamma : public ParticleImpl<egammaNavigation,
+                                    P4ImplEEtaPhiM,
+                                    Particle::Base>
+
+INav4Mom update - III
+=====================
+
+- plan was also to migrate ``CaloCell`` and everything that derives from one of the ``INavigable``, ``I4Momentum``, ... classes
+
+  - migration of ``CaloCell`` turned out tricky:
+    
+    - may levels in the inheritance tree
+
+    - all classes not necessarily concrete (fundamental assumption of the ``ParticleImpl`` templates)
+
+  - when the templated class was designed, ``CaloCell`` had a very different shape
+
+- if one wants to migrate ``CaloCell``:
+
+  - probably modify a bit the template class
+
+  - what to do about the ``64b`` integer (``AthenaBarCode``) uniquely identifying each and every cell ? (duplicating ``CellDescr``) ?
+
+- **if** everybody were to migrate to ``new Nav4MomImpl``:
+
+  - could get rid of **virtual** inheritance
+
+    - speed (mainly ``DataVector<T>::at``)
+
+    - memory layout
+
+    - serialization
+
+
+classes to migrate (?)
+======================
+- CaloCompositeKineBase, CaloCluster, CaloEnergyCluster, CaloTower, CaloCell
+- eflowObject
+- TrigT2Jet
+- MissingETSigObject, MissingETSigHypoKine, MissingETSigHypo
+- EWGenericObject
+- Rec::TrackParticle
+- TrigMuonEFTrack, TrigMuonEF, TrigTauTracksInfo
+- TrigTau
+- TrigEFBjet, TrigL2Bjet, 
+- TrigElectron, TrigPhoton
+- CombinedMuonFeature, TileTrackMuFeature, IsoMuonFeature
+- Muon_ROI, EmTau_ROI, Jet_ROI
+
