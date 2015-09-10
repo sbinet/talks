@@ -460,27 +460,9 @@ In another terminal:
  session=1kdgwh0cue0efokpe5t1gcvtj
 
 
-* asd
+* References
 
-`Docker` was born at `dotCloud`:
-
-- as `docker.py`
-- for their Platform-as-a-Service, a `Heroku` like service
-- first polyglot `PaaS`
-- built on top of `LXC` and `AUFs`
-- custom `Linux` kernel (`2.6.38+grsec+setns+aufs+fixes`)
-
-* Container management: issues
-
-- containers handled by multiple components
-- has to deal with many locks to prevent undisciplined concurrent modifications
-- issues with concurrency
-
-Solution:
-
-- one daemon to manage them all
-- no concurrent access, no locking, no problem
-- simple code with less dependencies (easier deployment)
-
-* What is Docker?
-
+- http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
+- http://www.slideshare.net/dotCloud/docker-intro-november
+- https://sif.info-ufr.univ-montp2.fr/docker-talk
+- https://docs.docker.com/introduction/understanding-docker/
