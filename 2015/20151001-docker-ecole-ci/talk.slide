@@ -462,7 +462,7 @@ In another terminal:
 
 * References
 
-- http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
-- http://www.slideshare.net/dotCloud/docker-intro-november
-- https://sif.info-ufr.univ-montp2.fr/docker-talk
-- https://docs.docker.com/introduction/understanding-docker/
+.link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
+.link http://www.slideshare.net/dotCloud/docker-intro-november
+.link https://sif.info-ufr.univ-montp2.fr/docker-talk
+.link https://docs.docker.com/introduction/understanding-docker/
