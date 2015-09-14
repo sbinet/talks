@@ -1,6 +1,6 @@
 ## base environment w/ deps for the web-app
 FROM centos:7
-MAINTAINER me@domain.org
+MAINTAINER binet@cern.ch
 
 RUN yum update -y && \
 	yum install -y maven

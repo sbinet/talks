@@ -39,6 +39,8 @@ Before 1960, cargo transport looked like:
 
 .image _figs/docker-nn-matrix.png
 
+_Note:_ a 3rd dimension (OS/platform) could be considered
+
 * Docker: an application container
 
 .image _figs/docker-container-code.png
@@ -46,6 +48,18 @@ Before 1960, cargo transport looked like:
 * Docker: no combinatorics no more
 
 .image _figs/docker-nn-matrix-solved.png
+
+* Docker
+
+`Docker` is an open source project to pack ship and run any application as a
+lightweight container: [[http://www.docker.io][docker.io]]
+
+
+
+_Note:_ Although `docker` is primarily (ATM) Linux-oriented, it supports other
+OSes (Windows+MacOSX) at the price of a thin `Linux` VM which is automatically
+installed (and managed) on these systems.
+See [[https://docs.docker.com/installation/][docker installation]]
 
 * Docker
 
@@ -299,13 +313,13 @@ The registry is also available from the browser:
 
 - run in the directory holding that `Dockerfile`
 
- $ docker build -t <myname>/web .
- $ docker run -d -P <myname>/web
+ $ docker build -t <myname>/server .
+ $ docker run -d -P <myname>/server
 
 - retrieve the port number:
 
  $ docker ps
- 34dc03cdbae8        binet/web           "/bin/sh -c 'nginx -g"   0.0.0.0:32770->80/tcp
+ 34dc03cdbae8        binet/server         "/bin/sh -c 'nginx -g"   0.0.0.0:32770->80/tcp
 
 or:
 
@@ -378,21 +392,21 @@ And re-start the `docker` daemon with the following extra configuration:
 
 or, just qualify the image name:
 
- $ docker tag <some-hash-id> localhost:5000/binet/web
- $ docker push localhost:5000/binet/web
+ $ docker tag <some-hash-id> localhost:5000/binet/server
+ $ docker push localhost:5000/binet/server
 
 
 * Docker-ized Hub
 
 - Search the private Hub
 
- $ docker search localhost:5000/web
- NAME        DESCRIPTION   STARS     OFFICIAL   AUTOMATED
- binet/web                 0                    
+ $ docker search localhost:5000/server
+ NAME           DESCRIPTION   STARS     OFFICIAL   AUTOMATED
+ binet/server                 0                    
  
 - Pull from the private Hub
 
- $ docker pull localhost:5000/binet/web
+ $ docker pull localhost:5000/binet/server
  
 *NOTE:* the same remark (about the thin in-between VM) holds for Windows and
 MacOSX users.
@@ -423,14 +437,21 @@ Never again:
 - Mount code inside a `build` container
 - Build+test inside that container
 
+We'll test this workflow in the remainder of the hands-on session...
+
 * Create a base container
 
 - create a directory `docker-web-base` to hold the `Dockerfile` for the base container
-- choose your favorite `Linux` distro (say, `centos`)
+- create the `Dockerfile` and choose your favorite `Linux` distro (say, `centos`) as a base image,
 - install the needed dependencies for the web-app (`maven` on `centos`)
 - run:
 
  $ docker build -t <myname>/web-base .
+
+
+* Create a base container - solution
+
+(see next slide)
 
 * Create a base container - II
 
@@ -459,6 +480,28 @@ In another terminal:
  <a href='/analyse'>Analyse de données</a>
  session=1kdgwh0cue0efokpe5t1gcvtj
 
+* Create the final container
+
+Now that we know the base image "works", we'll automatize the build part as yet
+another `Dockerfile`:
+
+- create a new `Dockerfile` file (at the root of the `git` repository) based on the `web-base` image, with the correct build+run instructions
+- make sure you can `docker` `build` it and tag it as `web-app`
+- make sure that you can still access the web server when you run:
+
+  $ docker run -d -p 8080:8080 localhost:5000/<myname>/web-app
+
+_Hint:_ `ADD`
+
+.link https://docs.docker.com/reference/builder/
+
+* Create the final container - solutions
+
+(see next slide)
+
+* Create the final container - II
+
+.code _code/webapp-dockerfile
 
 * References
 

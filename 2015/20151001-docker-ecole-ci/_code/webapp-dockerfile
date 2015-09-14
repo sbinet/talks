@@ -1,0 +1,13 @@
+## image for the web-app
+FROM localhost:5000/binet/web-base
+
+MAINTAINER binet@cern.ch
+
+## add the whole git-repo
+ADD . /opt/in2p3/tp
+
+WORKDIR /opt/in2p3/tp
+RUN ./bin/compile.sh
+
+CMD ./bin/run.sh
+
