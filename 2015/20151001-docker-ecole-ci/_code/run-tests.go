@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 var (
@@ -29,6 +31,11 @@ func init() {
 }
 
 func main() {
+	start := time.Now()
+	defer func() {
+		log.Printf("time= %v\n", time.Since(start))
+	}()
+
 	origdir, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("could not fetch current working directory: %v\n", err)
@@ -51,19 +58,9 @@ func main() {
 	}
 
 	// launch a registry if not there
-	err = exec.Command("docker", "inspect", "ecole-registry").Run()
+	err = launchRegistry(tmpdir)
 	if err != nil {
-		go func() {
-			cmd := exec.Command(
-				"docker", "run",
-				"-p", "5000:5000", "-v", tmpdir+"/registry:/var/lib/registry",
-				"--name=ecole-registry", "registry",
-			)
-			err = cmd.Run()
-			if err != nil {
-				log.Fatalf("could not launch ecole-registry: %v\n", err)
-			}
-		}()
+		log.Fatalf("error launching registry: %v\n", err)
 	}
 
 	// clone repository
@@ -95,7 +92,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "-t", localhost+":5000/binet/web-base", ".",
+		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-base", ".",
 	)
 	cmd.Dir = filepath.Join(repodir, "docker-web-base")
 	err = run(cmd)
@@ -120,7 +117,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "-t", localhost+":5000/binet/web-app", ".",
+		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-app:v1", ".",
 	)
 	cmd.Dir = repodir
 	err = run(cmd)
@@ -128,12 +125,12 @@ func main() {
 		log.Fatalf("error build web-app: %v\n", err)
 	}
 
-	_ = run(exec.Command("docker", "kill", "binet-web-app"))
-	_ = run(exec.Command("docker", "rm", "binet-web-app"))
+	_ = exec.Command("docker", "kill", "binet-web-app").Run()
+	_ = exec.Command("docker", "rm", "binet-web-app").Run()
 	cmd = exec.Command(
 		"docker", "run", "-d", "-p", "8080:8080",
 		"--name=binet-web-app",
-		localhost+":5000/binet/web-app",
+		localhost+":5000/binet/web-app:v1",
 	)
 	err = run(cmd)
 	if err != nil {
@@ -150,22 +147,87 @@ func main() {
 
 	// FIXME(sbinet): we rely on the docker-push to take some time
 	// so the http.Get will see a container exposing a (running) web server...
-	resp, err := http.Get("http://" + localhost + ":8080/")
+	testWebServer("http://"+localhost+":8080/", "<h1>Bienvenue ")
+
+	// now create a v2
+	const v2 = `package fr.in2p3.informatique.ecole2015.web;
+
+import org.eclipse.jetty.server.QuietServletException;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class MyServlet extends HttpServlet
+{
+    private String greeting="Welcome to école informatique IN2P3 2015";
+    public MyServlet(){}
+    public MyServlet(String greeting)
+    {
+        this.greeting=greeting;
+    }
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws QuietServletException, IOException
+    {
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("<h1>"+greeting+"</h1>");
+        response.getWriter().println("<a href='/analyse'>Analyse de données</a>");
+        response.getWriter().println("session=" + request.getSession(true).getId());
+    }
+}`
+
+	myservlet, err := os.Create(filepath.Join(
+		repodir,
+		"src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java",
+	))
 	if err != nil {
-		log.Printf("response:\n%#v\n", resp)
-		log.Fatalf("error GET-localhost:8080: %v\n", err)
+		log.Fatalf("error opening file myservlet file: %v\n", err)
 	}
-	defer resp.Body.Close()
-	hello := new(bytes.Buffer)
-	_, err = io.Copy(hello, resp.Body)
+	defer myservlet.Close()
+
+	_, err = myservlet.WriteString(v2)
 	if err != nil {
-		log.Fatalf("error printing resp.body: %v\n", err)
+		log.Fatalf("error updating [%s]: %v\n", myservlet.Name(), err)
+	}
+	err = myservlet.Close()
+	if err != nil {
+		log.Fatalf("error closing [%s]: %v\n", myservlet.Name(), err)
 	}
 
-	fmt.Printf("===\n%v===\n", string(hello.Bytes()))
-	if !bytes.HasPrefix(hello.Bytes(), []byte("<h1>Bienvenue ")) {
-		log.Fatalf("invalid homepage:\n%v\n", string(hello.Bytes()))
+	// now create and run server-v2
+	cmd = exec.Command(
+		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-app:v2", ".",
+	)
+	cmd.Dir = repodir
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error build web-app: %v\n", err)
 	}
+
+	_ = exec.Command("docker", "kill", "binet-web-app-v2").Run()
+	_ = exec.Command("docker", "rm", "binet-web-app-v2").Run()
+	cmd = exec.Command(
+		"docker", "run", "-d", "-p", "8082:8080",
+		"--name=binet-web-app-v2",
+		localhost+":5000/binet/web-app:v2",
+	)
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error running web-app: %v\n", err)
+	}
+
+	cmd = exec.Command(
+		"docker", "push", localhost+":5000/binet/web-app:v2",
+	)
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error pushing web-app: %v\n", err)
+	}
+
+	testWebServer("http://"+localhost+":8082/", "<h1>Welcome to ")
+	testWebServer("http://"+localhost+":8080/", "<h1>Bienvenue ")
 
 }
 
@@ -201,4 +263,90 @@ func cp(dst, src string) error {
 	}
 
 	return fdst.Close()
+}
+
+func launchRegistry(tmpdir string) error {
+	data := make([]struct {
+		State struct {
+			Running    bool
+			Paused     bool
+			Restarting bool
+			OOMKilled  bool
+			Dead       bool
+			Pid        int
+			ExitCode   int
+			Error      string
+			StartedAt  time.Time
+			FinishedAt time.Time
+		}
+	}, 0)
+
+	cmd := exec.Command(
+		"docker", "inspect", "ecole-registry",
+	)
+	buf := new(bytes.Buffer)
+	cmd.Stdout = buf
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("starting a registry...\n")
+		err = run(exec.Command("docker", "pull", "registry"))
+		if err != nil {
+			log.Printf("error retrieving registry image: %v\n", err)
+			return err
+		}
+
+		go func() {
+			cmd := exec.Command(
+				"docker", "run",
+				"-p", "5000:5000", "-v", tmpdir+"/registry:/var/lib/registry",
+				"--name=ecole-registry", "registry",
+			)
+			err = cmd.Run()
+			if err != nil {
+				log.Fatalf("could not launch ecole-registry: %v\n", err)
+			}
+		}()
+		return nil
+	}
+
+	err = json.Unmarshal(buf.Bytes(), &data)
+	if err != nil {
+		log.Printf("error unmarshaling JSON: %v\n", err)
+		return err
+	}
+
+	if !data[0].State.Running {
+		log.Printf("restarting registry...\n")
+		go func() {
+			cmd := exec.Command("docker", "restart", "ecole-registry")
+			err = cmd.Run()
+			if err != nil {
+				log.Fatalf("could not restart ecole-registry: %v\n", err)
+			}
+		}()
+		time.Sleep(5 * time.Second)
+		return nil
+	}
+	return err
+}
+
+func testWebServer(url string, prefix string) {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Printf("response:\n%#v\n", resp)
+		log.Fatalf("error GET-localhost:8080: %v\n", err)
+	}
+	defer resp.Body.Close()
+	hello := new(bytes.Buffer)
+	_, err = io.Copy(hello, resp.Body)
+	if err != nil {
+		log.Fatalf("error printing resp.body: %v\n", err)
+	}
+
+	fmt.Printf("===\n%v===\n", string(hello.Bytes()))
+	if !bytes.HasPrefix(hello.Bytes(), []byte(prefix)) {
+		log.Fatalf("invalid homepage:\n%v\n", string(hello.Bytes()))
+	}
 }
