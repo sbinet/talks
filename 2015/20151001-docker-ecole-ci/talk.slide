@@ -493,6 +493,8 @@ another `Dockerfile`:
 
 _Hint:_ `ADD`
 
+_Hint:_ `CMD`
+
 .link https://docs.docker.com/reference/builder/
 
 * Create the final container - solutions
@@ -502,6 +504,13 @@ _Hint:_ `ADD`
 * Create the final container - II
 
 .code _code/webapp-dockerfile
+
+* Create the final container - III
+
+- `CMD` describes the command to be run by default when the container is started
+- `ADD` copies files, directories or URLs into the container's filesystem
+- `VOLUME` creates a volume mount point inside the container which can contain data from the host or from other containers
+- `USER` defines the user (or `UID`) with whom to run the various commands inside the container
 
 * Create multiple versions of an image
 
@@ -536,6 +545,12 @@ Modify the `Jenkins` build to:
 - build the final container
 - run the tests suite
 - push the result as a tagged image
+
+* Conclusions
+
+- `docker` is a rather good tool to deploy applications in containers
+- eases the life of developers and sysadmins (devops)
+- `docker` isn't the only game in town (watch out for `rkt` from `CoreOS`)
 
 * References
 
