@@ -529,6 +529,14 @@ Let's do just that.
 
 - make sure the servers on ports `8080` and `8082` display the correct welcome messages.
 
+* Continuous Integration
+
+Modify the `Jenkins` build to:
+
+- build the final container
+- run the tests suite
+- push the result as a tagged image
+
 * References
 
 .link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
