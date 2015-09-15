@@ -503,6 +503,32 @@ _Hint:_ `ADD`
 
 .code _code/webapp-dockerfile
 
+* Create multiple versions of an image
+
+At times, it might be very useful to test 2 versions of an application and run
+them concurrently (to debug discrepancies.)
+
+Let's do just that.
+
+- tag the last `web-app` image as `v1`
+
+  $ docker tag localhost:5000/<myname>/web-app localhost:5000/<myname>/web-app:v1
+
+- modify `src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java` to print a different welcome message
+- containerize the new version as `.../web-app:v2`
+
+* Create multiple versions of an image - II
+
+- run the container `v2` on port `8082`
+
+  $ docker run -p 8082:8080 localhost:5000/<myname>/web-app:v2
+
+- run the container `v1` on port `8080`
+
+  $ docker run -p 8080:8080 localhost:5000/<myname>/web-app:v1
+
+- make sure the servers on ports `8080` and `8082` display the correct welcome messages.
+
 * References
 
 .link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
