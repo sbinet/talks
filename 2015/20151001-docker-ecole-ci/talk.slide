@@ -546,11 +546,101 @@ Modify the `Jenkins` build to:
 - run the tests suite
 - push the result as a tagged image
 
+* Creation of a build+target container pair
+
+So far, we have been building containers where the intermediate results leading
+to the final binary (or set of binaries) are left inside the image.
+
+This might not be completely efficient if these intermediate steps are (disk)
+resource heavy.
+
+The usual solution is to have a 2-step process:
+
+- a container in which the binaries are built
+- a container in which the binaries are directly copied from the first
+
+Let's do that.
+
+_Hint:_ `docker` `export`
+_Hint:_ `docker` `import`
+
+* Creation of a build+target container pair
+
+(solution on next slide)
+
+* Creation of a build+target container pair
+
+Extract the root fs from the build image:
+
+ $ mkdir rootfs && cd rootfs
+ $ docker export <user>-web-app | tar xf -
+ $ ls opt/in2p3/tp
+ bin/                      .git/                     sonar-project.properties
+ doc/                      .gitignore                src/
+ Dockerfile                pom.xml                   target/
+ docker-web-base/          README.md                 
+
+The binaries are under `target`.
+If they were static libraries, you could just create a very slim container with
+them, using `docker` `import`.
+
+* Running GUIs
+
+The application we have been currently "dockerizing" doesn't need any graphics
+per se.
+Many do, though.
+
+Let's try to run a simple graphics-enabled application from within a `docker`
+container:
+
+  $ docker run -it --rm centos bash
+  docker> xclock
+
+
+* Running GUIs - II
+
+Running GUIs is a bit more involved than just running your simple "from the
+mill" CLI application.
+
+There are many options to enable graphics:
+
+- `ssh` into a container with `X11` forwarding
+- `VNC`
+- sharing the `X11` socket
+
+
+.link http://fabiorehm.com/blog/2014/09/11/running-gui-apps-with-docker/
+.link https://blog.docker.com/2013/07/docker-desktop-your-desktop-over-ssh-running-inside-of-a-docker-container/
+.link http://wiki.ros.org/docker/Tutorials/GUI
+
+* Running GUIs - III
+
+Let's try the most direct (albeit a bit insecure) one: sharing the `X11` socket.
+
+First, allow all `X11` connections (that's the insecure part):
+
+ $ xhost +
+
+Then:
+
+ $ docker run -ti --rm \
+       -e DISPLAY=$DISPLAY \
+       -v /tmp/.X11-unix:/tmp/.X11-unix \
+       centos bash
+ docker> yum install -y xclock && xclock
+
+Don't forget to re-enable `X11` access control afterwards:
+
+ $ xhost -
+
+
 * Conclusions
 
 - `docker` is a rather good tool to deploy applications in containers
 - eases the life of developers and sysadmins (devops)
-- `docker` isn't the only game in town (watch out for `rkt` from `CoreOS`)
+- `docker` isn't the only game in town
+- `rkt` (`rocket`) from `CoreOS`
+- `systemd-nspawn`, now part of `systemd`
 
 * References
 
