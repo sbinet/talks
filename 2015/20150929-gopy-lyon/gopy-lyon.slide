@@ -499,8 +499,8 @@ Come join the fun of the complete world "Gomination" via `CPython`.
 
 * Prospects
 
-- new rules for `cgo` in `go-1.6` and the improved garbage collector will constrain the way `C` extension modules and `.so` can be built.
-- will need to reuse `gomobile` 's IPC (I=intra) `mobile/bind/seq` protocol
+- [[https://github.com/golang/go/issues/12416][new rules]] for `cgo` in `go-1.6` and the improved garbage collector will constrain the way `C` extension modules and `.so` can be built.
+- will need to reuse `gomobile` 's IPC (I=intra) [[https://godoc.org/golang.org/x/mobile/bind/seq][mobile/bind/seq]] protocol
 - implement the missing features
 - handle cycles between values, across language boundaries
 - support for `python-3`
@@ -509,6 +509,6 @@ Come join the fun of the complete world "Gomination" via `CPython`.
 Grand (ambitious) vision:
 
 - perhaps extract some of the bits and pieces of `gopy` and create
-- `go-binder` to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `C++`, ...
+- [[https://github.com/go-binder][go-binder]] to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `C++`, ...
 - ie: a `SWIG` for `Go` ?
 
