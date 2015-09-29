@@ -466,7 +466,7 @@ Probably easier to just mount the sources *inside* the base container:
 
  $ docker run -it -v `pwd`:/opt/in2p3/tp -p 8080:8080 <myname>/web-base bash
  [root@48b2c74a5004 tp]# ./bin/compile.sh 
- [root@48b2c74a5004 tp]# ./bin/run.sh     
+ [root@48b2c74a5004 tp]# java -jar /opt/in2p3/tp/target/webserver-1.0-SNAPSHOT-jar-with-dependencies.jar
  2015-09-10 14:13:25.467:INFO::main: Logging initialized @623ms
  2015-09-10 14:13:25.719:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
  2015-09-10 14:13:25.918:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@4645801a{/,null,AVAILABLE}
