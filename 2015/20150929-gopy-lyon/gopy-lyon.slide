@@ -31,52 +31,9 @@ A proton-proton collider of 27km of circumference.
 .image _figs/cernring-l.jpg 450 700
 
 
-* LHC tunnel and one of the ~1200 dipole magnets
-
-.image _figs/lhc-magnet.jpg 500 700
-
-
-* ATLAS detector (44m x 25m)
-
-.image _figs/atlas-detector.gif 600 800
-
-
 * ATLAS installation
 
 .image _figs/pit.png
-
-
-* Results
-
-.image _figs/higgs-to-2e2mu-candidate.png 500 700
-
-
-* High level view of the data pipeline
-
-Data is collected at the 4 interaction points
-
-- collisions every 150 ns
-- ~1.6 Mb / collision
-- ~1 Pb/year of raw data (~10 Pb with replicates)
-
-Raw data is then filtered to only keep "interesting" events (collisions of protons)
-
-
-* Main steps of data analysis/massaging
-
-#Monte-Carlo techniques
-
-- *Generation:* production of a single physics event (_e.g.:_ a collision and its decay products)
-- *Simulation:* modelisation of the interactions b/w particles and detector material
-- *Reconstruction:* building physics objects (electrons, photons, ...) from the detector signals (energy deposits)
-- *Analysis:* analyse reconstruction output(s) to test hypotheses
-
-.image _figs/schema-general-flux-all-en.png 300 300
-
-#* 
-#
-#.image _figs/data-flux-summary-all.png 400 700
-
 
 * Software in HEP
 
@@ -229,7 +186,7 @@ So far:
 - building a package of data analysis facilities
 
 
-And, of course... `gopy`.
+And, of course... [[https://github.com/go-python/gopy][gopy]]!
 
 * gopy
 
@@ -271,7 +228,7 @@ For `gopy` to create the `.so` module, it will need:
 
 * gopy - hello world
 
-Consider this simple package:
+Consider this simple package `github.com/me/hello`:
 
 .code _code/hello.go
 
@@ -322,7 +279,7 @@ Let's see what `gopy` has  actually generated:
 
  //export cgo_func_hello_Hello
  // cgo_func_hello_Hello wraps hello.Hello
- func cgo_func_hello_Hello(name string) (gopy_ret string) {
+ func cgo_func_hello_Hello(name string) (string) {
  	_gopy_000 := hello.Hello(name)
  	return _gopy_000
  }
@@ -419,6 +376,14 @@ Now consider:
  >>> u = st.Struct(42)
  >>> print u
  structs.Struct{private:0, Public:42}
+
+ >>> u = st.Struct()
+ >>> print u
+ structs.Struct{private:0, Public:0}
+ >>> u.private = 42
+ Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ AttributeError: 'structs.Struct' object has no attribute 'private'
  
 * gopy - wrapping a struct
 
@@ -457,7 +422,7 @@ Now consider:
 - slices and arrays implement the sequence protocol (but not yet subslices assignment)
 - implements the buffer protocol for slices and arrays
 - `maps` aren't supported yet
-- `interfaces` aren't supported yet
+- `interfaces` aren't supported yet (except for `error`)
 - functions/methods taking pointers to values are not supported yet
 - implementing a `Go` interface from `python` isn't supported yet either
 - channels are not supported yet
@@ -487,7 +452,7 @@ Thanks to the simple rules and formalism of `Go` it is reasonnably easy to
 automate:
 
 - the extraction of the exported API
-- the generation of bindings to (a number of) language(s)
+- the generation of bindings to a (number of) language(s)
 
 `gopy` is released under `BSD-3` and accepts pull requests (eagerly!)
 Come join the fun of the complete world "Gomination" via `CPython`.
