@@ -474,6 +474,6 @@ Come join the fun of the complete world "Gomination" via `CPython`.
 Grand (ambitious) vision:
 
 - perhaps extract some of the bits and pieces of `gopy` and create
-- [[https://github.com/go-binder][go-binder]] to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `C++`, ...
+- [[https://github.com/go-binder][go-binder]] to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `R`, `C++`, ...
 - ie: a `SWIG` for `Go` ?
 
