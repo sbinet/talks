@@ -757,7 +757,7 @@ Don't forget to re-enable `X11` access control afterwards:
 - eases the life of developers and sysadmins (devops)
 - `docker` isn't the only game in town
 - [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS`
-- `systemd-nspawn`, now part of `systemd`
+- [[http://0pointer.de/public/systemd-man/systemd-nspawn.html][systemd-nspawn]], now part of `systemd`
 
 * References
 
