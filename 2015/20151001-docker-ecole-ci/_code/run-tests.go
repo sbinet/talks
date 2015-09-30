@@ -307,6 +307,8 @@ func launchRegistry(tmpdir string) error {
 			if err != nil {
 				log.Fatalf("could not launch ecole-registry: %v\n", err)
 			}
+			// FIXME(sbinet): wait a bit for the server to get completely ready
+			time.Sleep(5 * time.Second)
 		}()
 		return nil
 	}
