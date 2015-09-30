@@ -594,6 +594,20 @@ Modify the `Jenkins` build to:
 - run the tests suite
 - push the result as a tagged image
 
+* Sharing images
+
+Up to now, the images you've been creating have been put on your local registry.
+But there is another registry instance available at:
+
+ cc-ecole2015-docker.in2p3.fr:5000
+
+Let's try to package the previous `web-app:v2` and `web-app:v1` images and put
+them on that new registry:
+
+ $ docker tag localhost:5000/<myname>/web-app cc-ecole2015-docker.in2p3.fr:5000/<myname>/web-app
+
+Now, try to `pull` the `web-app` image of your friend and run it.
+
 * Creation of a build+target container pair
 
 So far, we have been building containers where the intermediate results leading
