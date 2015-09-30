@@ -223,6 +223,33 @@ The `docker` client ships with many a subcommand:
 # 
 #  $ docker daemon --bip=10.10.0.0/24 -H fd://
 
+* Interlude: docker configuration @CC.in2p3
+
+* Linux
+
+We'll need to tell the `docker` `daemon` to use `cc-ecole2015-docker.in2p3.fr:5000` as a possible registry.
+
+This is done by adding 
+
+ --insecure-registry=cc-ecole2015-docker.in2p3.fr:5000
+
+to the `daemon` invocation command.
+
+*e.g.:* on my `Archlinux` box:
+
+ $ docker daemon --insecure-registry=cc-ecole2015-docker.in2p3.fr:5000 -H fd://
+
+* MacOSX/Windows
+
+Same thing, but on `MacOSX` and `Windows`, that's done via `docker-machine`:
+
+ $ docker-machine create -d virtualbox \
+  --engine-insecure-registry=cc-ecole2015-docker.in2p3.fr:5000 \
+  vm-ecole
+
+ $ eval $(docker-machine env vm-ecole)
+
+
 * Hello World
 
 Fetch a `docker` image from the `docker` registry:
@@ -358,7 +385,7 @@ between your machine and the container.
 The container is running inside that VM so you need to replace `localhost` with
 the `IP` of that VM:
 
- $ docker-machine ip default
+ $ docker-machine ip vm-ecole
  192.168.59.103
 
 or, directly from the running container:
