@@ -569,7 +569,9 @@ Let's do just that.
 
 - tag the last `web-app` image as `v1`
 
-  $ docker tag localhost:5000/<myname>/web-app localhost:5000/<myname>/web-app:v1
+  $ docker tag \
+      localhost:5000/<myname>/web-app \
+      localhost:5000/<myname>/web-app:v1
 
 - modify `src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java` to print a different welcome message
 - containerize the new version as `.../web-app:v2`
@@ -578,11 +580,15 @@ Let's do just that.
 
 - run the container `v2` on port `8082`
 
-  $ docker run -p 8082:8080 localhost:5000/<myname>/web-app:v2
+  $ docker run -p 8082:8080 \
+      --name=web-app-v2     \
+      localhost:5000/<myname>/web-app:v2
 
 - run the container `v1` on port `8080`
 
-  $ docker run -p 8080:8080 localhost:5000/<myname>/web-app:v1
+  $ docker run -p 8080:8080 \
+      --name=web-app-v1     \
+      localhost:5000/<myname>/web-app:v1
 
 - make sure the servers on ports `8080` and `8082` display the correct welcome messages.
 
@@ -604,9 +610,43 @@ But there is another registry instance available at:
 Let's try to package the previous `web-app:v2` and `web-app:v1` images and put
 them on that new registry:
 
- $ docker tag localhost:5000/<myname>/web-app cc-ecole2015-docker.in2p3.fr:5000/<myname>/web-app
+ $ docker tag \
+     localhost:5000/<myname>/web-app \
+     cc-ecole2015-docker.in2p3.fr:5000/<myname>/web-app
 
 Now, try to `pull` the `web-app` image of your friend and run it.
+
+* Inspecting logs
+
+`docker` is nice enough to let us inspect what (running) containers are generating as logs.
+
+For a single container, it is as simple as:
+
+ $ docker logs <some-container-id>
+ $ docker logs <some-container-name>
+
+* Inspecting logs - II
+
+_e.g.:_
+
+ $ docker logs web-app-v2
+ {
+  "timeMillis" : 1443615891663,
+  "thread" : "main",
+  "level" : "INFO",
+  "loggerName" : "org.eclipse.jetty.server.Server",
+  "message" : "Started @1343ms",
+  "endOfBatch" : false,
+  "loggerFqcn" : "org.eclipse.jetty.util.log.Slf4jLog",
+  "contextMap" : [ ]
+ }
+
+ $ docker logs ecole-registry
+ [...]
+ 30/Sep/2015:12:20:13 +0000 DEBUG: args = {'tag': u'latest', 'namespace': u'binet', 'repository': u'web-app'}
+ 30/Sep/2015:12:20:13 +0000 DEBUG: [get_tag] namespace=binet; repository=web-app; tag=latest
+ 30/Sep/2015:12:20:13 +0000 DEBUG: api_error: Tag not found
+ 172.17.42.1 - - [30/Sep/2015:12:20:13 +0000] "GET /v1/repositories/binet/web-app/tags/latest HTTP/1.1" 404 26 "-" "docker/1.8.2 go/go1.5.1 git-commit/0a8c2e3-dirty kernel/4.2.1-1-ARCH os/linux arch/amd64"
 
 * Creation of a build+target container pair
 
@@ -625,6 +665,7 @@ Let's do that.
 
 _Hint:_ `docker` `export`
 _Hint:_ `docker` `import`
+_Hint:_ `docker` `cp`
 
 * Creation of a build+target container pair
 
@@ -635,13 +676,19 @@ _Hint:_ `docker` `import`
 Extract the root fs from the build image:
 
  $ mkdir rootfs && cd rootfs
- $ docker export <user>-web-app | tar xf -
+ $ docker run -d -p 8080:8080 --name=web-app-v2 \
+     localhost:5000/<myname>/web-app:v2
+ $ docker export web-app-v2 | tar xf -
  $ ls opt/in2p3/tp
  bin/                      .git/                     sonar-project.properties
  doc/                      .gitignore                src/
  Dockerfile                pom.xml                   target/
  docker-web-base/          README.md                 
 
+Another way is to use `docker` `cp`:
+
+ $ docker cp web-app-v2:/opt/in2p3/tp tp
+ 
 The binaries are under `target`.
 If they were static libraries, you could just create a very slim container with
 them, using `docker` `import`.
@@ -656,8 +703,16 @@ Let's try to run a simple graphics-enabled application from within a `docker`
 container:
 
   $ docker run -it --rm centos bash
+  docker> yum install -y xclock
   docker> xclock
 
+
+If the network is too slow, you can try to pull:
+
+  $ docker pull \
+      cc-ecole2015-docker.in2p3.fr:5000/centos-xclock
+
+where `xclock` and its dependencies have been already installed.
 
 * Running GUIs - II
 
@@ -701,7 +756,7 @@ Don't forget to re-enable `X11` access control afterwards:
 - `docker` is a rather good tool to deploy applications in containers
 - eases the life of developers and sysadmins (devops)
 - `docker` isn't the only game in town
-- `rkt` (`rocket`) from `CoreOS`
+- [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS`
 - `systemd-nspawn`, now part of `systemd`
 
 * References
