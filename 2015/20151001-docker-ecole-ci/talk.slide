@@ -765,3 +765,8 @@ Don't forget to re-enable `X11` access control afterwards:
 .link http://www.slideshare.net/dotCloud/docker-intro-november
 .link https://sif.info-ufr.univ-montp2.fr/docker-talk
 .link https://docs.docker.com/introduction/understanding-docker/
+.link https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/rkt/docs
+
