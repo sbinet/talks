@@ -386,40 +386,6 @@ This brings:
 - _exact_ _same_ _behavior_
 - regardless of versions, distros and dependencies
 
-* Docker-ized Hub
-
-Going meta...
-
-- Images on the Hub are public and shared
-- Private images are possible ($$$)
-
-But it is possible to run your own registry, on your infrastructure:
-
- $ docker pull registry
- $ docker run -p 5000:5000 -v <HOST_DIR>:/tmp/registry-dev registry
- 
-Then, just qualify the image name:
-
- $ docker tag <some-image-hash-id> localhost:5000/binet/server
- $ docker push localhost:5000/binet/server
-
-
-* Docker-ized Hub
-
-- Search the private Hub
-
- $ docker search localhost:5000/server
- NAME           DESCRIPTION   STARS     OFFICIAL   AUTOMATED
- binet/server                 0                    
- 
-- Pull from the private Hub
-
- $ docker pull localhost:5000/binet/server
- 
-*NOTE:* the same remark (about the thin in-between VM) holds for Windows and
-MacOSX users.
-ie: replace `localhost` with the `IP` address of that `VM`.
-
 * Docker for the developer
 
 - manage and *control* dependencies
@@ -488,6 +454,15 @@ In another terminal:
  <a href='/analyse'>Analyse de données</a>
  session=1kdgwh0cue0efokpe5t1gcvtj
 
+* Base container for dev - II
+
+- On windows, the correct `-v` syntax is like:
+
+ $ docker run -it -v //c/Users/username/some/path:/opt/in2p3/tp ...
+
+.link https://github.com/docker/docker/issues/12590#issuecomment-96767796
+
+
 * Create the final container
 
 Now that we know the base image "works", we'll automatize the build part as yet
@@ -497,7 +472,7 @@ another `Dockerfile`:
 - make sure you can `docker` `build` it and tag it as `web-app`
 - make sure that you can still access the web server when you run:
 
-  $ docker run -d -p 8080:8080 localhost:5000/<myname>/web-app
+  $ docker run -d -p 8080:8080 <myname>/web-app
 
 _Hint:_ `ADD`
 
@@ -530,8 +505,8 @@ Let's do just that.
 - tag the last `web-app` image as `v1`
 
   $ docker tag \
-      localhost:5000/<myname>/web-app \
-      localhost:5000/<myname>/web-app:v1
+      <myname>/web-app \
+      <myname>/web-app:v1
 
 - modify `src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java` to print a different welcome message
 - containerize the new version as `.../web-app:v2`
@@ -542,13 +517,13 @@ Let's do just that.
 
   $ docker run -p 8082:8080 \
       --name=web-app-v2     \
-      localhost:5000/<myname>/web-app:v2
+      <myname>/web-app:v2
 
 - run the container `v1` on port `8080`
 
   $ docker run -p 8080:8080 \
       --name=web-app-v1     \
-      localhost:5000/<myname>/web-app:v1
+      <myname>/web-app:v1
 
 - make sure the servers on ports `8080` and `8082` display the correct welcome messages.
 
@@ -571,7 +546,7 @@ Let's try to package the previous `web-app:v2` and `web-app:v1` images and put
 them on that new registry:
 
  $ docker tag \
-     localhost:5000/<myname>/web-app \
+     <myname>/web-app \
      cc-ecole2015-docker.in2p3.fr:5000/<myname>/web-app
 
 Now, try to `pull` the `web-app` image of your friend and run it.
