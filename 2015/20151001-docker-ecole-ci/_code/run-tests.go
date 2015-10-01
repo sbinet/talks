@@ -52,17 +52,6 @@ func main() {
 		log.Fatalf("could not chdir to [%s]: %v\n", tmpdir, err)
 	}
 
-	err = os.MkdirAll(filepath.Join(tmpdir, "registry"), 0755)
-	if err != nil {
-		log.Fatalf("error creating 'registry' dir: %v\n", err)
-	}
-
-	// launch a registry if not there
-	err = launchRegistry(tmpdir)
-	if err != nil {
-		log.Fatalf("error launching registry: %v\n", err)
-	}
-
 	// clone repository
 	cmd := exec.Command(
 		"git", "clone", "git@gitlab.in2p3.fr:EcoleInfo2015/TP.git", "TP",
@@ -92,7 +81,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-base", ".",
+		"docker", "build", "--rm", "-t", "binet/web-base", ".",
 	)
 	cmd.Dir = filepath.Join(repodir, "docker-web-base")
 	err = run(cmd)
@@ -101,7 +90,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "push", localhost+":5000/binet/web-base",
+		"docker", "push", "binet/web-base",
 	)
 	err = run(cmd)
 	if err != nil {
@@ -117,7 +106,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-app:v1", ".",
+		"docker", "build", "--rm", "-t", "binet/web-app:v1", ".",
 	)
 	cmd.Dir = repodir
 	err = run(cmd)
@@ -130,7 +119,7 @@ func main() {
 	cmd = exec.Command(
 		"docker", "run", "-d", "-p", "8080:8080",
 		"--name=binet-web-app",
-		localhost+":5000/binet/web-app:v1",
+		"binet/web-app:v1",
 	)
 	err = run(cmd)
 	if err != nil {
@@ -138,7 +127,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "push", localhost+":5000/binet/web-app",
+		"docker", "push", "binet/web-app",
 	)
 	err = run(cmd)
 	if err != nil {
@@ -198,7 +187,7 @@ public class MyServlet extends HttpServlet
 
 	// now create and run server-v2
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", localhost+":5000/binet/web-app:v2", ".",
+		"docker", "build", "--rm", "-t", "binet/web-app:v2", ".",
 	)
 	cmd.Dir = repodir
 	err = run(cmd)
@@ -211,7 +200,7 @@ public class MyServlet extends HttpServlet
 	cmd = exec.Command(
 		"docker", "run", "-d", "-p", "8082:8080",
 		"--name=binet-web-app-v2",
-		localhost+":5000/binet/web-app:v2",
+		"binet/web-app:v2",
 	)
 	err = run(cmd)
 	if err != nil {
@@ -219,7 +208,7 @@ public class MyServlet extends HttpServlet
 	}
 
 	cmd = exec.Command(
-		"docker", "push", localhost+":5000/binet/web-app:v2",
+		"docker", "push", "binet/web-app:v2",
 	)
 	err = run(cmd)
 	if err != nil {
