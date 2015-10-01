@@ -648,6 +648,18 @@ _e.g.:_
  30/Sep/2015:12:20:13 +0000 DEBUG: api_error: Tag not found
  172.17.42.1 - - [30/Sep/2015:12:20:13 +0000] "GET /v1/repositories/binet/web-app/tags/latest HTTP/1.1" 404 26 "-" "docker/1.8.2 go/go1.5.1 git-commit/0a8c2e3-dirty kernel/4.2.1-1-ARCH os/linux arch/amd64"
 
+* Inspecting logs - III
+
+- launch a container in interactive mode
+- start a bash shell
+- run:
+
+ docker> logger -i -s plop
+
+- in another terminal:
+
+ $ docker logs <container-id>
+
 * Creation of a build+target container pair
 
 So far, we have been building containers where the intermediate results leading
