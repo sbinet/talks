@@ -389,10 +389,6 @@ the `IP` of that VM:
  $ docker-machine ip vm-ecole
  192.168.59.103
 
-or, directly from the running container:
-
- $ docker inspect -f '{{.NetworkSettings.IPAddress}}' 34dc03cdbae8
-
 and then:
 
  $ curl 192.168.59.103:32770
