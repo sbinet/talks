@@ -590,7 +590,7 @@ _e.g.:_
 
 - launch a container in interactive mode
 - start a bash shell
-- run:
+- run inside that container:
 
  docker> logger -i -s plop
 
