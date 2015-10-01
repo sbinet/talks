@@ -247,7 +247,8 @@ Same thing, but on `MacOSX` and `Windows`, that's done via `docker-machine`:
   --engine-insecure-registry=cc-ecole2015-docker.in2p3.fr:5000 \
   vm-ecole
 
- $ eval $(docker-machine env vm-ecole)
+ $ eval $(docker-machine env vm-ecole)  ## MacOSX
+ $ eval $(./docker-machine.exe env --shell=bash vm-ecole) ## Win
 
 
 * Hello World
