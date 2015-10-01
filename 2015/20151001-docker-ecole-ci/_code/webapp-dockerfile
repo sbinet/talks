@@ -1,5 +1,5 @@
 ## image for the web-app
-FROM localhost:5000/binet/web-base
+FROM binet/web-base
 
 MAINTAINER binet@cern.ch
 

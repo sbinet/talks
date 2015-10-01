@@ -202,49 +202,18 @@ The `docker` client ships with many a subcommand:
   Built:        Sat Aug 15 17:29:10 UTC 2015
   OS/Arch:      linux/amd64
 
-# * Interlude - docker configuration @CC
-# 
-# * docker configuration @CC (for Linux boxen)
-# 
-# Unfortunately, the local network for Sonar, Jenkins, etc... at the CC uses the
-# same virtual network that `docker` (on `Linux`) uses for its containers.
-# 
-# So we'll have to modify slightly the default configuration (and reach 8th Dan of
-# `docker` mastery)
-# 
-# _i.e._ use 10.10.0.0/24 as the CIDR instead of 172.17.0.0/24
-# 
-# The key thing is to restart the `docker` `daemon` with the added switch:
-# 
-#  $ docker daemon --bip=10.10.0.0/24 [...] 
-# 
-# 
-# *e.g.:* _(on_ _my_ _ArchLinux_ _box)_
-# 
-#  $ docker daemon --bip=10.10.0.0/24 -H fd://
-
 * Interlude: docker configuration @CC.in2p3
 
 * Linux
 
-We'll need to tell the `docker` `daemon` to use `cc-ecole2015-docker.in2p3.fr:5000` as a possible registry.
-
-This is done by adding 
-
- --insecure-registry=cc-ecole2015-docker.in2p3.fr:5000
-
-to the `daemon` invocation command.
-
-*e.g.:* on my `Archlinux` box:
-
- $ docker daemon --insecure-registry=cc-ecole2015-docker.in2p3.fr:5000 -H fd://
+Just use the default config.
 
 * MacOSX/Windows
 
-Same thing, but on `MacOSX` and `Windows`, that's done via `docker-machine`:
+Same thing, but on `MacOSX` and `Windows`, let's create a new Linux VM and call
+it `vm-ecole`:
 
  $ docker-machine create -d virtualbox \
-  --engine-insecure-registry=cc-ecole2015-docker.in2p3.fr:5000 \
   vm-ecole
 
  $ eval $(docker-machine env vm-ecole)  ## MacOSX
@@ -429,15 +398,9 @@ But it is possible to run your own registry, on your infrastructure:
  $ docker pull registry
  $ docker run -p 5000:5000 -v <HOST_DIR>:/tmp/registry-dev registry
  
-And re-start the `docker` daemon with the following extra configuration:
+Then, just qualify the image name:
 
- -H tcp://127.0.0.1:2375 \
- -H unix:///var/run/docker.sock \
- --insecure-registry <REGISTRY_HOSTNAME>:5000
-
-or, just qualify the image name:
-
- $ docker tag <some-hash-id> localhost:5000/binet/server
+ $ docker tag <some-image-hash-id> localhost:5000/binet/server
  $ docker push localhost:5000/binet/server
 
 
