@@ -90,12 +90,24 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "push", "binet/web-base",
+		"docker", "tag", "-f",
+		"binet/web-base",
+		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
 	)
 	err = run(cmd)
 	if err != nil {
-		log.Fatalf("error pushing web-base")
+		log.Fatalf("error tagging web-base to cc-ecole/web-base: %v\n", err)
 	}
+
+	/*
+		cmd = exec.Command(
+			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
+		)
+		err = run(cmd)
+		if err != nil {
+			log.Fatalf("error pushing web-base")
+		}
+	*/
 
 	err = cp(
 		filepath.Join(repodir, "Dockerfile"),
@@ -127,12 +139,24 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "push", "binet/web-app",
+		"docker", "tag",
+		"binet/web-app:v1",
+		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
 	)
 	err = run(cmd)
 	if err != nil {
-		log.Fatalf("error pushing web-app: %v\n", err)
+		log.Fatalf("error tagging web-app to cc-ecole/web-app: %v\n", err)
 	}
+
+	/*
+		cmd = exec.Command(
+			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
+		)
+		err = run(cmd)
+		if err != nil {
+			log.Fatalf("error pushing web-app: %v\n", err)
+		}
+	*/
 
 	// FIXME(sbinet): we rely on the docker-push to take some time
 	// so the http.Get will see a container exposing a (running) web server...
