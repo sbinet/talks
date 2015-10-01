@@ -625,6 +625,9 @@ For a single container, it is as simple as:
  $ docker logs <some-container-id>
  $ docker logs <some-container-name>
 
+- inspect the logs of your `web-app-v2` container
+- insepct the logs of the container running your local registry
+
 * Inspecting logs - II
 
 _e.g.:_
