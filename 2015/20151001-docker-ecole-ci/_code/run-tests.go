@@ -81,7 +81,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", "binet/web-base", ".",
+		"docker", "build", "-t", "binet/web-base", ".",
 	)
 	cmd.Dir = filepath.Join(repodir, "docker-web-base")
 	err = run(cmd)
@@ -99,15 +99,13 @@ func main() {
 		log.Fatalf("error tagging web-base to cc-ecole/web-base: %v\n", err)
 	}
 
-	/*
-		cmd = exec.Command(
-			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
-		)
-		err = run(cmd)
-		if err != nil {
-			log.Fatalf("error pushing web-base")
-		}
-	*/
+	cmd = exec.Command(
+		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
+	)
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error pushing web-base")
+	}
 
 	err = cp(
 		filepath.Join(repodir, "Dockerfile"),
@@ -118,7 +116,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", "binet/web-app:v1", ".",
+		"docker", "build", "-t", "binet/web-app:v1", ".",
 	)
 	cmd.Dir = repodir
 	err = run(cmd)
@@ -139,7 +137,7 @@ func main() {
 	}
 
 	cmd = exec.Command(
-		"docker", "tag",
+		"docker", "tag", "-f",
 		"binet/web-app:v1",
 		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
 	)
@@ -148,15 +146,13 @@ func main() {
 		log.Fatalf("error tagging web-app to cc-ecole/web-app: %v\n", err)
 	}
 
-	/*
-		cmd = exec.Command(
-			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
-		)
-		err = run(cmd)
-		if err != nil {
-			log.Fatalf("error pushing web-app: %v\n", err)
-		}
-	*/
+	cmd = exec.Command(
+		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
+	)
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error pushing web-app: %v\n", err)
+	}
 
 	// FIXME(sbinet): we rely on the docker-push to take some time
 	// so the http.Get will see a container exposing a (running) web server...
@@ -211,7 +207,7 @@ public class MyServlet extends HttpServlet
 
 	// now create and run server-v2
 	cmd = exec.Command(
-		"docker", "build", "--rm", "-t", "binet/web-app:v2", ".",
+		"docker", "build", "-t", "binet/web-app:v2", ".",
 	)
 	cmd.Dir = repodir
 	err = run(cmd)
@@ -232,11 +228,21 @@ public class MyServlet extends HttpServlet
 	}
 
 	cmd = exec.Command(
-		"docker", "push", "binet/web-app:v2",
+		"docker", "tag", "-f",
+		"binet/web-app:v2",
+		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
 	)
 	err = run(cmd)
 	if err != nil {
-		log.Fatalf("error pushing web-app: %v\n", err)
+		log.Fatalf("error tagging web-app to cc-ecole/web-app:v2: %v\n", err)
+	}
+
+	cmd = exec.Command(
+		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
+	)
+	err = run(cmd)
+	if err != nil {
+		log.Fatalf("error pushing web-app:v2: %v\n", err)
 	}
 
 	testWebServer("http://"+localhost+":8082/", "<h1>Welcome to ")
