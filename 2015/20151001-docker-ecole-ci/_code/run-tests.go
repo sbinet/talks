@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -17,6 +18,7 @@ import (
 
 var (
 	localhost = "localhost"
+	doPush    = flag.Bool("do-push", false, "push to cc-ecole2015-docker")
 )
 
 func init() {
@@ -35,6 +37,8 @@ func main() {
 	defer func() {
 		log.Printf("time= %v\n", time.Since(start))
 	}()
+
+	flag.Parse()
 
 	origdir, err := os.Getwd()
 	if err != nil {
@@ -99,12 +103,14 @@ func main() {
 		log.Fatalf("error tagging web-base to cc-ecole/web-base: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error pushing web-base")
+	if *doPush {
+		cmd = exec.Command(
+			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
+		)
+		err = run(cmd)
+		if err != nil {
+			log.Fatalf("error pushing web-base")
+		}
 	}
 
 	err = cp(
@@ -146,12 +152,14 @@ func main() {
 		log.Fatalf("error tagging web-app to cc-ecole/web-app: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error pushing web-app: %v\n", err)
+	if *doPush {
+		cmd = exec.Command(
+			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
+		)
+		err = run(cmd)
+		if err != nil {
+			log.Fatalf("error pushing web-app: %v\n", err)
+		}
 	}
 
 	// FIXME(sbinet): we rely on the docker-push to take some time
@@ -237,14 +245,15 @@ public class MyServlet extends HttpServlet
 		log.Fatalf("error tagging web-app to cc-ecole/web-app:v2: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error pushing web-app:v2: %v\n", err)
+	if *doPush {
+		cmd = exec.Command(
+			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
+		)
+		err = run(cmd)
+		if err != nil {
+			log.Fatalf("error pushing web-app:v2: %v\n", err)
+		}
 	}
-
 	testWebServer("http://"+localhost+":8082/", "<h1>Welcome to ")
 	testWebServer("http://"+localhost+":8080/", "<h1>Bienvenue ")
 
