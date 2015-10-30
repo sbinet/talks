@@ -1,0 +1,34 @@
+docker & HEP: containerization of applications for development,
+distribution and preservation.
+==============================
+
+HEP software stacks are not shallow.
+Indeed, HEP experiments' software are usually many applications in one
+(reconstruction, simulation, analysis, ...) and thus require many
+libraries - developed in-house or by third parties - to be properly
+compiled and installed.
+Moreover, because of resource constraints, experiments' software is
+usually installed, tested, validated and deployed on a very narrow set
+of platforms, architectures, toolchains and operating systems. As a
+consequence, bootstrapping a software environment on a developer
+machine or deploying the software on production or user machines is
+usually perceived as tedious and iterative work, especially when one
+wants the native performances of bare metal.
+
+`Docker` containers provide an interesting avenue for packaging
+applications and development environment, relying on the Linux kernel
+capabilities for process isolation, adding "git"-like capabilities to
+the filesystem layer and providing (close to) native CPU, memory and
+I/O performances.
+
+This paper will introduce in more details the modus operandi of
+`Docker` containers and then focus on the `hepsw/docks` containers
+which provide containerized software stacks for -among others-
+`LHCb`. The paper will then discuss various strategies experimented
+with to package software (e.g. `CVMFS`, `RPM`s, from-source) and
+applied to optimize provisioning speed and disk usage, leveraging the
+caching system of `Docker`.
+
+Finally, the paper will report on benchmarks comparing workloads on
+native, VM and `Docker` containers setups.
+
