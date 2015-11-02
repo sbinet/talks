@@ -13,7 +13,7 @@
 \usepackage{subfig}
 
 
-\title{\texttt{docker} \& \texttt{HENP}}
+\title{\texttt{Docker} \& \texttt{HENP}}
 \author{S\'ebastien Binet}
 \date{Novembre 2015}
 \affil{CNRS/IN2P3/LPC}
@@ -64,7 +64,7 @@ aux environnements de travail typiques dans \texttt{HENP}.
 %\section*{Origines}
 \section*{Technologies utilis\'ees}
 
-\texttt{docker} est un projet \emph{open source} \'ecrit en
+\texttt{Docker} est un projet \emph{open source} \'ecrit en
 \texttt{Go}~\cite{ref-golang} pour empaqueter, distribuer et lancer n'importe
 quelle application \`a l'int\'erieur d'un conteneur.
 
@@ -79,7 +79,7 @@ d'exploitation pour l'isolation plut\^ot que de virtualiser tout le
 mat\'eriel.}
 \end{figure}
  
-\texttt{docker} utilise les espaces de nommage (\emph{namespaces})
+\texttt{Docker} utilise les espaces de nommage (\emph{namespaces})
 \texttt{Linux}, les \texttt{cgroups}~\cite{ref-cgroups} et un syst\`eme de
 fichiers permettant la fusion de points de montage (\emph{unioning}) pour isoler
 les processus.
@@ -117,7 +117,7 @@ performances de provisionnement de disques.
 \subsection*{Images \texttt{docker}}
 
 Les images \texttt{docker} sont cr\'e\'ees \`a partir d'une image de base.
-\texttt{docker} met \`a disposition un nombre important d'images de base
+\texttt{Docker} met \`a disposition un nombre important d'images de base
 officielles (\texttt{ubuntu}, \texttt{centos}, etc\ldots).
 Ces images peuvent \^etre t\'el\'echarg\'ees \emph{via} la commande
 \texttt{docker pull} comme illustr\'e dans la figure~\ref{fig-docker-pull}.
@@ -358,9 +358,9 @@ est install\'ee.}
 
 \section*{Cas d'usages}
 
-\texttt{docker} est tr\`es utile pour un certain nombre de \emph{workflows}
+\texttt{Docker} est tr\`es utile pour un certain nombre de \emph{workflows}
 typiques dans \texttt{HENP}.
-\texttt{docker} permet en effet:
+\texttt{Docker} permet en effet:
 \begin{itemize}
  \item l'encapsulation de la construction de l'enti\`eret\'e de la pile
 	 logicielle d'une exp\'erience, en s'assurant qu'il n'y a aucune
@@ -371,14 +371,14 @@ typiques dans \texttt{HENP}.
  \item la distribution simple et rapide d'environnements de d\'eveloppement.
 \end{itemize}
 
-\texttt{docker} permet \'egalement une meilleure s\'eparation des
-responsabilit\'es (\emph{separation of concerns}) entre les \'equipes de
-d\'eveloppement et de production, en ad\'equation avec la mouvance
-\emph{DevOps}~\cite{ref-devops}.
+\texttt{Docker} permet \'egalement une r\'epartition plus souple des
+responsabilit\'es entre les \'equipes de d\'eveloppement et de production, en
+ad\'equation avec la mouvance \emph{DevOps}~\cite{ref-devops}.
 
 L'\'equipe de d\'eveloppement peut ainsi choisir la distribution \texttt{Linux}
 ad\'equate, le portefeuille de d\'ependances externes (ainsi que leur version),
-son cadriciel, etc\ldots sans g\^ener l'\'equipe de production.
+son cadriciel, etc\ldots sans impact pour l'\'equipe de production (autre que
+l'adoption des conteneurs comme outil de mis en production).
 De son c\^ot\'e, l'\'equipe de production peut se focaliser sur la gestion des
 machines, la gestion des logs, la politique de sauvegarde des donn\'ees, le
 \emph{monitoring}, etc\ldots sans interf\'erer avec le processus
