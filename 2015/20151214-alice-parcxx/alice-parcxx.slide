@@ -1,0 +1,117 @@
+Introduction to parallel programming
+MRRTF, 2015/12/14
+
+Sebastien Binet
+CNRS/IN2P3/LPC
+binet@cern.ch
+
+* Parallel programming
+
+is hard in `C++`
+
+* FairMQ + docker
+
+Running the `FairMQ` example 2 with `docker` (you need 3 terminals):
+
+ term-1> docker run -it --rm --name=ex2-fair hepsw/alice-fair bash
+ term-2> docker exec -it ex2-fair bash
+ term-3> docker exec -it ex2-fair bash
+
+In `term-1`, create `/data/ex2-sample-process-sink.json` from [[https://github.com/FairRootGroup/FairRoot/blob/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json][ex2-sample-process-sink.json]]:
+
+ term-1> curl -L \
+  https://raw.githubusercontent.com/FairRootGroup/FairRoot/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json \
+  > /data/ex2-sampler-processor-sink.json
+
+Then:
+
+ term-1> ex2-sampler --id sampler1 \
+         --config-json-file /data/ex2-sampler-processor-sink.json
+ term-2> ex2-sink --id sink1 \
+         --config-json-file /data/ex2-sampler-processor-sink.json
+ term-3> ex2-processor --id processor2
+         --config-json-file /data/ex2-sampler-processor-sink.json
+
+* FairMQ - term-1
+
+ term-1> ex2-sampler --id sampler1 \
+         --config-json-file /data/ex2-sampler-processor-sink.json 
+ [16:22:24][STATE] Entering FairMQ state machine
+ [...]
+ [16:22:24][STATE] Entering INITIALIZING DEVICE state
+ [16:22:24][DEBUG] Validating channel "data-out[0]"... VALID
+ [16:22:24][DEBUG] Initializing channel data-out[0] (push)
+ [16:22:24][DEBUG] Binding channel data-out[0] on tcp://*:5555
+ [16:22:25][STATE] Entering DEVICE READY state
+ [16:22:25][STATE] Entering INITIALIZING TASK state
+ [16:22:25][STATE] Entering READY state
+ [16:22:25][STATE] Entering RUNNING state
+ [16:22:25][INFO] DEVICE: Running...
+ [16:22:26][INFO] Sending "Hello"
+  
+* FairMQ - term-2
+
+ term-2> ex2-sink --id sink1 --config-json-file /data/ex2-sampler-processor-sink.json 
+ [16:24:33][STATE] Entering FairMQ state machine
+ [...]
+ [16:24:33][STATE] Entering INITIALIZING DEVICE state
+ [16:24:33][DEBUG] Validating channel "data-in[0]"... VALID
+ [16:24:33][DEBUG] Initializing channel data-in[0] (pull)
+ [16:24:33][DEBUG] Binding channel data-in[0] on tcp://*:5556
+ [16:24:34][STATE] Entering DEVICE READY state
+ [16:24:34][STATE] Entering INITIALIZING TASK state
+ [16:24:34][STATE] Entering READY state
+ [16:24:34][STATE] Entering RUNNING state
+ [16:24:34][INFO] DEVICE: Running...
+
+* FairMQ - term-3
+
+ term-3> ex2-processor --id processor2 --config-json-file /data/ex2-sampler-processor-sink.json 
+ [16:26:30][STATE] Entering FairMQ state machine
+ [...]
+ [16:26:30][STATE] Entering INITIALIZING DEVICE state
+ [16:26:30][DEBUG] Validating channel "data-out[0]"... VALID
+ [16:26:30][DEBUG] Initializing channel data-out[0] (push)
+ [16:26:30][DEBUG] Connecting channel data-out[0] to tcp://localhost:5556
+ [16:26:30][DEBUG] Validating channel "data-in[0]"... VALID
+ [16:26:30][DEBUG] Initializing channel data-in[0] (pull)
+ [16:26:30][DEBUG] Connecting channel data-in[0] to tcp://localhost:5555
+ [16:26:31][STATE] Entering DEVICE READY state
+ [16:26:31][STATE] Entering INITIALIZING TASK state
+ [16:26:31][STATE] Entering READY state
+ [16:26:31][STATE] Entering RUNNING state
+ [16:26:31][INFO] DEVICE: Running...
+ [16:26:31][INFO] Received data, processing...
+ [16:26:31][INFO] Received data, processing...
+ [16:26:32][INFO] Received data, processing...
+ [16:26:33][INFO] Received data, processing...
+ [16:26:34][INFO] Received data, processing...
+ ^C
+ [16:26:35][INFO] Caught signal 2
+ [16:26:35][DEBUG] Closed all sockets!
+ [16:26:35][INFO] Exiting.
+
+* FairMQ
+
+When `processor2` is run, the chain is complete and processing can start:
+
+ [term-1]
+ [16:22:25][INFO] DEVICE: Running...
+ [16:22:26][INFO] Sending "Hello"
+ [16:26:31][INFO] Sending "Hello"
+ [16:26:32][INFO] Sending "Hello"
+ [16:26:33][INFO] Sending "Hello"
+ [16:26:34][INFO] Sending "Hello"
+ [16:26:35][INFO] Sending "Hello"
+
+ [term-2]
+ [16:26:31][INFO] Received message: "Hello (modified by processor2)"
+ [16:26:31][INFO] Received message: "Hello (modified by processor2)"
+ [16:26:32][INFO] Received message: "Hello (modified by processor2)"
+ [16:26:33][INFO] Received message: "Hello (modified by processor2)"
+ [16:26:34][INFO] Received message: "Hello (modified by processor2)"
+ 
+- 6 "Hello" data packets are send over the wire
+- 5 packets are processed by `processor2` (before `^C` was hit)
+- 5 packets are displayed by `sink1`
+
