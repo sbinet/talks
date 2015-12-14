@@ -5,9 +5,169 @@ Sebastien Binet
 CNRS/IN2P3/LPC
 binet@cern.ch
 
+* Disclaimer
+
+I used to be a `C++` programmer, then a `python` programmer.
+
+Nowadays, I am a [[https://golang.org][Go]] programmer at heart, enjoying blazing fast compilation time, builtin concurrency constructs, easy installation and deployment, etc...
+
+I really learned parallel/concurrent programming with `Go`.
+My views on parallel programming with `C++` are thus somewhat skewed.
+
+.image figs/gopher.png
+.caption The Go mascott: a gopher
+
 * Parallel programming
 
-is hard in `C++`
+Parallel programming is hard.
+Parallel programming is harder in `C++`.
+
+Actually, are we really sure we want to do *parallel* programming ?
+
+* Concurrency vs Parallelism
+
+_Concurrency:_ programming as the composition of independently executing processes/tasks.
+
+_Parallelism:_ programming as the simultaneous execution of (possibly related) computations.
+
+.image figs/conc-vs-par.png 350 _
+
+* Concurrency vs Parallelism
+
+Concurrency is about dealing with lots of things at once.
+Parallelism is about doing lots of things at once.
+
+Concurrency is about (program) *structure*.
+Parallelism is about (program) *execution*.
+
+.image figs/conc-vs-par-prog.png 350 _
+
+* Concurrency vs Parallelism
+
+Concurrency and parallelism are related.
+Concurrency isn't parallelism (it's better!)
+
+Parallelizing an application is done by:
+
+- finding concurrency in the problem
+- exposing the concurrency in the source code
+- exploiting the exposed concurrency to complete the job in less time.
+
+.image figs/conc-vs-par-decomp.png
+
+* Decomposition in parallel programs
+
+Every parallel program is based on concurrency
+i.e: tasks defined by an application that can run at the same time.
+
+*EVERY* parallel program requires a _task_decomposition_ and a _data_decomposition_:
+
+- Task decomposition: break the application down into a set of tasks that can execute concurrently.
+- Data decomposition: How must the data be broken down into chunks and associated with threads/processes to make the parallel program run efficiently.
+
+* Goldilocks
+
+Parallel approaches have to find the "sweet spot" between two extremes.
+
+Too fine grained:
+
+- Data: computation dominated by overhead
+- Tasks: context switching overhead
+
+Too coarse grained:
+
+- Data: load balancing problems
+- Tasks: insufficient items to keep processes busy
+
+* Parallel programming: multi-process vs multi-threaded
+
+Multi-process:
+
+- resource requirements are multiplied w/ nbr of process instances
+- (clever) use of `fork(2)` can mitigate this issue (but not in a `MT` environment)
+- one process can not corrupt the memory of another process
+- overhead of pushing data from one process to the other
+
+Multi-threaded:
+
+- small context switch times (wrt an OS' process)
+- automatic sharing of many hardware resources (memory, fds, sockets...)
+- thread-safety of external libraries?
+- one thread can corrupt another thread
+
+`FairRoot` design can cater for both (`MP` _via_ `ZeroMQ` or `NanoMQ` message queues)
+
+* Multi-threading & Multi-processing in a C++ world
+
+Modern architectures impose massive challenges on programmability in the context of performance portability.
+
+- massive increase in on-node parallelism
+- deep memory hierarchies
+
+Only *portable* parallelization solution for `C++` programmers (today?): *OpenMP* & *MPI*
+
+- hugely successful for years
+- widely used and supported
+- simple use for simple cases
+- very portable
+- highly optimized
+
+_Which_ `C++` BTW ?
+
+* C++ timeline
+
+`C++` is a wide and complex language.
+Know your `C++` and the (subset of?) `C++` you are *allowed* to write!
+
+- `C++03`?
+- `C++11`?
+- `C++14`?
+
+.image figs/wg21-timeline.png 300 _
+
+* Parallelism in C++
+
+`C++11` introduced lower level abstractions:
+
+- `std::thread`, `std::mutex`, `std::future`, ...
+- fairly limited, more is needed
+- `C++` needs stronger support for higher-level parallelism
+
+Several proposals to the Standardization Committee are accepted or under consideration:
+
+- Technical Specification: Concurrency
+- Technical Specification: Parallelism
+- Other smaller proposals: resumable functions, task regions, executors
+
+* Parallelism in C++
+
+Currently, there is no overarching vision related to higher-level parallelism
+
+- goal is to standardize on a "big story" by 2020
+- no need for OpenMP, OpenACC, OpenCL, etc...
+
+But for the moment, `C++` programmers are stuck with `C++11/14`...
+
+* Memory model
+
+With `C++11`, finally `C++` has a memory model that contemplates a multi-threaded execution of a program.
+
+A thread is a single flow of control within a program
+
+- Every thread can potentially access every object and function in the program
+- The interleaving of each thread's instructions is undefined
+
+.image figs/thread-exec-race.png
+
+* Memory model
+
+`C++` guarantees that two threads can update and access *separate* memory locations without interfering with each other.
+
+- For all other situations updates and accesses have to be properly synchronized
+  - atomics, locks, memory fences
+- If updates and accesses to the same location by multiple threads are not properly synchronized, there is a data race
+  - undefined behavior
+- Data races can be made visible by transformations applied by the compiler or by the processor for performance reasons
 
 * FairMQ + docker
 
