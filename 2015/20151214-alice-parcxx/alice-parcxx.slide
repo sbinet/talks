@@ -22,6 +22,45 @@ My views on parallel programming with `C++` are thus somewhat skewed.
 Parallel programming is hard.
 Parallel programming is harder in `C++`.
 
+Actually, why do we have to do *parallel* programming ?
+
+* Moore's law
+
+.image figs/cpu-free-lunch.png _ 550
+
+* The hardware/software contract
+
+.image figs/par-prog-old-days.png _ 850
+
+* 
+
+.image figs/par-prog-power.png _ 850
+
+* 
+
+.image figs/par-prog-cores.png _ 850
+
+* Many cores: we are all doing it
+
+.image figs/par-prog-hw.png _ 800
+
+* Hardware diversity: basic building blocks
+
+.image figs/par-prog-building-blocks.png
+
+* Hardware diversity: combining building blocks
+
+.image figs/par-prog-heterogeneous.png
+
+* Hardware diversity: CPUs
+
+.image figs/par-prog-cpu.png _ 800
+
+* Parallel programming
+
+Ok, so we have to do parallel programming to properly utilize our new
+hardware...
+
 Actually, are we really sure we want to do *parallel* programming ?
 
 * Concurrency vs Parallelism
@@ -148,6 +187,8 @@ Currently, there is no overarching vision related to higher-level parallelism
 
 But for the moment, `C++` programmers are stuck with `C++11/14`...
 
+* Interlude: memory model & tools
+
 * Memory model
 
 With `C++11`, finally `C++` has a memory model that contemplates a multi-threaded execution of a program.
@@ -163,11 +204,154 @@ A thread is a single flow of control within a program
 
 `C++` guarantees that two threads can update and access *separate* memory locations without interfering with each other.
 
-- For all other situations updates and accesses have to be properly synchronized
-  - atomics, locks, memory fences
-- If updates and accesses to the same location by multiple threads are not properly synchronized, there is a data race
-  - undefined behavior
+- For all other situations updates and accesses have to be properly synchronized (_ie:_ atomics, locks, memory fences)
+- If updates and accesses to the same location by multiple threads are not properly synchronized, there is a data race (_ie:_ undefined behavior)
 - Data races can be made visible by transformations applied by the compiler or by the processor for performance reasons
+
+* Tools to support parallel programming development/debugging
+
+.link http://valgrind.org/docs/manual/drd-manual.html
+.link http://valgrind.org/docs/manual/hg-manual.html
+.link http://clang.llvm.org/docs/ThreadSanitizer.html
+
+Detect races at runtime:
+
+- needs a test case and workload that triggers a race
+- no false positive, but can not detect all possible races
+
+Needs a recompilation (`TSan`), (dramatic) increase of resources requirements at
+runtime (CPU, VMem) b/c of code instrumentation and bookkeeping.
+
+* C++ parallel programming: building blocks
+
+* C++11 std::thread
+
+`C++11` (finally!) standardized threads
+
+- `std::thread` is now part of the standard `C++` library
+- `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
+
+* C++11 std::thread
+
+.code code/hello-par.cxx
+
+ $> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
+ $> ./hello-par
+ ** inside thread 139800850654976!
+ 
+* C++11 std::thread - avoiding errors
+
+.code code/hello-2.cxx
+
+*(1)* Thread function must do *exception*handling*: unhandled exception => program termination
+
+*(2)* Must join with _thread_ *before* handle goes out of scope, otherwise:
+program termination.
+
+* Programming style
+
+- Old school: thread functions (what we just saw)
+- Middle school: function objects (functors)
+
+.code code/par-functors.cxx
+
+* Programming style
+
+- New school: `C++11` lambda functions (aka anonymous functions)
+
+It's all about trade-offs...
+
+*Lambda*functions:*
+
+- easier and more readable (once your brained has been trained)
+- code remains inline
+- potentially more *dangerous* (`[&]` captures everything by reference)
+
+*Functions:*
+
+- more efficient: lambdas involve class, function objects
+- potentially *safer*: requires explicit variable scoping
+- more cumbersome
+
+* Example: matrix multiply
+
+.image figs/matrix-multiply.png
+
+* Sequential version
+
+.image figs/matrix-multiply-seq.png
+
+* Structured (fork-join) parallelism
+
+A common pattern when creating multiple threads 
+
+.image figs/matrix-multiply-fork-join.png
+
+* Parallel solution
+
+.image figs/matrix-multiply-par.png _ 850
+
+* Types of parallelism
+
+Most common types:
+
+- Data
+- Task
+- Embarrassingly parallel
+- Dataflow
+
+* Data parallelism 
+
+.image figs/par-types-data.png
+
+* Task parallelism
+
+.image figs/par-types-task.png
+
+* Embarrassingly parallel
+
+.image figs/par-types-emb-par.png
+
+* Dataflow
+
+.image figs/par-types-dataflow.png
+
+* C++ concurrency features
+
+.image figs/cxx-features.png
+
+* Futures
+
+*Futures* provide a higher level of abstraction
+
+- you start an asynchronous/parallel operation
+- you are returned a handle to wait for the result
+- thread creation, join and exceptions are handled for you
+
+* std::async + std::future
+
+.image figs/future-async.png
+
+* async operations
+
+.image figs/future-async-2.png
+
+* 
+
+That's all for today.
+Many more to cover, though:
+
+- SIMD
+- Thread Building Blocks (`Intel TBB`)
+- `FPGA`
+- ...
+
+* Parallel programming: references
+
+.link https://web2.infn.it/esc15
+.link http://concur.rspace.googlecode.com/hg/talk/concur.html
+.link http://sc13.supercomputing.org/sites/default/files/prog105/prog105.pdf
+
 
 * FairMQ + docker
 
