@@ -344,6 +344,8 @@ Many more to cover, though:
 - SIMD
 - Thread Building Blocks (`Intel` `TBB`)
 - `FPGA`
+- (auto-)vectorization
+- `OpenCL`/`OpenMP`/`OpenACC`
 - ...
 
 * Parallel programming: references
