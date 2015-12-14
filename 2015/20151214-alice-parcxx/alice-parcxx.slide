@@ -342,7 +342,7 @@ That's all for today.
 Many more to cover, though:
 
 - SIMD
-- Thread Building Blocks (`Intel TBB`)
+- Thread Building Blocks (`Intel` `TBB`)
 - `FPGA`
 - ...
 
