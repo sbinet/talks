@@ -1,0 +1,14 @@
+## base environment w/ deps for the web-app
+FROM centos:7
+MAINTAINER binet@cern.ch
+
+RUN yum update -y && \
+	yum install -y maven
+
+RUN mkdir -p /opt/in2p3/tp
+
+## change current directory
+WORKDIR /opt/in2p3/tp
+
+## prepare for web server
+EXPOSE 8080

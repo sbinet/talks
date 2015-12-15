@@ -1,0 +1,12 @@
+## image for the web-app
+FROM binet/web-base
+
+MAINTAINER binet@cern.ch
+
+## add the whole git-repo
+ADD . /opt/in2p3/tp
+
+WORKDIR /opt/in2p3/tp
+RUN ./bin/compile.sh
+
+CMD java -jar /opt/in2p3/tp/target/webserver-1.0-SNAPSHOT-jar-with-dependencies.jar
