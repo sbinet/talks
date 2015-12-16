@@ -202,23 +202,7 @@ The `docker` client ships with many a subcommand:
   Built:        Sun Nov 22 00:15:15 UTC 2015
   OS/Arch:      linux/amd64
 
-* Interlude: docker configuration @CC.in2p3
-
-* Linux
-
-Just use the default config.
-
-* MacOSX/Windows
-
-Same thing, but on `MacOSX` and `Windows`, let's create a new Linux VM and call
-it `vm-ecole`:
-
- $ docker-machine create -d virtualbox \
-  vm-ecole
-
- $ eval $(docker-machine env vm-ecole)  ## MacOSX
- $ eval $(./docker-machine.exe env --shell=bash vm-ecole) ## Win
-
+* Whirlwind tour of docker features
 
 * Hello World
 
@@ -355,7 +339,7 @@ between your machine and the container.
 The container is running inside that VM so you need to replace `localhost` with
 the `IP` of that VM:
 
- $ docker-machine ip vm-ecole
+ $ docker-machine ip default
  192.168.59.103
 
 and then:
@@ -413,14 +397,71 @@ Never again:
 
 We'll test this workflow in the remainder of the hands-on session...
 
+* Deployment workflow
+
+- Pull binary (possibly from a private registry), packaged as a container
+- Deploy container on cloud or local cluster
+
+Many tools exist to ease the deployment of multi-containers applications
+_eg_: an application consisting of a web-server and a database, where each
+binary is packaged as a single container.
+Each container needs to communicate with the other.
+Configuration(s) also need to be provided to these containers...
+
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/etcd/docs/latest/
+.link https://docs.docker.com/compose/
+
+
+* Conclusions
+
+- `docker` is a rather good tool to deploy applications in containers
+- eases the life of developers and sysadmins (devops)
+- `docker` isn't the only game in town
+- [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS`
+- [[http://0pointer.de/public/systemd-man/systemd-nspawn.html][systemd-nspawn]], now part of `systemd`
+
+* References
+
+.link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
+.link http://www.slideshare.net/dotCloud/docker-intro-november
+.link https://sif.info-ufr.univ-montp2.fr/docker-talk
+.link https://docs.docker.com/introduction/understanding-docker/
+.link https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/rkt/docs
+
+* Hands-on session
+
+* Development workflow
+
+- Fetch the code from `github`:
+
+ $ git clone git://github.com/sbinet/loops-20151217-tp
+ $ cd loops-20151217-tp
+
+We'll see _a_ use of `docker` as part of a development workflow:
+ 
+- Edit code
+- Mount code inside a `build` container
+- Build+test inside that container
+
+We'll test this workflow in the remainder of the hands-on session...
+
+
 * Create a base container
 
 - create a directory `docker-web-base` to hold the `Dockerfile` for the base container
-- create the `Dockerfile` and choose your favorite `Linux` distro (say, `centos`) as a base image,
-- install the needed dependencies for the web-app (`maven` on `centos`)
+- create the `Dockerfile` and choose your favorite `Linux` distro (say, `debian`) as a base image,
+- install the needed dependencies for the web-app (`go` and `pkg-config`)
 - run:
 
  $ docker build -t <myname>/web-base .
+
+
+_Hint:_ The image `golang`, an official image from Docker Inc., is based on `debian` and has `go` installed...
 
 
 * Create a base container - solution
@@ -438,27 +479,33 @@ We'll test this workflow in the remainder of the hands-on session...
 
 Probably easier to just mount the sources *inside* the base container:
 
- $ docker run -it -v `pwd`:/opt/in2p3/tp -p 8080:8080 <myname>/web-base bash
- [root@48b2c74a5004 tp]# ./bin/compile.sh 
- [root@48b2c74a5004 tp]# java -jar /opt/in2p3/tp/target/webserver-1.0-SNAPSHOT-jar-with-dependencies.jar
- 2015-09-10 14:13:25.467:INFO::main: Logging initialized @623ms
- 2015-09-10 14:13:25.719:INFO:oejs.Server:main: jetty-9.3.z-SNAPSHOT
- 2015-09-10 14:13:25.918:INFO:oejsh.ContextHandler:main: Started o.e.j.s.ServletContextHandler@4645801a{/,null,AVAILABLE}
- 2015-09-10 14:13:25.933:INFO:oejs.ServerConnector:main: Started ServerConnector@62b60fbb{HTTP/1.1,[http/1.1]}{0.0.0.0:8080}
- 2015-09-10 14:13:25.934:INFO:oejs.Server:main: Started @1093ms
- 
+ $ docker run -it -v `pwd`:/go/src/github.com/sbinet/loops-20151217-tp \
+    -p 8080:8080 <myname>/web-base bash
+ [root@48b2c74a5004 /go]# go run ./src/github.com/sbinet/loops-20151217-tp/web-app/main.go 
+ 2015/12/16 14:13:13 listening on: http://localhost:8080
+
+  
 In another terminal:
 
  $ curl localhost:8080
- <h1>Bienvenue à l'école informatique IN2P3 2015</h1>
- <a href='/analyse'>Analyse de données</a>
- session=1kdgwh0cue0efokpe5t1gcvtj
+ hello LoOPS 20151217!
+ 
+ 
+ --- running external command...
+ 
+ >>> pkg-config --cflags python2
+ Package python2 was not found in the pkg-config search path.
+ Perhaps you should add the directory containing `python2.pc'
+ to the PKG_CONFIG_PATH environment variable
+ No package 'python2' found
+ error: exit status 1
+
 
 * Base container for dev - II
 
 - On windows, the correct `-v` syntax is like:
 
- $ docker run -it -v //c/Users/username/some/path:/opt/in2p3/tp ...
+ $ docker run -it -v //c/Users/username/some/path:/go/src/ ...
 
 .link https://github.com/docker/docker/issues/12590#issuecomment-96767796
 
@@ -508,7 +555,7 @@ Let's do just that.
       <myname>/web-app \
       <myname>/web-app:v1
 
-- modify `src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java` to print a different welcome message
+- modify `sbinet/loops-20151217-tp/web-app/main.go` to print a different welcome message
 - containerize the new version as `.../web-app:v2`
 
 * Create multiple versions of an image - II
@@ -527,27 +574,18 @@ Let's do just that.
 
 - make sure the servers on ports `8080` and `8082` display the correct welcome messages.
 
-* Continuous Integration
-
-Modify the `Jenkins` build to:
-
-- build the final container
-- run the tests suite
-- push the result as a tagged image
-
 * Sharing images
 
-Up to now, the images you've been creating have been put on your local registry.
-But there is another registry instance available at:
+Up to now, the images you've been creating have been put on your local disk.
+But there is this public registry instance available at:
 
- cc-ecole2015-docker.in2p3.fr:5000
+.link https://hub.docker.com
 
 Let's try to package the previous `web-app:v2` and `web-app:v1` images and put
-them on that new registry:
+them on that registry:
 
- $ docker tag \
-     <myname>/web-app \
-     cc-ecole2015-docker.in2p3.fr:5000/<myname>/web-app
+ $ docker push <myname>/web-app:v1
+ $ docker push <myname>/web-app:v2
 
 Now, try to `pull` the `web-app` image of your friend and run it.
 
@@ -561,32 +599,13 @@ For a single container, it is as simple as:
  $ docker logs <some-container-name>
 
 - inspect the logs of your `web-app-v2` container
-- insepct the logs of the container running your local registry
-
-* Inspecting logs - II
 
 _e.g.:_
 
  $ docker logs web-app-v2
- {
-  "timeMillis" : 1443615891663,
-  "thread" : "main",
-  "level" : "INFO",
-  "loggerName" : "org.eclipse.jetty.server.Server",
-  "message" : "Started @1343ms",
-  "endOfBatch" : false,
-  "loggerFqcn" : "org.eclipse.jetty.util.log.Slf4jLog",
-  "contextMap" : [ ]
- }
+ 2015/12/16 14:53:56 listening on: http://localhost:8080
 
- $ docker logs ecole-registry
- [...]
- 30/Sep/2015:12:20:13 +0000 DEBUG: args = {'tag': u'latest', 'namespace': u'binet', 'repository': u'web-app'}
- 30/Sep/2015:12:20:13 +0000 DEBUG: [get_tag] namespace=binet; repository=web-app; tag=latest
- 30/Sep/2015:12:20:13 +0000 DEBUG: api_error: Tag not found
- 172.17.42.1 - - [30/Sep/2015:12:20:13 +0000] "GET /v1/repositories/binet/web-app/tags/latest HTTP/1.1" 404 26 "-" "docker/1.8.2 go/go1.5.1 git-commit/0a8c2e3-dirty kernel/4.2.1-1-ARCH os/linux arch/amd64"
-
-* Inspecting logs - III
+* Inspecting logs - II
 
 - launch a container in interactive mode
 - start a bash shell
@@ -627,21 +646,39 @@ Extract the root fs from the build image:
 
  $ mkdir rootfs && cd rootfs
  $ docker run -d -p 8080:8080 --name=web-app-v2 \
-     localhost:5000/<myname>/web-app:v2
+     <myname>/web-app:v2
  $ docker export web-app-v2 | tar xf -
- $ ls opt/in2p3/tp
- bin/                      .git/                     sonar-project.properties
- doc/                      .gitignore                src/
- Dockerfile                pom.xml                   target/
- docker-web-base/          README.md                 
+ $ ls go/src/github.com/sbinet/loops-20151217-tp/
+ Dockerfile  docker-web-base  hello  README.md web-app
+ $ ls go/bin
+ web-app
 
 Another way is to use `docker` `cp`:
 
- $ docker cp web-app-v2:/opt/in2p3/tp tp
+ $ docker cp web-app-v2:/go/bin/web-app web-app
  
-The binaries are under `target`.
-If they were static libraries, you could just create a very slim container with
-them, using `docker` `import`.
+The binaries are under `/go/bin`.
+As `go` usually creates static libraries, you can just create a very slim
+container with them, using `docker` `import`.
+
+* Creation of a build+target container pair
+
+ $ mkdir rootfs && cd rootfs
+ $ docker cp web-app-v2:/go/bin/web-app web-app
+ $ cat > Dockerfile << EOF
+ FROM ubuntu
+ ADD web-app /usr/bin/web-app
+ CMD web-app
+ EOF
+ $ docker build -t slim-web-app .
+
+Compare the size:
+
+ $ docker images
+ ubuntu               14.04             187.9 MB
+ slim-web-app         latest            196.6 MB
+ binet/web-app        latest            749.3 MB
+ golang               1.5.2             703.8 MB
 
 * Running GUIs
 
@@ -652,17 +689,10 @@ Many do, though.
 Let's try to run a simple graphics-enabled application from within a `docker`
 container:
 
-  $ docker run -it --rm centos bash
-  docker> yum install -y xclock
+  $ docker run -it --rm ubuntu bash
+  docker> apt-get update -y && apt-get install -y x11-apps
   docker> xclock
 
-
-If the network is too slow, you can try to pull:
-
-  $ docker pull \
-      cc-ecole2015-docker.in2p3.fr:5000/centos-xclock
-
-where `xclock` and its dependencies have been already installed.
 
 * Running GUIs - II
 
@@ -693,8 +723,8 @@ Then:
  $ docker run -ti --rm \
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
-       centos bash
- docker> yum install -y xclock && xclock
+       ubuntu bash
+ docker> apt-get update -y && apt-get install -y xclock && xclock
 
 Don't forget to re-enable `X11` access control afterwards:
 

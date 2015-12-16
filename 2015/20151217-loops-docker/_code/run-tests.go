@@ -111,6 +111,7 @@ func main() {
 		log.Fatalf("error creating web-app/Dockerfile: %v\n", err)
 	}
 
+	log.Printf("tagging binet/web-app:v1...\n")
 	cmd = exec.Command(
 		"docker", "build", "-t", "binet/web-app:v1", ".",
 	)
@@ -122,6 +123,7 @@ func main() {
 
 	_ = exec.Command("docker", "kill", "binet-web-app").Run()
 	_ = exec.Command("docker", "rm", "binet-web-app").Run()
+	log.Printf("running binet-web-app (v1)...\n")
 	cmd = exec.Command(
 		"docker", "run", "-d", "-p", "8080:8080",
 		"--name=binet-web-app",
@@ -142,8 +144,7 @@ func main() {
 		}
 	}
 
-	// FIXME(sbinet): we rely on the docker-push to take some time
-	// so the http.Get will see a container exposing a (running) web server...
+	time.Sleep(2 * time.Second) // racing the web server...
 	testWebServer("http://"+localhost+":8080/", "hello LoOPS 20151217!\n")
 
 	// now create a v2
@@ -153,13 +154,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os/exec"
 )
 
 func main() {
 	http.HandleFunc("/", rootHandle)
-	addr := "localhost:8080"
-	log.Printf("listening on: http://%v\n", addr)
-	err := http.ListenAndServe(addr, nil)
+	port := ":8080"
+	log.Printf("listening on: http://localhost%s\n", port)
+	err := http.ListenAndServe("0.0.0.0"+port, nil)
 	if err != nil {
 		log.Fatalf("error closing web server: %v\n", err)
 	}
@@ -167,6 +169,14 @@ func main() {
 
 func rootHandle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome LoOPS 20151217!\n")
+	fmt.Fprintf(w, "\n\n--- running external command...\n\n>>> pkg-config --cflags python2\n")
+	cmd := exec.Command("pkg-config", "--cflags", "python2")
+	cmd.Stdout = w
+	cmd.Stderr = w
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintf(w, "error: %v\n", err)
+	}
 }`
 
 	web, err := os.Create(filepath.Join(
@@ -188,6 +198,7 @@ func rootHandle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// now create and run server-v2
+	log.Printf("building binet/web-app:v2...\n")
 	cmd = exec.Command(
 		"docker", "build", "-t", "binet/web-app:v2", ".",
 	)
@@ -199,6 +210,7 @@ func rootHandle(w http.ResponseWriter, r *http.Request) {
 
 	_ = exec.Command("docker", "kill", "binet-web-app-v2").Run()
 	_ = exec.Command("docker", "rm", "binet-web-app-v2").Run()
+	log.Printf("running binet-web-app (v2)...\n")
 	cmd = exec.Command(
 		"docker", "run", "-d", "-p", "8082:8080",
 		"--name=binet-web-app-v2",
@@ -218,6 +230,7 @@ func rootHandle(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("error pushing web-app:v2: %v\n", err)
 		}
 	}
+	time.Sleep(2 * time.Second) // racing the web-servers...
 	testWebServer("http://"+localhost+":8082/", "Welcome LoOPS ")
 	testWebServer("http://"+localhost+":8080/", "hello LoOPS ")
 
