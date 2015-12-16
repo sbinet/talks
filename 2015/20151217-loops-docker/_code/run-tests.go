@@ -45,7 +45,7 @@ func main() {
 		log.Fatalf("could not fetch current working directory: %v\n", err)
 	}
 
-	tmpdir, err := ioutil.TempDir("", "ecole-ci-")
+	tmpdir, err := ioutil.TempDir("", "loops-tp-")
 	if err != nil {
 		log.Fatalf("could not create tempdir: %v\n", err)
 	}
@@ -58,14 +58,14 @@ func main() {
 
 	// clone repository
 	cmd := exec.Command(
-		"git", "clone", "git@gitlab.in2p3.fr:EcoleInfo2015/TP.git", "TP",
+		"git", "clone", "git@github.com:sbinet/loops-20151217-tp.git",
 	)
 	err = run(cmd)
 	if err != nil {
 		log.Fatalf("could not retrieve git repo!")
 	}
 
-	repodir := filepath.Join(tmpdir, "TP")
+	repodir := filepath.Join(tmpdir, "loops-20151217-tp")
 	err = os.Chdir(repodir)
 	if err != nil {
 		log.Fatalf("could not chdir to [%s]: %v\n", repodir, err)
@@ -93,19 +93,9 @@ func main() {
 		log.Fatalf("error build web-base image: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "tag", "-f",
-		"binet/web-base",
-		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error tagging web-base to cc-ecole/web-base: %v\n", err)
-	}
-
 	if *doPush {
 		cmd = exec.Command(
-			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-base",
+			"docker", "push", "binet/web-base",
 		)
 		err = run(cmd)
 		if err != nil {
@@ -142,19 +132,9 @@ func main() {
 		log.Fatalf("error running web-app: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "tag", "-f",
-		"binet/web-app:v1",
-		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error tagging web-app to cc-ecole/web-app: %v\n", err)
-	}
-
 	if *doPush {
 		cmd = exec.Command(
-			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v1",
+			"docker", "push", "binet/web-app:v1",
 		)
 		err = run(cmd)
 		if err != nil {
@@ -164,53 +144,47 @@ func main() {
 
 	// FIXME(sbinet): we rely on the docker-push to take some time
 	// so the http.Get will see a container exposing a (running) web server...
-	testWebServer("http://"+localhost+":8080/", "<h1>Bienvenue ")
+	testWebServer("http://"+localhost+":8080/", "hello LoOPS 20151217!\n")
 
 	// now create a v2
-	const v2 = `package fr.in2p3.informatique.ecole2015.web;
+	const v2 = `package main
 
-import org.eclipse.jetty.server.QuietServletException;
+import (
+	"fmt"
+	"log"
+	"net/http"
+)
 
-import java.io.IOException;
+func main() {
+	http.HandleFunc("/", rootHandle)
+	addr := "localhost:8080"
+	log.Printf("listening on: http://%v\n", addr)
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		log.Fatalf("error closing web server: %v\n", err)
+	}
+}
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-public class MyServlet extends HttpServlet
-{
-    private String greeting="Welcome to école informatique IN2P3 2015";
-    public MyServlet(){}
-    public MyServlet(String greeting)
-    {
-        this.greeting=greeting;
-    }
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws QuietServletException, IOException
-    {
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("<h1>"+greeting+"</h1>");
-        response.getWriter().println("<a href='/analyse'>Analyse de données</a>");
-        response.getWriter().println("session=" + request.getSession(true).getId());
-    }
+func rootHandle(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Welcome LoOPS 20151217!\n")
 }`
 
-	myservlet, err := os.Create(filepath.Join(
+	web, err := os.Create(filepath.Join(
 		repodir,
-		"src/main/java/fr/in2p3/informatique/ecole2015/web/MyServlet.java",
+		"web-app/main.go",
 	))
 	if err != nil {
-		log.Fatalf("error opening file myservlet file: %v\n", err)
+		log.Fatalf("error opening file: %v\n", err)
 	}
-	defer myservlet.Close()
+	defer web.Close()
 
-	_, err = myservlet.WriteString(v2)
+	_, err = web.WriteString(v2)
 	if err != nil {
-		log.Fatalf("error updating [%s]: %v\n", myservlet.Name(), err)
+		log.Fatalf("error updating [%s]: %v\n", web.Name(), err)
 	}
-	err = myservlet.Close()
+	err = web.Close()
 	if err != nil {
-		log.Fatalf("error closing [%s]: %v\n", myservlet.Name(), err)
+		log.Fatalf("error closing [%s]: %v\n", web.Name(), err)
 	}
 
 	// now create and run server-v2
@@ -235,27 +209,17 @@ public class MyServlet extends HttpServlet
 		log.Fatalf("error running web-app: %v\n", err)
 	}
 
-	cmd = exec.Command(
-		"docker", "tag", "-f",
-		"binet/web-app:v2",
-		"cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
-	)
-	err = run(cmd)
-	if err != nil {
-		log.Fatalf("error tagging web-app to cc-ecole/web-app:v2: %v\n", err)
-	}
-
 	if *doPush {
 		cmd = exec.Command(
-			"docker", "push", "cc-ecole2015-docker.in2p3.fr:5000/binet/web-app:v2",
+			"docker", "push", "binet/web-app:v2",
 		)
 		err = run(cmd)
 		if err != nil {
 			log.Fatalf("error pushing web-app:v2: %v\n", err)
 		}
 	}
-	testWebServer("http://"+localhost+":8082/", "<h1>Welcome to ")
-	testWebServer("http://"+localhost+":8080/", "<h1>Bienvenue ")
+	testWebServer("http://"+localhost+":8082/", "Welcome LoOPS ")
+	testWebServer("http://"+localhost+":8080/", "hello LoOPS ")
 
 }
 

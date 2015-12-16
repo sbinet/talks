@@ -404,8 +404,8 @@ Never again:
 
 - Fetch code (`git`, `mercurial`, ...)
 
- $ git clone git@gitlab.in2p3.fr:EcoleInfo2015/TP.git
- $ cd TP
+ $ git clone git@github.com:sbinet/loops-20151217-tp
+ $ cd loops-20151217-tp
 
 - Edit code
 - Mount code inside a `build` container
