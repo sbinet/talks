@@ -1,0 +1,196 @@
+Introduction to Thread Building Blocks
+
+MRRTF, 2016/01/25
+
+Sebastien Binet
+CNRS/IN2P3/LPC
+binet@cern.ch
+
+* Recap from last episode
+
+* C++11 std::thread
+
+`C++11` (finally!) standardized threads
+
+- `std::thread` is now part of the standard `C++` library
+- `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
+
+* C++11 std::thread
+
+.code code/hello-par.cxx
+
+ $> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
+ $> ./hello-par
+ ** inside thread 139800850654976!
+ 
+* Programming style
+
+- Old school: thread functions (what we just saw)
+- Middle school: function objects (functors)
+- New school: `C++11` lambda functions (aka anonymous functions)
+
+* Types of parallelism
+
+Most common types:
+
+- Data
+- Task
+- Embarrassingly parallel
+- Dataflow
+
+* C++ concurrency features
+
+.image figs/cxx-features.png
+
+* Futures
+
+*Futures* provide a higher level of abstraction
+
+- you start an asynchronous/parallel operation
+- you are returned a handle to wait for the result
+- thread creation, join and exceptions are handled for you
+
+* Async tasks and futures
+
+.code code/async.cxx
+
+- access the result via the `get()` method
+- one can also use `wait()` to block the thread until the result is available (but doesn't read the result)
+
+* Intel Threading Building Blocks
+
+* Intel TBB - Introduction
+
+Open source project (GPLv2) for supporting scalable parallel programming `C++`.
+
+It is a *higher* *level* toolkit than `C++11` threads.
+
+"If it's suitable to your problem, then it's almost certainly a better choice."
+
+`TBB` supports common programming patterns for loops:
+
+- `parallel_for` for independent computations on arrays
+- `parallel_reduce` for a series of computations across an array
+- `parallel_scan` for more general prefix calculations.
+
+See the [[https://software.intel.com/en-us/node/506140][documentation]] for a complete list.
+
+`TBB` also provides thread-safe containers, a performant thread safe memory allocator and timing primitives.
+
+* Intel TBB - Introduction (cont'd)
+
+
+`TBB` also allows the construction of *graphs* describing the relationship between different parts of a program's execution and the `TBB` *scheduler* can exploit concurrency where different parts of the workflow are independent.
+
+Further, for *task* based workflows, `TBB` allows lower level interaction with its task scheduler, enabling it to be used as an execution engine for a higher level workflow generator.
+
+*Using* *TBB*.
+
+- include the header `"tbb/tbb.h"`
+- link against `-ltbb` (and, on `Linux`, against `-lrt`)
+- `TBB` identifiers are under the `tbb::` namespace.
+
+* Parallel loop algorithms
+
+* Parallel for
+
+Simple parallel operation where the same operation is performed independently over elements of a collection.
+
+Serially:
+
+  for (size_t i=0; i<array_size; ++i) {
+     my_func(x[i]);
+  }
+
+With `TBB`, to turn this sequential loop into a parallel one, one needs to express the operation as a _callable_ object, which can take a special `TBB` template class' instance as an argument.
+
+* Parallel for - II
+
+ #include "tbb/tbb.h"
+ 
+ class ApplyFunc {
+     double *const my_x;
+ public:
+     void operator()(const tbb::blocked_range<size_t>& r) const {
+         double *x = my_x;
+         for(size_t i=r.begin(); i!=r.end(); ++i)
+             my_func(x[i]);
+     }
+     ApplyFunc(double x[]):
+         my_x{x}
+     {}
+ };
+
+The `tbb::blocked_range<size_t>` parameter is used by `TBB` to instruct threads to operate on a certain chunk of the `my_x` array.
+
+* Parallel for - III
+
+With `ApplyFunc` defined, one can now invoke `tbb::parallel_for` like so:
+
+ #include "tbb/tbb.h"
+ 
+ void ParallelApplyFunc(double x[], size_t n) {
+     tbb::parallel_for(tbb::blocked_range<size_t>(0, n), ApplyFunc(x));
+ }
+
+In this case `parallel_for` is instructed to run over the range `[0,n)` on the `ApplyFunc(x)` class instance.
+
+Note that `parallel_for` will take care of setting up the `TBB` thread pool for us (in earlier versions of `TBB`, one needed to call `tbb::task_scheduler_init`, which is still available if you need to setup the `TBB` thread pool with special options).
+
+* Parallel for - IV
+
+As for the `std::thread` case, one can also use a lambda function instead of a functor:
+
+.code code/tbb-parallel-for-lambda.cxx
+
+Using the lambda which copies by value `[=]` satisfies all the criteria needed by `parallel_for` and makes for a very succinct declaration.
+
+* Parallel reduce
+
+`parallel_for` is great for when operations applied to elements of a collection are *independent*.
+But, there are cases where the operation needs input from the previous steps.
+If the computation can still be broken down into pieces, we can still parallelize this operation, which is called a *reduction*.
+
+Here's a simple example: if one needs to sum up 10 numbers one can do it like this
+
+  (((((((((1+2)+3)+4)+5)+6)+7)+8)+9)+10)
+
+which is sequential. But one could also do it like this:
+
+  ((1+2) + (3+4)) + ((5+6) + ((7+8) + (9+10)))
+
+where it's now much easier to see that the calculation can be parallelized.
+There are some extra steps needed here:
+
+- how to *split* the whole collection into smaller chunks
+- how to *join* the results of the smaller chunks into aggregated results.
+
+* Parallel reduce - II
+
+.code code/tbb-parallel-reduce.cxx
+
+* Parallel reduce - III
+
+Notice the two new methods that were needed
+
+- A special constructor that takes a reference to an existing `parallel_sum` instance and a special dummy parameter `tbb::split`. This is the *splitting* *constructor* that `TBB` uses to generate new parts of the *reduction* that will run on other threads. (The dummy variable distinguishes this method from the class's copy constructor.)
+- A `join` method that tells `TBB` how to *combine* the results from one fragment of the reduction with another (in this case, just adding up the partial sums).
+
+Once the class is ready, we invoke the reduction by calling `parallel_reduce`:
+
+.code code/tbb-parallel-reduce-use.cxx
+
+Note that because of the extra methods that are needed for `parallel_reduce` it's less easy to use a lambda here.
+
+* Different blocked range templates
+
+`blocked_range` is designed for `1D` collections.
+However, many times we need to deal with more complicated objects than that.
+So here we can use `blocked_range2d` or `blocked_range3d` to iterate.
+
+For a `blocked_range2d<T>` r, instead of using `r.begin()` we have `r.rows().begin()` and `r.cols().begin()` (likewise for `end()`).
+
+So a fragment of a matrix multiply would be something like:
+
+.code code/tbb-matrix-mult.cxx
+
