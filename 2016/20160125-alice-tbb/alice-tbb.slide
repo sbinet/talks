@@ -1,6 +1,6 @@
 Introduction to Thread Building Blocks
 
-MRRTF, 2016/01/25
+MRRTF, 2016-01-25
 
 Sebastien Binet
 CNRS/IN2P3/LPC
@@ -193,4 +193,151 @@ For a `blocked_range2d<T>` r, instead of using `r.begin()` we have `r.rows().beg
 So a fragment of a matrix multiply would be something like:
 
 .code code/tbb-matrix-mult.cxx
+
+* Containers
+
+`STL` containers are not thread safe.
+Reading them in parallel is fine.
+But as soon as one thread modifies a container while other threads access it: *corruption*.
+
+`STL` containers need to be guarded with a `std::mutex` for concurrent r/w access.
+`STL` containers thus are usually bottlenecks in multithreaded applications.
+
+`TBB` provides concurrency friendly containers with most of the features one can expect of their `STL` counterparts.
+There are two strategies to make such containers:
+
+- Use lock-free techniques, which correct for any interference between threads automatically.
+- Use fine grained locking, where only the part of the container which is being touched is wrapped in a mutex.
+
+* Concurrent vector
+
+`concurrent_vector<T>`:
+
+- allows dynamic growth of an array of type `T`.
+
+- can be grown safely while other threads are accessing it, including growing it themselves.
+
+.code code/vec-add.cxx
+
+- clearing or destroying the vector and accessing it is *unsafe*.
+- `size()` returns the size of all elements, even those being constructed, so accessing those elements might be problematic.
+- unlike an `std::vector`, elements in a concurrent vector are not guaranteed to be contiguous in memory.
+
+* Other containers
+
+`TBB` provides many other concurrent containers, including hash maps and queues. We won't cover them here, but having practiced with the concurrent vector you should find them pretty easy to use.
+
+- `tbb::concurrent_unordered_map`
+- `tbb::concurrent_unordered_set`
+- `tbb::concurrent_hash_map`
+- `tbb::concurrent_queue`
+
+* Pipelines and graphs
+
+Many real-world problems can be addressed with `TBB` `parallel_for`, `parallel_reduce` and more [[https://software.intel.com/en-us/node/506140][sophisticated patterns]].
+But `TBB` also allows for parallelization based on *task* *workflows*.
+
+_Pipelines_ are a simple execution concept.
+- Tasks to be executed come in a linear sequence, much like an assembly line.
+- Each incoming piece of data is processed by the first element of the pipeline, then the second and so on.
+- Serial process for any data element.
+- Parallelism arises because we can have many pieces of data moving through the pipeline at the one time.
+
+* Pipelines
+
+ +---------+
+ |  Start  | <- data1, data2, data3, ..., dataN
+ +---------+
+     |
+     V
+ +---------+
+ | Stage 1 |
+ +---------+
+     |
+     V
+ +---------+
+ | Stage 2 |
+ +---------+
+     |
+     V
+ +---------+
+ |  Stop   | -> outN, ... , out3, out2, out1
+ +---------+
+
+* Pipelines
+
+- Each stage can either be serial or parallel.
+- No more than one element will be processed by serial stages at a time.
+- Serial stages can be in order or out of order.
+
+- Multiple elements can be processed by parallel stages at the same time
+- Ordering is obviously not guaranteed.
+
+Considering the performance one might hope to get with a pipeline, obviously the serial stages are bottlenecks (especially serial in order), so keeping these stages short will help a lot.
+
+
+* Defining a Pipeline
+
+Pipelines are defined as a series of _filters_, each of which takes some input data and produces some transformed output data.
+The first filter's input data is `void`, as is the last filter's output data.
+
+.code code/pipeline.cxx
+
+`ntoken` prevents data from piling up at the choke point of the pipeline and consuming resources needlessly.
+
+* How a Pipeline runs
+
+`TBB` actually runs the pipeline by calling the `()` `operator` of each filter for the data element that is going to be processed.
+
+e.g., our `Transform` class might look like this:
+
+.code code/pipeline-transform.cxx
+
+Note that as the `()` `operator` might be called on a copy of the original class instance it needs to be `const` to ensure it does not make changes to the body which would be lost in the copy.
+
+* How a Pipeline runs - II
+
+Similarly, the `DataWriter` could look like:
+
+.code code/pipeline-datawriter.cxx
+
+The first stage is a bit more complicated as it needs a mechanism to tell the pipeline there is no more data to process.
+This is what the special `tbb::flow_control` class is for.
+
+* How a Pipeline runs - III
+
+.code code/pipeline-datareader.cxx
+
+* TBB Graphs
+
+The most general kind of task based workflow is a graph, where tasks are nodes and edges are data that flows between the nodes.
+
+ +---------+
+ |  Start  | <- data1, data2, data3, ..., dataN
+ +---------+--------------
+     |      \             \
+     V       \             \
+ +---------+  \|            \
+ | Node 1  |   +--------+    +--------+
+ +---------+   | Node 2 |    | Node 4 |
+     |         +--------+    +--------+
+     V              |             |
+ +---------+        |             |
+ | Node 3  |        |             |
+ +---------+        |             |
+     |              |             |
+     |   +----------+-------------+
+     |   |
+     V   V
+ +---------+
+ |  Node 5 | -> out1, out2, out3, ..., outN
+ +---------+
+
+* TBB Graphs - II
+
+Graphs are a very flexible way to execute tasks in parallel.
+`TBB` has many node types that allow for processing, splitting, joining, queueing etc.
+Note also that although the ASCII art example there is a `DAG` (Directed Acyclic Graph), `TBB` can implement graphs with cycles as well.
+
+The Intel [[https://software.intel.com/en-us/node/517340][documentation]] has a good introduction.
 
