@@ -341,3 +341,138 @@ Note also that although the ASCII art example there is a `DAG` (Directed Acyclic
 
 The Intel [[https://software.intel.com/en-us/node/517340][documentation]] has a good introduction.
 
+* TBB Graph Basics
+
+* Setting Up a Graph
+
+A graph in `TBB` is an object of type `tbb::flow::graph`, and you need to include the header `tbb/flow_graph.h`:
+
+.code code/tbb-graph.cxx
+
+* Attaching nodes to your graph
+
+In `TBB`, nodes may have different types.
+A simple case is to use the helper `function_node`:
+
+.code code/tbb-graph-func-node.cxx
+
+This creates a basic data processing node that:
+
+- ingests a certain type of data and then
+- produces an output data type.
+
+_Note:_ in `TBB` speak, nodes exchange _messages_, but these messages can be meaningful pieces of data.
+
+* Making Edges
+
+Once nodes have been connected, one needs to connect them _via_ edges so the graph can do useful work.
+This is done with the `tbb::flow::make_edge` function.
+It takes an input and an output node and connects them together:
+
+ tbb::flow::make_edge(n1, n2);
+
+This connects node `n1` to `n2`.
+
+* Getting The Graph Started
+
+You can push data into the graph by using the `try_put` method of a node.
+This pushes a piece of data into the node and will then trigger all of the associated data flows.
+
+  n1.try_put(1.0);
+
+Note that `try_put` returns a boolean to say if the node accepted the data.
+
+* At the End
+
+Before the graph object goes out of scope, one needs to wait for all data processing to finish by calling the `wait_for_all()` method:
+
+  g.wait_for_all()
+
+* Simple example
+
+.code code/tbb-graph-example.cxx / START/,/ END/
+
+* Simple example - II
+
+ $> ./tbb-graph-example
+ node n 0
+ node n 1
+ node n 2
+ node n 3
+ node m 0
+ node n 4
+ node n 9
+ node n 5
+ node m 1
+ node n 6
+ node m 4
+ node n 7
+ node n 8
+ node m 9
+ node m 16
+ node m 81
+ node m 25
+ node m 36
+ node m 49
+ node m 64
+
+* Simple example - III
+
+- all messages passed between nodes are *copied*
+- if large pieces of data need to be percolated through nodes, use `std::shared_ptr` (`std::unique_ptr` is not copyable)
+
+ tbb::flow::function_node< shared_ptr<T>, shared_ptr<T> >
+    generator( g, tbb::flow::unlimited, [](const shared_ptr<T> v) { // note the const
+        shared_ptr<T> v2 = make_shared<T> (some_function(*v));
+        return v2;
+ } );
+
+- if no data needs to be passed down, one can use the lightweight message `tbb::flow::continue_msg()`.
+
+* Other node types
+
+* Broadcast nodes
+
+A `broadcast` node sends its input to any output node to which it's connected.
+It doesn't do any processing.
+It's a bit like a plumbing `T` pipe.
+
+.code code/tbb-graph-nodes.cxx
+
+* Source Node
+
+A source node takes no input, but generates output internally, passing it out to its connected nodes.
+A source node needs to provide a callable that accepts a reference to its data type and sets the value of the reference to the data to be passed to other nodes.
+The call interface itself returns a boolean: `true` if more data might be available, `false` if not.
+
+* Source Node - II
+
+This source node provides the lines from a file as messages, one by one:
+
+.code code/tbb-graph-src-node.cxx
+
+* Combining parallelism
+
+One of the nice features of `TBB` is that the internal thread pool is managed between all types of parallelisms in an efficient way.
+This means that you can (and _should_) use parallelism within a `TBB` graph node, if that's possible.
+
+In this example a node that processes an array of doubles into another array of doubles uses `parallel_for` to exploit the concurrency available in this operation.
+
+ function_node< double *, double * > n1( g, unlimited, [&]( double *a ) -> double * {
+    double *b = new double[N];
+    parallel_for( 0, N, [&](int i) {
+        b[i] = f1(a[i]);
+    } );
+    return b;
+ } );
+
+_Note:_ lambdas can be nested.
+
+* Conclusions
+
+`TBB` is a nice high level parallelism toolkit.
+Applicable to a lot of HENP real world problems and use cases.
+
+`ATLAS` and `LHCb` (and all users of the `Gaudi` framework) standardized on it.
+
+Should `O2` too?
