@@ -1,0 +1,82 @@
+=== testbench ===
+
+$ uname -a
+Linux farnsworth 3.16.4-1-ARCH #1 SMP PREEMPT Mon Oct 6 08:22:27 CEST 2014 x86_64 GNU/Linux
+
+$ cat /proc/cpuinfo
+processor	: 0
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 23
+model name	: Intel(R) Core(TM)2 Duo CPU     T9400  @ 2.53GHz
+stepping	: 6
+microcode	: 0x60c
+cpu MHz		: 2526.930
+cache size	: 6144 KB
+physical id	: 0
+siblings	: 2
+core id		: 0
+cpu cores	: 2
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 10
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs bts rep_good nopl aperfmperf pni dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm sse4_1 lahf_lm dtherm tpr_shadow vnmi flexpriority
+bogomips	: 5055.43
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+===========================
+
+## with scheme==fastjet::Best
+6.29s user 0.64s system 84% cpu 8.253 total
+
+## with scheme==fastjet::N3Dumb
+48.00s user 0.59s system 97% cpu 49.661 total
+48.00s user 0.54s system 97% cpu 50.010 total
+delphes: RSS=55632
+
+
+## fads
+
+nprocs:0 RSS=17724
+nprocs:1 RSS=16688
+nprocs:2 RSS=25548
+
+$ fads-app -nprocs=0 -evtmax=500
+::: fads-app...
+app                  INFO cpu: 1m30.80663575s
+app                  INFO mem: alloc:           3257 kB
+app                  INFO mem: tot-alloc:    1326577 kB
+app                  INFO mem: n-mallocs:    2520622
+app                  INFO mem: n-frees:      2525940
+app                  INFO mem: gc-pauses:       1143 ms
+::: fads-app... [done] (time=1m30.812460304s)
+
+$ fads-app -nprocs=1 -evtmax=500          
+::: fads-app...
+app                  INFO workers done: 1/1
+app                  INFO cpu: 1m30.623066438s
+app                  INFO mem: alloc:           2891 kB
+app                  INFO mem: tot-alloc:    1329077 kB
+app                  INFO mem: n-mallocs:    2533915
+app                  INFO mem: n-frees:      2539031
+app                  INFO mem: gc-pauses:       1141 ms
+::: fads-app... [done] (time=1m30.628901468s)
+
+$ fads-app -nprocs=2 -evtmax=500          
+::: fads-app...
+app                  INFO workers done: 1/2
+app                  INFO workers done: 2/2
+app                  INFO cpu: 48.706992541s
+app                  INFO mem: alloc:           4431 kB
+app                  INFO mem: tot-alloc:    1332944 kB
+app                  INFO mem: n-mallocs:    2531286
+app                  INFO mem: n-frees:      2529838
+app                  INFO mem: gc-pauses:        907 ms
+::: fads-app... [done] (time=48.712818911s)

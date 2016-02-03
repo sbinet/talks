@@ -1,0 +1,609 @@
+HEP s/w: parallelism strikes back
+LPC Seminars, 2016-02-04
+
+Sebastien Binet
+CNRS/IN2P3/LPC
+
+* Parallelism: why?
+
+.image _figs/cpu-free-lunch.png 550 550
+
+* A bit of history: 1950-2000s
+
+- *1954:* computers were valve-based
+- *1956:* first magnetic disk system sold (IBM RAMAC), `FORTRAN` under development
+- *1959:* IBM-1401 shipped. Transistorised. Punched card input.
+- *1960:* `PDP-1` launched (18-bit words)
+- *1964:* `PDP-8` launched (12-bit words)
+- *1964:* `System/360` launched (4*8-bit byte words, 8-64-256 `kB` of RAM)
+    
+.image _figs/cern-computers.png 290 _
+ 
+* A bit of history: 1950-2000s (at CERN)
+
+- *1963:* `IBM-7090` (`x4` `CERN` total computing capacity at the time)
+- *1965:* `CDC-6600` (1 `MFLOPs`, `x15` `CERN` capacity)
+- *1972-1984:* `CDC-7600`, `IBM-370/168`
+- *1982:* VAX 750s,780s,8600s
+- *1988-1993:* `Cray`
+- *1996:* mainframes replaced by `UNIX` and `PC` servers.
+ 
+.image _figs/cern-computers.png 290 _
+
+* 
+
+.image _figs/cern-weekly-interactive-users.png  _ 800
+ 
+* (a brief) History of software in HEP
+
+* 50's-90's: FORTRAN77
+
+.code _code/hello.f
+
+ $ gfortran -c hello.f && gfortran -o hello hello.o
+ $ ./hello
+ Hello from FORTRAN
+
+- `FORTRAN77` is the *king*
+- 1964: *CERNLIB*
+- REAP (paper tape measurements), THRESH (geometry reconstruction)
+- SUMX, *HBOOK* (statistical analysis chain)
+- ZEBRA (memory management, I/O, ...)
+- GEANT3, *PAW*
+
+* 90's-...: C++
+
+.code _code/hello.cxx
+
+ $ c++ -o hello hello.cxx && ./hello
+ Hello from C++
+ 
+.image _figs/my-root6splash.png 190 190
+
+- object-oriented programming (OOP) is the cool kid on the block
+- *ROOT*, POOL, LHC++, AIDA, *Geant4*
+- `C++` takes roots in HEP
+
+* 00's-...: python
+
+.code _code/hello.py
+
+ $ python ./hello.py
+ Hello from python
+ 
+.image _figs/my-python-logo.png 100 250
+
+- `python` becomes the _de_ _facto_ scripting language in HEP
+- framework data-cards
+- analysis glue, (whole) analyses in `python`
+- *PyROOT*, rootpy
+- numpy, scipy, matplotlib, *IPython/Jupyter*
+
+* Current software in a nutshell
+
+- *Generators*: generation of true particles from fondamental physics first principles
+- *Full* *Simulation*: tracking of all stable particles in magnetic field through the detector simulating interaction, recording energy deposition (*CPU* *intensive*)
+- *Reconstruction*: from real data, or from `Monte-Carlo` simulation data as above
+- *Fast* *Simulation*: parametric simulation, faster, coarser
+- *Analysis*: daily work of physicists, running on output of reconstruction to derive analysis specific information (*I/O* *intensive*)
+- everything in the same `C++` offline control framework (except analysis)
+
+.image _figs/data-flux-summary-all.png 210 800
+
+
+* 
+
+- `C++`: *slow* (very slow?) to compile/develop, *fast* to execute
+- `python`: *fast* development cycle (no compilation), *slow* to execute
+# (can be mitigated if leveraging/rewriting(parts in) `C++`. more work)
+
+.image _figs/xkcd-compiling.png 400 400
+
+Are those our only options ?
+
+
+* Moore's law
+
+.image _figs/cpu-free-lunch.png 550 550
+
+* The hardware/software contract
+
+.image _figs/par-prog-old-days.png _ 850
+
+* Hardware diversity: combining building blocks
+
+.image _figs/par-prog-heterogeneous.png
+
+* Moore's law
+
+- Moore's law still observed at the hardware level
+- *However* the _effective_ perceived computing power is mitigated
+
+_"Easy_ _life"_ during the last 20-30 years:
+
+- Moore's law translated into *doubling* compute capacity every ~18 months (_via_ clock frequency)
+- *Concurrency* and *parallelism* necessary to efficiently harness the compute power of our new multi-core CPU architectures.
+
+_But_ our current software isn't prepared for parallel/concurrent environments.
+
+
+* Free lunch is over
+
+.image _figs/head-on.png _ 900
+
+* Interlude: concurrency & parallelism
+
+* Interlude: concurrency & parallelism
+
+- *Concurrency* is about _dealing_ with lots of things at once.
+- *Parallelism* is about _doing_ lots of things at once.
+- Not the same, but related.
+- Concurrency is about _structure_, parallelism is about _execution_.
+
+.image _figs/conc-para.png 200 600
+
+Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
+Communication is the means to coordinate the independent executions.
+
+* Concurrency vs Parallelism
+
+_Concurrency:_ programming as the composition of independently executing processes/tasks.
+
+_Parallelism:_ programming as the simultaneous execution of (possibly related) computations.
+
+.image _figs/conc-vs-par.png 350 _
+
+* Concurrency vs Parallelism
+
+Concurrency is about dealing with lots of things at once.
+Parallelism is about doing lots of things at once.
+
+Concurrency is about (program) *structure*.
+Parallelism is about (program) *execution*.
+
+.image _figs/conc-vs-par-prog.png 350 _
+
+
+* Concurrency in HEP software
+
+.image _figs/conc-level.png 600 400
+
+* Concurrency in HEP software - II
+
+.image _figs/levels-of-conc.png
+
+# Graal of concurrent software:
+
+.image _figs/gaudi-hive-2.png 250 350
+
+* 
+
+.image _figs/conc-para-mt-mp.png 600 1000
+
+
+* Multi-processing
+
+Launch _N_ instances of an application on a node with _N_ cores
+
+- re-use pre-existing code
+- _a_ _priori_ no required modification of pre-existing code
+- satisfactory _scalability_ with the number of cores
+
+*But:*
+
+- resource requirements increase with the number of processes
+- memory footprint *increases*
+- as do other O/S (limited) resources (file descriptors, network sockets, ...)
+- scalability of *I/O* debatable when number of cores > ~100
+
+
+* Multi-threading
+
+.image _figs/mt-cxx.png
+
+`C++11/14` libraries do help a bit:
+- `std::lambda`, `std::thread`, `std::promise`
+- (Intel) Threading Building Blocks
+- ...
+
+* Time for a new language ?
+
+.image _figs/new-lang.png 600 800
+
+* Candidates
+
+- python/pypy
+- FORTRAN-2008
+- Vala
+- Swift
+- Rust
+- Go
+- Chapel
+- Scala
+- Haskell
+- Clojure
+
+* Why not Go ?
+
+# .image _figs/hello-go.png 600 900
+
+.play _code/hello.go
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+* Go in a nutshell
+
+[[https://golang.org][Go]] is a new, general-purpose programming language.
+
+- Compiled
+- Statically typed
+- Concurrent
+- Simple
+- Productive
+
+"Go is a wise, clean, insightful, fresh thinking approach to the greatest-hits subset of the well understood."
+- Michael T. Jones
+
+
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 250 contributors join the project
+- Version 1.0 release in March 2012
+- Version 1.1 release in May 2013
+- Version 1.2 release in December 2013
+- Version 1.3 release in June 2014
+- Version 1.4 release in December 2014
+- Version 1.5 release in August 2015
+- Version 1.6: slated for ~mid-February 2016
+
+# Go was originally built by a team at Google, led by Robert Griesemer, Rob Pike, and Ken Thompson. In November 2010, Go was launched publically as an open source project. Since then, a team at Google and more than 250 contributors from the open source community continued to improve the Go language, libraries, and tools.
+
+# In March 2012, we announced Go 1, a version of the language and libraries that will be supported for years to come. 
+
+* Elements of Go
+
+- Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+* Elements of Go - II
+
+- available on MacOSX, Linux, Windows,... x86, x64, ARM, ARM64.
+- available on _lxplus_:
+
+  $ ssh lxplus
+  [...]
+  * LXPLUS Public Login Service
+  * 2014-09-23 - expect installed
+  * 2014-10-02 - golang (Go Language) installed
+  * ********************************************************************
+
+  $ /usr/bin/go version
+  go version go1.5.1 linux/amd64
+
+* Concurrency
+
+* Goroutines
+
+- The _go_ statement launches a function call as a goroutine
+	go f()
+	go f(x, y, ...)
+
+- A goroutine runs concurrently (but not necessarily in parallel)
+- A goroutine has its own (growable/shrinkable) stack
+
+
+* A simple example
+
+.code _code/concurrency1.go /f START/,/f END/
+
+Function f is launched as 3 different goroutines, all running concurrently:
+
+.play _code/concurrency1.go /main START/,/main END/
+
+
+* Communication via channels
+
+A channel type specifies a channel value type (and possibly a communication direction):
+
+	chan int
+	chan<- string  // send-only channel
+	<-chan T       // receive-only channel
+
+A channel is a variable of channel type:
+
+	var ch chan int
+	ch := make(chan int)  // declare and initialize with newly made channel
+
+A channel permits _sending_ and _receiving_ values:
+
+	ch <- 1   // send value 1 on channel ch
+	x = <-ch  // receive a value from channel ch (and assign to x)
+
+Channel operations synchronize the communicating goroutines.
+
+* Communicating goroutines
+
+Each goroutine sends its results via channel ch:
+
+.code _code/concurrency2.go /f START/,/f END/
+
+The main goroutine receives (and prints) all results from the same channel:
+
+.play _code/concurrency2.go /main START/,/main END/
+
+
+# * Non-elements of Go
+
+# - *no* dynamic libraries (but dynamic loading since `go-1.5`)
+# - *no* templates nor generics (maybe for `go-2.0`)
+# - *no* operator overloading
+
+* Real-world application?
+
+OK, [[https://golang.org][Go]] is great.
+
+And it's being used by [[https://github.com/golang/go/wiki/GoUsers][many companies]] (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
+
+But what about `HEP`? and `astro/cosmo`?
+
+
+* fads
+
+* fads
+
+`fads` is a "FAst Detector Simulation" toolkit.
+
+- morally a translation of [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]] into Go
+- uses [[https://github.com/go-hep/fwk][go-hep/fwk]] to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
+- uses [[https://github.com/go-hep/hbook][go-hep/hbook]] for histogramming, [[htpps://github.com/go-hep/hepmc][go-hep/hepmc]] for `HepMC` input/output
+
+Code is on github (BSD-3):
+
+.link https://github.com/go-hep/fwk
+.link https://github.com/go-hep/fads
+
+Documentation is served by [[https://godoc.org][godoc.org]]:
+
+.link https://godoc.org/github.com/go-hep/fwk
+.link https://godoc.org/github.com/go-hep/fads
+
+* go-hep/fads - Installation
+
+As easy as:
+
+  $ export GOPATH=$HOME/dev/gocode
+  $ export PATH=$GOPATH/bin:$PATH
+  
+  $ go get github.com/go-hep/fads/...
+
+Yes, with the ellipsis at the end, to also install sub-packages.
+
+- `go` `get` will recursively download and install all the packages that [[https://github.com/go-hep/fads][go-hep/fads]] depends on. (no `Makefile` needed)
+
+
+* go-hep/fwk - Examples
+
+
+  $ fwk-ex-tuto-1 -help
+  Usage: fwk-ex-tuto1 [options]
+  
+  ex:
+   $ fwk-ex-tuto-1 -l=INFO -evtmax=-1
+  
+  options:
+    -evtmax=10: number of events to process
+    -l="INFO": message level (DEBUG|INFO|WARN|ERROR)
+    -nprocs=0: number of events to process concurrently
+
+Runs 2 tasks.
+
+#- task 1 stores 2 `int`s under `"t1-ints1"` and `"t2-ints2"`.
+#- task 2 retrieves `"t1-ints1"` and stores `"t1-ints1-massaged"`
+
+.image _figs/fwk-ex1-dflow.png 200 200
+
+* go-hep/fwk - Examples
+
+  $ fwk-ex-tuto-1
+  ::: fwk-ex-tuto-1...
+  t2                   INFO configure...
+  t2                   INFO configure... [done]
+  t1                   INFO configure ...
+  t1                   INFO configure ... [done]
+  t2                   INFO start...
+  t1                   INFO start...
+  app                  INFO >>> running evt=0...
+  t1                   INFO proc... (id=0|0) => [10, 20]
+  t2                   INFO proc... (id=0|0) => [10 -> 100]
+  [...]
+  app                  INFO >>> running evt=9...
+  t1                   INFO proc... (id=9|0) => [10, 20]
+  t2                   INFO proc... (id=9|0) => [10 -> 100]
+  t2                   INFO stop...
+  t1                   INFO stop...
+  app                  INFO cpu: 654.064us
+  app                  INFO mem: alloc:             62 kB
+  app                  INFO mem: tot-alloc:         74 kB
+  app                  INFO mem: n-mallocs:        407
+  app                  INFO mem: n-frees:           60
+  app                  INFO mem: gc-pauses:          0 ms
+  ::: fwk-ex-tuto-1... [done] (cpu=788.578us)
+
+
+* go-hep/fwk - Concurrency
+
+[[https://github.com/go-hep/fwk][fwk]] enables:
+- event-level concurrency
+- tasks-level concurrency
+
+[[https://github.com/go-hep/fwk][fwk]] relies on [[https://golang.org][Go]]'s runtime to properly schedule _goroutines_.
+
+For sub-task concurrency, users are by construction required to use [[https://golang.org][Go]]'s constructs (_goroutines_ and _channels_) so everything is consistent *and* the _runtime_ has the *complete* *picture*.
+
+- *Note:* [[https://golang.org][Go]]'s runtime isn't yet _NUMA-aware_. A proposal for _Go-1.5_ _(June-2015)_ is in the [[https://docs.google.com/document/d/1d3iI2QWURgDIsSR6G2275vMeQ_X7w-qxM2Vp7iGwwuM/pub][works]]. (delayed as of Feb-2016)
+
+
+* go-hep/fads - real world use case
+
+- translated [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]]' ATLAS data-card into Go
+- [[https://github.com/go-hep/fads/blob/master/cmd/fads-app/main.go][go-hep/fads-app]]
+- installation:
+
+  $ go get github.com/go-hep/fads/cmd/fads-app
+  $ fads-app -help
+  Usage: fads-app [options] <hepmc-input-file>
+  
+  ex:
+   $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
+  
+  options:
+    -cpu-prof=false: enable CPU profiling
+    -evtmax=-1: number of events to process
+    -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
+    -nprocs=0: number of concurrent events to process
+
+* go-hep/fads - components
+
+- a `HepMC` converter
+- particle propagator
+- calorimeter simulator
+- energy rescaler, momentum smearer
+- isolation
+- b-tagging, tau-tagging
+- jet-finder (reimplementation of FastJet in Go: [[https://github.com/go-hep/fastjet][go-hep/fastjet]])
+- histogram service (from [[https://github.com/go-hep/fwk][go-hep/fwk]])
+
+Caveats:
+
+- no real persistency to speak of (_i.e.:_ `JSON`, `ASCII` and `Gob`)
+- jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
+
+
+* 
+
+
+.image _figs/fads-dflow.png 600 600
+
+
+* Results - testbenches
+
+- Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
+- MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
+- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+
+* Linux (40 cores) testbench: memory
+
+.image _figs/lhcb3-rss.png 550 800
+
+* Linux (40 cores) testbench: CPU
+
+.image _figs/lhcb3-cpu.png 550 800
+
+* Linux (40 cores) testbench: event throughput
+
+.image _figs/lhcb3-hz.png 550 800
+
+
+* Results & Conclusions
+
+- good RSS scaling
+- good CPU scaling
+
+- bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
+
+Also addresses `C++` and `python` deficiencies:
+
+- code distribution
+- code installation
+- compilation/development speed
+- runtime speed
+- simple language
+
+* Prospects
+
+- proper persistency package (in the works: [[https://github.com/go-hep/rio][go-hep/rio]])
+- histograms + n-tuples: [[https://github.com/go-hep/hbook][go-hep/hbook]], [[https://github.com/go-hep/hplot][go-hep/hplot]]
+- performance improvements (cpu-profiling via `go` `tool` `pprof`)
+- implement more of `go-fastjet` combination schemes and strategies
+- more end-user oriented documentation
+
+Join the fun: [[https://groups.google.com/d/forum/go-hep][go-hep forum]]
+
+[[http://go-hep.github.io/][go-hep]] has a website too: [[http://go-hep.github.io]]
+
+Have also a look at [[https://github.com/astrogo][astrogo]] for tools and libraries for astro/cosmo (_e.g.:_ a reader/writer for `FITS` files, [[https://github.com/astrogo/fitsio][astrogo/fitsio]])
+
+
+* Acknowledgements / resources
+
+.link http://talks.golang.org/2012/tutorial.slide
+
+.link http://talks.golang.org/2014/taste.slide
+
+.link http://tour.golang.org
+
+* That's all !
+
+
+* Backup
+
+* go-hep/fwk - configuration & steering
+
+- use regular [[https://golang.org][Go]] to configure and steer.
+- still on the fence on a DSL-based configuration language (`YAML`, `HCL`, `Toml`, ...)
+- probably *not* `Python` though
+
+  // job is the scripting interface to 'fwk'
+  import "github.com/go-hep/fwk/job"
+
+  func main() {
+  	// create a default fwk application, with some properties
+  	app := job.New(job.P{
+  		"EvtMax":   10,
+  		"NProcs":   2,
+  	})
+  	
+  	// ... cont'd on next page...
+
+* go-hep/fwk - configuration & steering
+
+  	// create a task that reads integers from some location
+  	// and publish the square of these integers under some other location
+  	app.Create(job.C{
+  		Type: "github.com/go-hep/fwk/testdata.task2",
+  		Name: "t2",
+  		Props: job.P{
+  			"Input":  "t1-ints1",
+  			"Output": "t1-ints1-massaged",
+  		},
+  	})
+  	// create a task that publish integers to some location(s)
+  	// create after the consummer task to exercize the automatic data-flow scheduling.
+  	app.Create(job.C{
+  		Type: "github.com/go-hep/fwk/testdata.task1",
+  		Name: "t1",
+  		Props: job.P{
+  			"Ints1": "t1-ints1",
+  			"Ints2": "t2-ints2",
+  			"Int1":  int64(10), // initial value for the Ints1
+  			"Int2":  int64(20), // initial value for the Ints2
+  		},
+  	})
+  	app.Run()
+
