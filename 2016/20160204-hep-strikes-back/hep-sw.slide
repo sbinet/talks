@@ -38,7 +38,8 @@ CNRS/IN2P3/LPC
 
 * 50's-90's: FORTRAN77
 
-.code _code/hello.f
+#.code _code/hello.f
+.play _code/hello.f.go /START OMIT/,/END OMIT/
 
  $ gfortran -c hello.f && gfortran -o hello hello.o
  $ ./hello
@@ -53,7 +54,8 @@ CNRS/IN2P3/LPC
 
 * 90's-...: C++
 
-.code _code/hello.cxx
+#.code _code/hello.cxx
+.play _code/hello.cxx.go /START OMIT/,/END OMIT/
 
  $ c++ -o hello hello.cxx && ./hello
  Hello from C++
@@ -66,7 +68,8 @@ CNRS/IN2P3/LPC
 
 * 00's-...: python
 
-.code _code/hello.py
+#.code _code/hello.py
+.play _code/hello.py.go /START OMIT/,/END OMIT/
 
  $ python ./hello.py
  Hello from python
@@ -227,7 +230,7 @@ Launch _N_ instances of an application on a node with _N_ cores
 
 # .image _figs/hello-go.png 600 900
 
-.play _code/hello.go
+.play _code/hello.go.go /START OMIT/,/END OMIT/
 
  $ go run hello.go
  Hello from Go
