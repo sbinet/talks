@@ -230,7 +230,7 @@ Launch _N_ instances of an application on a node with _N_ cores
 
 # .image _figs/hello-go.png 600 900
 
-.play _code/hello.go.go /START OMIT/,/END OMIT/
+.play _code/hello.go
 
  $ go run hello.go
  Hello from Go
