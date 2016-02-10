@@ -1,0 +1,124 @@
+Go && Polymer && astro
+Meeting Svc-info-LPC, 2016-02-11
+
+Sébastien Binet
+CNRS/IN2P3/LPC
+binet@clermont.in2p3.fr
+
+
+* Go
+
+You know already about [[https://golang.org][Go]].
+
+- Concurrency
+- Python-like, C-like
+- Development speed, runtime speed
+- Garbage collector
+
+* Polymer
+
+"""
+[[https://www.polymer-project.org][Polymer]] is designed to make it easier and faster for developers to create great, reusable components for the modern web.
+"""
+
+With custom elements, you can extend the vocabulary of HTML with your own elements.
+Elements that provide sophisticated UI. Elements that are as easy to use as <select>:
+
+  <my-tabstrip>
+    <my-tab>
+      Home
+    </my-tab>
+    <my-tab>
+      Services
+    </my-tab>
+    <my-tab>
+      Contact Us
+    </my-tab>
+  </my-tabstrip>
+
+
+* Polymer, web components and elements
+
+Polymer is built on top of the web components standards and it allows to build custom elements:
+
+.image images/webcomponents_stack.svg
+
+
+* Go+Polymer hello world
+
+- translated the tuto from `Linux` `Mag`
+- available at [[https://github.com/sbinet/tuto-polymer]]
+- served at [[http://clrbinetsrv.in2p3.fr:7072/go-poly-tuto]]
+
+* snfusion
+
+A (simple) simulation of the fusion processes that happen inside super-novae.
+Originally an `Excel` based analysis by Louis-Pierre.
+
+Ported to a real programming language: [[https://golang.org][Go]].
+
+Available at [[https://github.com/astrogo/snfusion]].
+
+* snfusion-gen
+
+ $> snfusion-gen -n 30000
+ snfusion-gen: processing...
+ snfusion-gen: composition of 10000 nuclei:
+ Nucleus{A: 12, Z: 6}: 6127
+ Nucleus{A: 16, Z: 8}: 3873
+ snfusion-gen: iter #3000/30000...
+ snfusion-gen: iter #6000/30000...
+ snfusion-gen: iter #9000/30000...
+ snfusion-gen: iter #12000/30000...
+ [...]
+ snfusion-gen: iter #30000/30000...
+ snfusion-gen: composition of 3066 nuclei:
+ Nucleus{A: 12, Z: 6}: 71
+ Nucleus{A: 16, Z: 8}: 63
+ Nucleus{A: 24, Z:12}: 126
+ Nucleus{A: 28, Z:14}: 170
+ Nucleus{A: 32, Z:16}: 124
+ Nucleus{A: 36, Z:18}: 165
+ Nucleus{A: 40, Z:20}: 377
+ Nucleus{A: 44, Z:22}: 343
+ Nucleus{A: 48, Z:24}: 348
+ Nucleus{A: 52, Z:26}: 640
+ Nucleus{A: 56, Z:28}: 639
+ snfusion-gen: processing... [done]: 10.52320492s
+
+* snfusion-plot
+
+- takes the output from `snfusion-gen`
+- creates a `PNG` plot
+
+ $> snfusion-plot -f output.csv -o output.png
+ snfusion-plot: plotting...
+ snfusion-plot: NumIters:   30000
+ snfusion-plot: NumCarbons: 60
+ snfusion-plot: Seed:       1234
+ snfusion-plot: Nuclei:     [Nucleus{A: 12, Z: 6} Nucleus{A: 16, Z: 8} Nucleus{A: 24, Z:12} Nucleus{A: 28, Z:14} Nucleus{A: 32, Z:16} Nucleus{A: 36, Z:18} Nucleus{A: 40, Z:20} Nucleus{A: 44, Z:22} Nucleus{A: 48, Z:24} Nucleus{A: 52, Z:26} Nucleus{A: 56, Z:28}]
+
+* snfusion-plot - II
+
+.image images/snfusion-plot.png
+
+* snfusion-web
+
+A web interface allowing to run and drive `snfusion-gen` + `snfusion-plot`.
+
+- web server written in [[https://golang.org][Go]]
+- clients connect to the server and request a new simulation (_ie:_ parameters)
+- set of parameters is sent back to server _via_ a [[https://en.wikipedia.org/wiki/WebSocket][WebSocket]]
+- server runs the simulation
+- sends the results back to the `javascript` frontend
+- sends the `SVG` plot back to the `javascript` frontend
+
+Code is [[https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web][here]].
+
+Served at [[http://clrbinetsrv.in2p3.fr:7071]]
+
+* snfusion-web
+
+- interesting technologies
+- learning curve a bit steep (my `javascript` is weak, as is my `CSS`)
+
