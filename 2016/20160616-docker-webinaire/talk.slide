@@ -1,0 +1,471 @@
+Docker & rkt
+Webinaire IN2P3, 2016/06/16
+
+Sebastien Binet
+CNRS/IN2P3/LPC
+
+
+* Docker origins
+
+
+* The container revolution
+
+Before 1960, cargo transport looked like:
+
+.image _figs/transport-pre-1960.png
+
+* MxN combinatorics: matrix from Hell
+
+.image _figs/transport-mxn-matrix.png
+
+
+* Solution: Intermodal shipping container
+
+.image _figs/transport-mxn-solved.png
+
+
+* Containers - analysis
+
+- enables seamless shipping on roads, railways and sea (intermodal)
+- standardized dimensions
+- opaque box convenient for all types of goods (privacy)
+
+.image _figs/cargo.jpg
+
+* What is Docker?
+
+
+* Application deployment
+
+.image _figs/docker-nn-matrix.png
+
+_Note:_ a 3rd dimension (OS/platform) could be considered
+
+* Docker: an application container
+
+.image _figs/docker-container-code.png
+
+* Docker: no combinatorics no more
+
+.image _figs/docker-nn-matrix-solved.png
+
+* Docker
+
+`Docker` is an open source project to pack ship and run any application as a
+lightweight container: [[http://www.docker.io][docker.io]]
+
+
+
+_Note:_ Although `docker` is primarily (ATM) Linux-oriented, it supports other
+OSes (Windows+MacOSX) at the price of a thin `Linux` VM which is automatically
+installed (and managed) on these systems.
+See [[https://docs.docker.com/installation/][docker installation]]
+
+* Docker
+
+`Docker` is an open source project to pack ship and run any application as a
+lightweight container: [[http://www.docker.io][docker.io]]
+
+High-level description:
+
+- kind of like a lightweight VM
+- runs in its own process space
+- has its own network interface
+- can run stuff as `root`
+
+Low-level description:
+
+- `chroot` on steroids
+- container `==` isolated process(es)
+- share kernel with host
+- no device emulation 
+
+* Docker: why?
+
+- same use cases than for VMs (for `Linux` centric workloads)
+- *speed*: boots in (milli)seconds
+- *footprint*: 100-1000 containers on a single machine/laptop, small disk   requirements
+
+.image _figs/vm-lxc.png 350 600
+
+* Docker: why?
+
+*Efficiency*: _almost_ no overhead
+
+- processes are isolated but run straight on the host
+- `CPU` performance = *native* performance
+- memory performance = a few % shaved off for (optional) accounting
+- network performance = small overhead
+
+* Docker: why?
+
+*Efficiency*: storage friendly
+
+- unioning filesystems
+- snapshotting filesystems
+- copy-on-write
+
+* Docker: why?
+
+- provisionning takes a few milliseconds
+- ... and a few kilobytes
+- creating a new container/base-image takes a few seconds
+
+* Why are Docker containers lightweight?
+
+.image _figs/vm-vs-containers.png 600 1000
+
+* Separation of concerns
+
+Tailored for the dev team:
+
+- my code
+- my framework
+- my libraries
+- my system dependencies
+- my packaging system
+- my distro
+- my data
+
+Don't care where it's running or how.
+
+* Separation of concerns
+
+Tailored for the ops team:
+
+- logs
+- backups
+- remote access
+- monitoring
+- uptime
+
+Don't care what's running in it.
+
+* Docker: blueprint
+
+* Docker: blueprint
+
+_Build,_ _ship_ and _run_ any application, _anywhere_.
+
+
+`Docker` uses a client/server architecture:
+
+- the `docker` _client_ talks to
+- a `docker` _daemon_ via sockets or a RESTful API.
+
+.image _figs/architecture.svg 350 600
+
+
+* Docker: basics of the system
+
+.image _figs/docker-system.png 550 1000
+
+* Docker: the CLI
+
+The `docker` client ships with many a subcommand:
+
+ $ docker help
+ Usage: docker [OPTIONS] COMMAND [arg...]
+        docker daemon [ --help | ... ]
+        docker [ -h | --help | -v | --version ]
+
+ A self-sufficient runtime for containers.
+
+ [...]
+
+ Commands:
+     attach    Attach to a running container
+     build     Build an image from a Dockerfile
+     commit    Create a new image from a container's changes
+     cp        Copy files/folders from a container to a HOSTDIR or to STDOUT
+     images    List images
+     import    Import the contents from a tarball to create a filesystem image
+     info      Display system-wide information
+ [...]
+
+* Hello World
+
+Fetch a `docker` image from the `docker` registry:
+
+ $ docker pull busybox
+ Using default tag: latest
+ latest: Pulling from library/busybox
+ cf2616975b4a: Pull complete 
+ 6ce2e90b0bc7: Pull complete 
+ 8c2e06607696: Already exists 
+ library/busybox:latest: The image you are pulling has been verified. Important: image verification is a tech preview feature and should not be relied on to provide security.
+ Digest: sha256:38a203e1986cf79639cfb9b2e1d6e773de84002feea2d4eb006b52004ee8502d
+ Status: Downloaded newer image for busybox:latest
+
+ $ docker images
+ REPOSITORY              TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ busybox                 latest              8c2e06607696        4 months ago        2.43 MB
+
+Now, run a command inside the image:
+
+ $ docker run busybox echo "Hello World"
+ Hello World
+
+
+* Docker basics
+
+- Run a container in detached mode:
+
+ $ docker run -d busybox sh -c \
+   'while true; do echo "hello"; sleep 1; done;'
+
+- Retrieve the container id:
+
+ $ docker ps
+ CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS
+ 321c1aa5bcd4        busybox             "sh -c 'while true; d"   3 seconds ago       Up 2 seconds
+
+- Attach to the running container:
+
+ $ docker attach 321c1aa5bcd4
+ hello
+ hello
+ [...]
+
+- Start/stop/restart container
+ 
+ $ docker stop 321c1aa5bcd4
+ $ docker restart 321c1aa5bcd4
+
+
+* Docker: public index (aka registry, aka the Hub)
+
+`Docker` containers may be published and shared on a public registry, the `Hub`.
+
+- It is searchable:
+
+ $ docker search apache2
+ NAME                                   STARS     OFFICIAL   AUTOMATED
+ rootlogin/apache2-symfony2             7                    [OK]
+ reinblau/php-apache2                   6                    [OK]
+ tianon/apache2                         4                    [OK]
+ [...]
+ $ docker pull tianon/apache2
+
+- Run the image and check the ports
+
+ $ docker run -d -p 8080:80 tianon/apache2
+ $ docker ps
+ CONTAINER ID        IMAGE               COMMAND                  PORTS
+ 49614161f5b7        tianon/apache2      "apache2 -DFOREGROUND"   0.0.0.0:8080->80/tcp
+
+The registry is also available from the browser:
+
+- [[https://hub.docker.com][hub.docker.com]]
+
+* Docker: creating a customized image
+
+- run `docker` interactively:
+
+ $ docker run -it ubuntu bash
+ root@524ef6c2e4ce:/# apt-get install -y memcached
+ [...]
+ root@524ef6c2e4ce:/# exit
+ 
+ $ docker commit `docker ps -q -l` binet/memcached
+ 4242210aba21641013b22198c7bdc00435b00850aaf9ae9cedc53ba75794891d
+
+ $ docker run -d -p 11211 -u daemon binet/memcached memcached
+ a84e18168f1473a338f9ea3473dd981bf5e3dc7e41511a1252f7bb216d875860
+
+ $ docker ps
+ CONTAINER ID        IMAGE               COMMAND                 PORTS
+ a84e18168f14        binet/memcached     "memcached"             0.0.0:32768->11211/tcp
+ 
+* Docker: creating a customized image
+
+- interactive way is fine but not scalable
+- enter `Dockerfiles`
+- recipes to build an image
+- start `FROM` a base image
+- `RUN` commands on top of it
+- easy to learn, easy to use
+
+* Docker: Dockerfile
+
+.code _code/dockerfile-nginx
+
+* Docker: Dockerfile-II
+
+- run in the directory holding that `Dockerfile`
+
+ $ docker build -t <myname>/server .
+ $ docker run -d -P <myname>/server
+
+- retrieve the port number:
+
+ $ docker ps
+ 34dc03cdbae8        binet/server         "/bin/sh -c 'nginx -g"   0.0.0.0:32770->80/tcp
+
+or:
+
+ $ docker inspect -f '{{.NetworkSettings.Ports}}' 34dc03cdbae8
+
+and then:
+
+ $ curl localhost:32770
+ Hi, I am in your container!
+
+* docker build
+
+- takes a snapshot after each step
+- re-uses those snapshots in future builds
+- doesn't re-run slow steps when it isn't necessary (cache system)
+
+.image _figs/docker-changes-updates.png 350 800
+
+* Docker Hub
+
+- `docker` `push` an image to the Hub
+- `docker` `pull` an image from the Hub to any machine
+
+This brings:
+
+- reliable deployment
+- consistency
+
+- images are self-contained, independent from host
+- if it works locally, it will work on the server
+- _exact_ _same_ _behavior_
+- regardless of versions, distros and dependencies
+
+* Docker for the developer
+
+- manage and *control* dependencies
+- if it works on my machine, it works on the cluster
+- reproducibility
+- small but durable recipes
+
+Never again:
+
+- juggle with 3 different incompatible FORTRAN compilers
+- voodoo incantations to get that exotic library to link with IDL
+- figure out which version of LAPACK works with that code
+- ... and what obscure flag coaxed it into compiling last time
+
+* Development workflow
+
+- Fetch code (`git`, `mercurial`, ...)
+
+ $ git clone git@github.com:sbinet/my-project.git
+ $ vim my-project/some-file.cpp &
+ $ docker run -it \
+    -v `pwd`/my-project:/src \
+    -v `pwd`/build:/build \
+   <my-name>/my-project-base-dev bash
+
+- Edit code
+- Mount code inside a `build` container with all dependencies pre-installed
+- Build+test inside that container
+- Retrieve the build artifacts under `/build`
+
+Can be automatized via a `Makefile`:
+
+- ideally, the `my-project-base-dev` image definition is provided by the `git` repository
+
+* rkt
+
+* rkt: introduction
+
+[[https://coreos.com/rkt/docs][rkt]] is another [[https://golang.org][Go]]-based application to run containers.
+
+The main differences _wrt_ `docker` are:
+
+- an improved process model
+- an improved security support
+- a somewhat more `UNIX` -y philosophy (one tool per job)
+
+`rkt` implements the [[https://github.com/appc/spec][ACI (App Container Images)]] format to ensure portability and prevent *lock-in*.
+
+`rkt` is also a partner of the [[https://www.opencontainers.org/][OCI (Open Container Initiative)]] project.
+
+* rkt: support for standards
+
+`ACI/appc` and `OCI` try to standardize a few components of the container/image ecosystem:
+
+- container image format (`appc`)
+- image distribution (`appc`)
+- runtime (`appc`, `OCI`)
+- on-disk image format (`OCI`)
+
+* rkt: process model
+
+.image _figs/rkt-vs-docker-process-model.png 400 _
+
+
+- `rkt` has no centralized `"init"` daemon
+- `rkt` launches containers directly from client commands
+- `rkt` is thus compatible with `init` systems (`systemd`, `upstart`, ...)
+
+* rkt: privilege separation
+
+.image _figs/rkt-vs-docker-fetch.png 400 _
+
+- standard `UNIX` group permissions
+- signature verification of downloaded images (with simple user privileges)
+
+* rkt: hello world
+
+Create a statically linked `Go` web server:
+
+.code _code/hello-web.go
+
+Build with:
+
+ $ CGO_ENABLED=0 go build -ldflags '-extldflags "-static"' -o hello ./hello-web.go
+ $ file hello
+ hello: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped
+ $ ldd hello
+ not a dynamic executable
+
+* rkt: create the image
+
+To create the image, use the [[https://github.com/appc/acbuild][acbuild]] tool:
+
+.code _code/rkt-create-image
+
+This creates an `ACI` containing the application code and the needed metadata.
+
+- advantage _wrt_ a `Dockerfile`: this can *easily* and *seamlessly* be integrated into `Makefile` -based workflows
+
+* rkt: run the container
+
+ $ rkt --insecure-options=image run hello-0.0.1-linux-amd64.aci
+ image: using image from local store for image name coreos.com/rkt/stage1-coreos:1.6.0
+ image: using image from file hello-0.0.1-linux-amd64.aci
+ networking: loading networks from /etc/rkt/net.d
+ networking: loading network default with type ptp
+
+in another terminal:
+
+ $ rkt list
+ UUID		APP		IMAGE NAME					STATE	NETWORKS
+ 37e2ee52	hello	example.com/hello:0.0.1		running	default:ip4=172.16.28.4
+ 
+ $ curl http://172.16.28.4:5000
+ hello
+
+* Conclusions
+
+- `docker` is a rather good tool to deploy applications in containers
+- eases the life of developers and sysadmins (devops)
+- `docker` isn't the only game in town
+- [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS`
+- [[http://0pointer.de/public/systemd-man/systemd-nspawn.html][systemd-nspawn]], now part of `systemd`
+
+* References
+
+.link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
+.link http://www.slideshare.net/dotCloud/docker-intro-november
+.link https://sif.info-ufr.univ-montp2.fr/docker-talk
+.link https://docs.docker.com/introduction/understanding-docker/
+.link https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/rkt/docs
+

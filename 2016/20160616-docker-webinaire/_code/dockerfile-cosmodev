@@ -1,0 +1,25 @@
+from ubuntu:14.04
+
+run apt-get update -y && apt-get install -y gcc g++ gfortran \
+    python python-numpy cython libblas-dev liblapack-dev \
+    make curl git
+
+run mkdir -p /build/jla /build/salt2
+run git clone https://github.com/lesgourg/class_public /build/class && \
+    cd /build/class && make
+run cd /build/jla && \
+ curl -O -L http://supernovae.in2p3.fr/sdss_snls_jla/jla_likelihood_v6.tgz && \
+ tar zxf jla_likelihood_v6.tgz
+run cd /build/jla/jla_likelihood_v6 && \
+ make && make test_jla
+run cd /build/salt2 && \
+        curl -L http://supernovae.in2p3.fr/salt/lib/exe/fetch.php?media=snfit-2.4.2.tar.gz > snfit-2.4.2.tar.gz
+run cd /build/salt2 && \
+        tar zxf snfit-2.4.2.tar.gz && \
+        cd snfit-2.4.2 && \
+        ls && \
+        ./configure && \
+        make && make install
+run git clone https://github.com/cmbant/CosmoMC /build/cosmomc && \
+        cd /build/cosmomc && \
+        BUILD=gfortran make
