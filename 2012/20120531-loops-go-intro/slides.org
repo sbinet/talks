@@ -1,0 +1,338 @@
+#+TITLE:     \texttt{Go} tour - introduction
+#+AUTHOR:    S\'ebastien Binet
+#+EMAIL:     sebastien.binet@cern.ch
+#+INSTITUTE: LAL/IN2P3
+#+DATE:      2012-05-31
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+startup: showall
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+LaTeX_HEADER: \usetheme[titlepagelogo=lal-logo]{Binet}
+#+latex_header: \usepackage{minted}
+#+latex_header: \usemintedstyle{emacs}
+#+latex_header: \pgfdeclareimage[height=1.5cm]{lal-logo}{lal-logo-eps-converted-to}
+#+latex_HEADER: \logo{\pgfuseimage{lal-logo}}
+#+latex_HEADER: \hypersetup{colorlinks,linkcolor=blue,urlcolor=blue}
+
+# #+BEAMER_HEADER_EXTRA: \logo{\includegraphics{lal-logo.eps}}
+#+BEAMER_HEADER_EXTRA: \institute[LAL]{\insertlogo\hskip0.1cm}
+
+#+BEAMER_FRAME_LEVEL: 2
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+
+* \texttt{Go} tour - intro
+
+** Motivations
+
+- Moore's law ceased to provide the traditional single-threaded
+  performance increases
+
+  - clock-frequency wall of 2003
+
+  - still deliver increases in @transistor density@
+
+- multicore systems become the norm
+
+- need to "go parallel" to get scalability
+
+** In a ~C++~ world...
+- parallel programming in ~C++~ is @doable@:
+  - ~C/C++~ "locking + threads" (~pthreads~, ~WinThreads~)
+    - excellent performance
+    - good generality
+    - relatively @low productivity@
+  - multi-threaded applications...
+    - hard to get right
+    - hard to @keep@ right
+    - hard to @keep@ efficient and optimized across releases
+  - multi-process applications...
+    - leverage ~fork+COW~ on ~GNU/Linux~
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+ \begin{center}
+ Parallel programming in ~C++~ is \alert{doable}, \\
+ but \alert{\emph{no panacea}}
+ \end{center}
+
+
+** In a ~C++~ world...
+- in ~C++03~, we have libraries to help with parallel programming
+  - ~boost::lambda~
+  - ~boost::MPL~
+  - ~boost::thread~
+  - Threading Building Blocks (TBB)
+  - Concurrent Collections (CnC)
+  - ~OpenMP~
+  - ...
+
+
+** In a ~C++11~ world...
+- in ~C++11~, we get:
+  - \lambda functions (and a new syntax to define them)
+  - ~std::thread~, 
+  - ~std::future~, 
+  - ~std::promise~
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+ \begin{center}
+ Helps taming the beast \\
+ ... at the price of sprinkling templates everywhere... \\
+ ... and complicating further a not so simple language...
+ \end{center}
+
+
+** In a ~C++11~ world...
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+yay! for ~C++11~, but old problems are @still there...@
+
+
+*** \quad                                                          :B_normal:
+    :PROPERTIES:
+    :BEAMER_env: normal
+    :END:
+
+- @build scalability@
+  - templates 
+  - headers system
+  - still no module system (WG21 - N2073)
+    - maybe in the next Technical Report ?
+
+\vspace
+
+- @code distribution@
+  - no ~CPAN~ like readily available infrastructure (and
+    cross-platform) for ~C++~
+ 
+** Time for a new language ?
+
+*** \quad                                                       :B_quotation:
+    :PROPERTIES:
+    :BEAMER_env: quotation
+    :END:
+ "Successful new languages build on existing languages and where
+ possible, support legacy software. C++ grew our of C. java grew out
+ of C++. To the programmer, they are all one continuous family of C
+ languages."
+ (T. Mattson)
+
+
+*** \quad                                                          :B_normal:
+    :PROPERTIES:
+    :BEAMER_env: normal
+    :END:
+
+- notable exception (which confirms the rule): @python@
+
+
+*** \quad                                                      :B_alertblock:
+    :PROPERTIES:
+    :BEAMER_env: alertblock
+    :END:
+    Can we have a language:
+    - as easy as @python@,
+    - as fast (or nearly as fast) as ~C/C++/FORTRAN~,
+    - with none of the deficiencies of ~C++~,
+    - and is multicore/manycore friendly ?
+
+** \quad
+
+#+begin_latex
+\begin{center}
+Why not {\texttt Go} ?\\
+\href{http://golang.org}{{\color{blue}golang.org}}
+\end{center}
+#+end_latex
+
+** Elements of ~go~
+
+- obligatory ~hello world~ example...
+
+#+begin_src go
+package main
+import "fmt"
+func main() {
+    fmt.Println("Hello, World")
+}
+#+end_src
+
+file:figs/golang-logo.pdf
+
+** Elements of ~go~ - II
+
+- founding fathers:
+
+  - Russ Cox, Robert Griesemer, Ian Lance Taylor
+
+  - Rob Pike, Ken Thompson
+
+- @concurrent@, compiled
+
+- @garbage collected@
+
+- an open-source general programming language
+
+- best of both 'worlds':
+
+  - feel of a @dynamic language@
+
+    - limited verbosity thanks to *type inference system*, map, slices
+
+  - safety of a @static type system@
+
+  - compiled down to machine language (so it is fast)
+
+    - goal is within 10% of @C@
+
+- @object-oriented@ (but w/o classes), @builtin reflection@
+
+- first-class functions with @closures@
+
+- @duck-typing@ \`a la ~python~
+
+** ~Go~ concurrent
+
+*** goroutines                                                      :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+
+  - a function executing concurrently as other goroutines @in the same address space@
+
+  - starting a goroutine is done with the ~go~ keyword
+
+    - ~go myfct(arg1, arg2)~
+
+  - growable stack 
+
+    - @lightweight threads@ 
+
+    - starts with a few kB, grows (and shrinks) as needed
+
+      - now, also available in ~GCC~ 4.6 (thanks to the ~GCC-Go~ front-end)
+
+    - no stack overflow
+
+** ~Go~ concurrent - II
+
+*** channels                                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+
+  - provide (type safe) communication and synchronization
+
+#+begin_src go
+ // create a channel of mytype
+ my_chan := make(chan mytype)
+ my_chan <- some_data    // sending data
+ some_data = <- my_chan  // receiving data
+#+end_src
+
+  - ~send~ and ~receive~ are atomic
+
+*** \quad                                                      :B_alertblock:
+    :PROPERTIES:
+    :BEAMER_env: alertblock
+    :END:
+ \begin{center}
+ \emph{
+ "Do not communicate by sharing memory; instead, \\
+  share memory by communicating"
+ }
+ \end{center}
+
+** Non-elements of ~Go~
+
+- @no@ dynamic libraries (frown upon)
+
+- @no@ dynamic loading (yet)
+
+  - but can either rely on separate processes
+
+    - ~IPC~ is made easy /via/ the ~netchan~ package
+
+    - many ~RPC~ substrates too (~JSON~, ~XML~, ~protobuf~, \ldots)
+
+  - or rebuild executables on the fly
+
+    - @compilation@ of ~Go~ code is @fast@ 
+
+    - even faster than ~FORTRAN~ and/or ~C~
+
+- @no@ templates/generics
+
+  - still open issue
+
+  - looking for the proper ~Go~ -friendly design
+
+- @no@ operator overloading
+
+
+** Go from anywhere to everywhere
+
+- code compilation and distribution are (/de facto/) standardized
+
+- put your code on some repository
+
+  - ~bitbucket~, ~launchpad~, ~googlecode~, ~github~, ...
+
+- check out, compile and install in one go with @go get@:
+
+  - ~go get bitbucket.org/binet/igo~
+
+  - no ~root~ access required
+
+  - automatically handle @dependencies@
+
+\vspace
+
+- ~go get~ -able packages are listed on the dashboard:
+
+  - [[http://godashboard.appspot.com][godashboard.appspot.com]]
+#  - \href{godashboard.appspot.com}{{\color{blue}godashboard.appspot.com}}
+
+
+** Tour content
+
+- bases of ~go~: types, slices, maps, functions, closures, interfaces
+
+- goroutines, channels
+
+- mini load-balancer
+
+** \quad
+
+file:figs/bumper640x360.png
+
+
+** Bibliography
+
+- http://golang.org
+
+- http://tour.golang.org
+
+- http://concur.rspace.googlecode.com/hg/talk/concur.html
+
+
