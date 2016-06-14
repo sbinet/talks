@@ -1,4 +1,4 @@
-Docker & rkt
+Docker
 Webinaire IN2P3, 2016/06/16
 
 Sebastien Binet
@@ -182,6 +182,28 @@ The `docker` client ships with many a subcommand:
      import    Import the contents from a tarball to create a filesystem image
      info      Display system-wide information
  [...]
+
+* Docker: the CLI
+
+ $ docker version
+ Client:
+  Version:      1.11.2
+  API version:  1.23
+  Go version:   go1.6.2
+  Git commit:   b9f10c9
+  Built:        Sun Jun  5 23:17:55 2016
+  OS/Arch:      linux/amd64
+ 
+ Server:
+  Version:      1.11.2
+  API version:  1.23
+  Go version:   go1.6.2
+  Git commit:   b9f10c9
+  Built:        Sun Jun  5 23:17:55 2016
+  OS/Arch:      linux/amd64
+
+* Whirlwind tour of docker features
+
 
 * Hello World
 
@@ -368,6 +390,51 @@ Can be automatized via a `Makefile`:
 
 - ideally, the `my-project-base-dev` image definition is provided by the `git` repository
 
+* Deployment workflow
+
+- Pull binary (possibly from a private registry), packaged as an image
+- Deploy container on cloud or local cluster
+
+Many tools exist to ease the deployment of multi-containers applications
+_eg_: an application consisting of a web-server and a database, where each
+binary is packaged as a single container.
+Each container needs to communicate with the other.
+Configuration(s) also need to be provided to these containers...
+
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/etcd/docs/latest/
+.link https://docs.docker.com/compose/
+
+
+* Hands-on session
+
+For people with an interest in practical experience, have a look at this tutorial:
+
+.link http://talks.godoc.org/github.com/sbinet/talks/2015/20151217-loops-docker/talk.slide#41
+
+
+* Conclusions
+
+- `docker` is a rather good tool to deploy applications in containers
+- eases the life of developers and sysadmins (devops)
+- `docker` isn't the only game in town
+- [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS` (see bonus slides of this talk)
+- [[http://0pointer.de/public/systemd-man/systemd-nspawn.html][systemd-nspawn]], now part of `systemd`
+
+* References
+
+.link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
+.link http://www.slideshare.net/dotCloud/docker-intro-november
+.link https://sif.info-ufr.univ-montp2.fr/docker-talk
+.link https://docs.docker.com/introduction/understanding-docker/
+.link https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin
+.link http://kubernetes.io/
+.link http://mesos.apache.org/
+.link https://coreos.com/rkt/docs
+
+* Bonus
+
 * rkt
 
 * rkt: introduction
@@ -450,22 +517,4 @@ in another terminal:
  $ curl http://172.16.28.4:5000
  hello
 
-* Conclusions
-
-- `docker` is a rather good tool to deploy applications in containers
-- eases the life of developers and sysadmins (devops)
-- `docker` isn't the only game in town
-- [[https://coreos.com/rkt/docs][rkt]] (`rocket`) from `CoreOS`
-- [[http://0pointer.de/public/systemd-man/systemd-nspawn.html][systemd-nspawn]], now part of `systemd`
-
-* References
-
-.link http://www.slideshare.net/jpetazzo/introduction-to-docker-december-2014-tour-de-france-bordeaux-special-edition
-.link http://www.slideshare.net/dotCloud/docker-intro-november
-.link https://sif.info-ufr.univ-montp2.fr/docker-talk
-.link https://docs.docker.com/introduction/understanding-docker/
-.link https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin
-.link http://kubernetes.io/
-.link http://mesos.apache.org/
-.link https://coreos.com/rkt/docs
 
