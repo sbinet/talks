@@ -17,7 +17,7 @@
 
 \usepackage[frenchb]{babel}
 
-\title{Introduction \`a \texttt{Go}\\ \&\\ Retours d'exp\'eriences}
+\title{Introduction \`a \texttt{Go}\\ \&\\ Retours d'exp\'erience}
 \author{S\'ebastien Binet}
 \date{Juin 2016}
 \affil{CNRS/IN2P3/LPC}
@@ -25,7 +25,7 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
+\section*{}
 
 Il n'y a plus de \emph{"Free Lunch"} possible: la loi de Moore~\cite{ref-moore}
 n'est plus aussi ais\'ee \`a mettre en {\oe}uvre que par le pass\'e.
@@ -50,8 +50,8 @@ s\'equentielle \`a chacun de ces \'ev\'enements.
 Cependant, chaque n\oe ud de calcul h\'ebergeant chacun de ces programmes, met \`a
 disposition des ressources finies (empreinte m\'emoire, \emph{CPU}, descripteurs
 de fichiers, \emph{sockets}, \emph{E/S}, etc\ldots), ressources dont le passage \`a
-l'\'echelle est plus ardu lorsque l'empreinte m\'emoire des \emph{jobs} de
-reconstruction des exp\'eriences du LHC atteint 2-4 $Gb$ de \texttt{RAM}.
+l'\'echelle est plus probl\'ematique lorsque l'empreinte m\'emoire des \emph{jobs} de
+reconstruction des exp\'eriences du LHC atteint 2 \`a 4 $Go$ de \texttt{RAM}.
 Cette exploitation du parall\'elisme atteint ses limites avec les
 ordres de grandeurs du LHC.
 
@@ -74,7 +74,7 @@ De plus, m\^eme si \texttt{C++11}~\cite{ref-cxx11} et
 \texttt{C++14}~\cite{ref-cxx14} apportent enfin la standardisation tant attendue
 des APIs de programmation parall\`ele (\texttt{std::thread},
 \texttt{std::mutex}, \texttt{std::future}), cela se fait au prix d'une
-complexification encore plus pouss\'ee de ce langage, sans toutefois exposer une
+complexification encore plus pouss\'ee de ce langage, sans pourtant exposer une
 API de haut niveau.
 Il semble donc judicieux de se demander s'il n'existerait pas un nouveau langage
 de programmation mieux adapt\'e \`a l'exploitation des architectures
@@ -82,15 +82,16 @@ parall\`eles\ldots
 
 Pourquoi pas \texttt{Go}~\cite{ref-golang}?
 
-\section{Anatomie de \texttt{Go}}
+\section*{Anatomie de \texttt{Go}}
 
 \texttt{Go} est un langage de programmation, libre (licence \texttt{BSD-3}),
 initialement d\'evelopp\'e par Google et annonc\'e au monde en novembre 2009.
 C'est un langage compil\'e, avec gestion automatique de la m\'emoire \emph{via} un
-ramasse-miettes (\emph{garbage collector}), le support de la r\'eflection de
-type, des fonctions anonymes, des \emph{closures} et de la programmation
-orient\'ee objet.
-La syntaxe de \texttt{Go} est r\'eminiscente du \texttt{C}.
+ramasse-miettes (\emph{garbage collector}), le support de l'introspection de
+type, des fonctions anonymes, des \emph{closures}~\footnote{Les \emph{closures}
+sont des fonctions qui capturent des r\'ef\'erences \`a des variables libres
+de l'environnement.} et de la programmation orient\'ee objet.
+La syntaxe de \texttt{Go} est une r\'eminiscence de celle du \texttt{C}.
 Un bref aper\c cu d'un premier programme en \texttt{Go} est donn\'e dans la
 figure~\ref{fig-go-hello}.
 
@@ -110,7 +111,7 @@ func main() {
 \caption{\label{fig-go-hello}Un premier programme en \texttt{Go}.}
 \end{figure}
 
-\texttt{Go} est appr\'eci\'e pour sa capacit\'e \`a apporter au d\'eveloppeur
+\texttt{Go} est appr\'eci\'e pour sa capacit\'e \`a apporter au d\'eveloppeur,
 ainsi qu'\`a l'utili\-sa\-teur final, le meilleur des mondes "dynamique" et
 "statique":
 \begin{itemize}
@@ -123,7 +124,7 @@ ainsi qu'\`a l'utili\-sa\-teur final, le meilleur des mondes "dynamique" et
 
 De plus, le support de \texttt{Go} pour les interfaces ressemble fortement au
 \emph{duck-typing} de \texttt{Python}~\cite{ref-python} et se pr\^ete tr\`es
-bien \`a l'\'ecriture de larges cadriciels (\emph{frameworks}) tels que ceux
+bien \`a l'\'ecriture de vastes cadriciels (\emph{frameworks}) tels que ceux
 utilis\'es et d\'evelopp\'es pour les exp\'eriences au LHC.
 
 Enfin, \texttt{Go} expose un support accru et int\'egr\'e au langage, de la
@@ -139,14 +140,14 @@ une \texttt{goroutine} bloqu\'ee, par exemple, par une op\'eration d'\texttt{E/S
 \texttt{goroutines} du programme.
 De plus, les \texttt{goroutines} sont tr\`es peu gourmandes en ressources
 gr\^ace \`a leur pile de petite taille et ajust\'ee \`a l'ex\'ecution.
-Ceci permet d'en lancer un tr\`es grand nombre et ce sur des machines modestes:
-il n'est pas rare de voir des programmes comportant des milliers de
+Ceci permet d'en lancer un tr\`es grand nombre et ce sur des machines tr\`es
+ordinaires: il n'est pas rare de voir des programmes comportant des milliers de
 \texttt{goroutines} sur des laptops aux capacit\'es modestes, prouesse
 impossible avec des \emph{threads} natifs.
 
 Dans le langage \texttt{Go}, le m\'ecanisme permettant d'\'echanger des
-donn\'ees entre \texttt{goroutines} et ce sans circonvenir la s\^uret\'e du
-syst\`eme de typage (\emph{type safety}), est appel\'e un \texttt{channel}.
+donn\'ees entre \texttt{goroutines} et ce sans remettre en cause la s\^uret\'e
+du syst\`eme de typage (\emph{type safety}), est appel\'e un \texttt{channel}.
 Envoyer et recevoir des donn\'ees par un \texttt{channel} sont des op\'erations
 atomiques et permettent donc de synchroniser l'ex\'ecution des
 \texttt{goroutines}.
@@ -218,29 +219,29 @@ func main() {
 \end{figure}
 
 Depuis la publication de la version \texttt{1.0} de \texttt{Go} en 2012, le
-langage est consid\'er\'e stable et compl\'etement r\'etro-compatible: chaque
-nouvelle version de \texttt{Go} (une tous les six mois en moyenne) compilera
-correctement un programme valide de 2012.
+langage est consid\'er\'e comme stable et compl\`etement r\'etrocompatible:
+chaque nouvelle version de \texttt{Go} (une tous les six mois en moyenne)
+compilera correctement un programme valide de 2012.
 Ce contrat de stabilit\'e est \'egalement appliqu\'e \`a la biblioth\`eque
 standard livr\'ee avec le compilateur.
 
-De part son origine et son ADN, \texttt{Go} permet de d\'evelopper rapidement de
-larges programmes.
+De par son origine et son ADN, \texttt{Go} permet de d\'evelopper rapidement des
+programmes d'envergure.
 Son mod\`ele de compilation d'\'executables statiques permet \'egalement de les
-d\'eployer ais\'ement sur de larges infrastructures: \texttt{Go} est rapidement
+d\'eployer ais\'ement sur de grandes infrastructures: \texttt{Go} est rapidement
 devenu la \emph{lingua franca} du d\'eveloppement \emph{cloud}.
 Est-il adapt\'e \`a l'environnement HEP et astro?
 
-\section{Retours d'exp\'eriences}
+\section*{Retours d'exp\'erience}
 
 %% fads, fwk
 %% go-lsst/fcs-ctl
 %% go-lsst/snfusion
 
-\subsection{Analyse \& simulation}
+\subsection*{Analyse \& simulation}
 
-\texttt{Go} a d'abord fait ses d\'ebuts dans HEP \emph{via} la
-r\'eimpl\'ementation du \emph{framework} de contr\^ole hors-ligne d'ATLAS et LHCb:
+\texttt{Go} a fait ses d\'ebuts dans HEP \emph{via} la r\'eimpl\'ementation du
+\emph{framework} de contr\^ole hors-ligne d'ATLAS et LHCb:
 \textsc{Gaudi}~\cite{ref-gaudi}.
 Cette r\'eimpl\'ementation, appel\'ee simplement \texttt{fwk}, est regroup\'ee
 sous l'ombrelle de l'organisation \texttt{go-hep}~\cite{ref-gohep}.
@@ -253,7 +254,7 @@ laquelle la programmation parall\`ele peut \^etre mise en \oe uvre avec
 Un autre axe de travail \'etait de montrer qu'un cadriciel concurrent comme
 \texttt{fwk} \'etait non seulement adapt\'e aux grosses exp\'eriences LHC avec
 leur infrastructure sous-jacente, mais \'etait \'egalement adapt\'e aux
-entreprises de plus petites tailles telles qu'une analyse individuelle ou bien
+applications de plus petite taille telles qu'une analyse individuelle ou bien
 une biblioth\`eque de simulation.
 En effet, une des critiques r\'ecurrentes des physiciens vis-\`a-vis de
 \textsc{Gaudi} est sa lourdeur d'impl\'ementation ainsi que la difficult\'e de
@@ -277,7 +278,7 @@ Ces performances sont report\'ees dans la figure~\ref{fig-fads-delphes}.
 
 Au cours du d\'eveloppement de \texttt{fads}, plusieurs biblioth\`eques
 d'interfa\c cage avec l'existant (\textsc{Root}, \texttt{HepMC},
-\texttt{HEPEVT}) ont du \^etre d\'evelopp\'ees, ainsi que des biblioth\`eques
+\texttt{HEPEVT}) ont d\^u \^etre d\'evelopp\'ees, ainsi que des biblioth\`eques
 d'analyse (histogrammes, \emph{plot}s).
 Ce travail a permis de montrer que \texttt{Go} est un langage viable et
 comp\'etitif dans le cadre du calcul et de l'analyse de donn\'ees, et ce, m\^eme
@@ -295,7 +296,7 @@ dans le microcosme HEP.
 	assez de ressources (RAM) pour \textsc{Delphes}.}
 \end{figure}
 
-\subsection{Contr\^ole commande \& monitoring}
+\subsection*{Contr\^ole commande \& monitoring}
 
 Un axe de recherche plus r\'ecent est l'investigation de \texttt{Go} et sa
 pertinence dans le monde du contr\^ole commande.
@@ -332,12 +333,12 @@ La solution retenue a donc \'et\'e l'\'ecriture d'un ex\'ecutable servant une
 page web HTML5 utilisant \texttt{Polymer}~\cite{ref-polymer} pour r\'ealiser
 l'interface graphique.
 L'utilisateur envoie des commandes depuis l'interface, commandes qui sont
-ensuite relay\'ee au serveur \emph{via} des WebSockets.
+ensuite relay\'ees au serveur \emph{via} des WebSockets.
 Le serveur se charge de la communication avec les moteurs et renvoie
 r\'esultats des commandes, histogrammes, flux vid\'eo et grandeurs
 \emph{monitor\'ees} \`a l'utilisateur au moyen d'un autre WebSocket.
-L'authentification des utilisateurs ainsi que la syndicalisation des flux et
-connexions sont g\'er\'ees c\^ot\'e serveur.
+L'authentification des utilisateurs, ainsi que la syndicalisation des flux et
+connexions, sont g\'er\'ees c\^ot\'e serveur.
 Cette architecture orient\'ee web permet \emph{in fine} une grande transparence
 r\'eseau, et ce, m\^eme pour des clients Windows.
 La figure~\ref{fig-fcs-lsst} constitue un aper\c cu de l'interface graphique.
@@ -350,22 +351,22 @@ La figure~\ref{fig-fcs-lsst} constitue un aper\c cu de l'interface graphique.
 	LPC. L'interface est en HTML5/\texttt{Polymer}, le serveur en \texttt{Go}.}
 \end{figure}
 
-\section{Conclusions}
+\section*{Conclusions}
 
 Cet article a pr\'esent\'e le langage \texttt{Go}.
 Son approche pragmatique et sa volont\'e de rester simple (mais pas simpliste),
 coupl\'ees \`a son mod\`ele de programmation concurrente, font de \texttt{Go} un
 langage r\'esolument adapt\'e \`a l'environnement plus h\'et\'erog\`ene des
-machines multi-c\oe urs d'aujourd'hui et de demain.
+machines multic\oe urs d'aujourd'hui et de demain.
 
 Malgr\'e son relatif jeune \^age, \texttt{Go} comporte d\'ej\`a la plupart des
 biblioth\`eques n\'ecessaires \`a la programmation d'applications de calcul et
 d'analyse.
 Les outils int\'egr\'es \`a la cha\^ine de d\'eveloppement de \texttt{Go}
-permettent de plus de rapidement optimiser un code donn\'e (CPU, m\'emoire,
+permettent, de plus, de rapidement optimiser un code donn\'e (CPU, m\'emoire,
 concurrence, I/O, \ldots).
 Enfin, l'empreinte m\'emoire r\'eduite de \texttt{Go} par rapport \`a
-\texttt{Java} et ses facilit\'es en programmation concurrente, en font une
+\texttt{Java} et ses facilit\'es en programmation concurrente en font une
 alternative cr\'edible dans le domaine de l'acquisition et \emph{monitoring}
 de donn\'ees, et le contr\^ole commande.
 
