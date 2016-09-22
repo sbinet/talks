@@ -495,12 +495,8 @@ In another terminal:
  
  --- running external command...
  
- >>> pkg-config --cflags python2
- Package python2 was not found in the pkg-config search path.
- Perhaps you should add the directory containing `python2.pc'
- to the PKG_CONFIG_PATH environment variable
- No package 'python2' found
- error: exit status 1
+ >>> pkg-config --version systemd
+ 0.28
 
 
 * Base container for dev - II

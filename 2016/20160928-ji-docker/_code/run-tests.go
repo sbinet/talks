@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -18,7 +17,6 @@ import (
 
 var (
 	localhost = "localhost"
-	doPush    = flag.Bool("do-push", false, "push to cc-ecole2015-docker")
 )
 
 func init() {
@@ -93,16 +91,6 @@ func main() {
 		log.Fatalf("error build web-base image: %v\n", err)
 	}
 
-	if *doPush {
-		cmd = exec.Command(
-			"docker", "push", "binet/web-base",
-		)
-		err = run(cmd)
-		if err != nil {
-			log.Fatalf("error pushing web-base")
-		}
-	}
-
 	err = cp(
 		filepath.Join(repodir, "Dockerfile"),
 		filepath.Join(origdir, "webapp-dockerfile"),
@@ -134,18 +122,8 @@ func main() {
 		log.Fatalf("error running web-app: %v\n", err)
 	}
 
-	if *doPush {
-		cmd = exec.Command(
-			"docker", "push", "binet/web-app:v1",
-		)
-		err = run(cmd)
-		if err != nil {
-			log.Fatalf("error pushing web-app: %v\n", err)
-		}
-	}
-
 	time.Sleep(2 * time.Second) // racing the web server...
-	testWebServer("http://"+localhost+":8080/", "hello LoOPS 20151217!\n")
+	testWebServer("http://"+localhost+":8080/", "hello JI-2016!\n")
 
 	// now create a v2
 	const v2 = `package main
@@ -168,9 +146,9 @@ func main() {
 }
 
 func rootHandle(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome LoOPS 20151217!\n")
-	fmt.Fprintf(w, "\n\n--- running external command...\n\n>>> pkg-config --cflags python2\n")
-	cmd := exec.Command("pkg-config", "--cflags", "python2")
+	fmt.Fprintf(w, "Welcome JI-2016!\n")
+	fmt.Fprintf(w, "\n\n--- running external command...\n\n>>> pkg-config --version systemd\n")
+	cmd := exec.Command("pkg-config", "--version", "systemd")
 	cmd.Stdout = w
 	cmd.Stderr = w
 	err := cmd.Run()
@@ -221,18 +199,9 @@ func rootHandle(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("error running web-app: %v\n", err)
 	}
 
-	if *doPush {
-		cmd = exec.Command(
-			"docker", "push", "binet/web-app:v2",
-		)
-		err = run(cmd)
-		if err != nil {
-			log.Fatalf("error pushing web-app:v2: %v\n", err)
-		}
-	}
 	time.Sleep(2 * time.Second) // racing the web-servers...
-	testWebServer("http://"+localhost+":8082/", "Welcome LoOPS ")
-	testWebServer("http://"+localhost+":8080/", "hello LoOPS ")
+	testWebServer("http://"+localhost+":8082/", "Welcome JI-2016")
+	testWebServer("http://"+localhost+":8080/", "hello JI-2016")
 
 }
 
@@ -268,75 +237,6 @@ func cp(dst, src string) error {
 	}
 
 	return fdst.Close()
-}
-
-func launchRegistry(tmpdir string) error {
-	data := make([]struct {
-		State struct {
-			Running    bool
-			Paused     bool
-			Restarting bool
-			OOMKilled  bool
-			Dead       bool
-			Pid        int
-			ExitCode   int
-			Error      string
-			StartedAt  time.Time
-			FinishedAt time.Time
-		}
-	}, 0)
-
-	cmd := exec.Command(
-		"docker", "inspect", "ecole-registry",
-	)
-	buf := new(bytes.Buffer)
-	cmd.Stdout = buf
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("starting a registry...\n")
-		err = run(exec.Command("docker", "pull", "registry"))
-		if err != nil {
-			log.Printf("error retrieving registry image: %v\n", err)
-			return err
-		}
-
-		go func() {
-			cmd := exec.Command(
-				"docker", "run",
-				"-p", "5000:5000", "-v", tmpdir+"/registry:/var/lib/registry",
-				"--name=ecole-registry", "registry",
-			)
-			err = cmd.Run()
-			if err != nil {
-				log.Fatalf("could not launch ecole-registry: %v\n", err)
-			}
-			// FIXME(sbinet): wait a bit for the server to get completely ready
-			time.Sleep(5 * time.Second)
-		}()
-		return nil
-	}
-
-	err = json.Unmarshal(buf.Bytes(), &data)
-	if err != nil {
-		log.Printf("error unmarshaling JSON: %v\n", err)
-		return err
-	}
-
-	if !data[0].State.Running {
-		log.Printf("restarting registry...\n")
-		go func() {
-			cmd := exec.Command("docker", "restart", "ecole-registry")
-			err = cmd.Run()
-			if err != nil {
-				log.Fatalf("could not restart ecole-registry: %v\n", err)
-			}
-		}()
-		time.Sleep(5 * time.Second)
-		return nil
-	}
-	return err
 }
 
 func testWebServer(url string, prefix string) {
