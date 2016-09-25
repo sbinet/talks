@@ -4,7 +4,7 @@ FROM binet/web-base
 MAINTAINER binet@cern.ch
 
 ## add the whole git-repo
-ADD . /go/src/github.com/sbinet/ji-docker-2016
+COPY . /go/src/github.com/sbinet/ji-docker-2016
 
 RUN go install github.com/sbinet/ji-docker-2016/web-app
 

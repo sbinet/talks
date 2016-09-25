@@ -519,7 +519,7 @@ another `Dockerfile`:
 
   $ docker run -d -p 8080:8080 <myname>/web-app
 
-_Hint:_ `ADD`
+_Hint:_ `COPY`
 
 _Hint:_ `CMD`
 
@@ -536,7 +536,7 @@ _Hint:_ `CMD`
 * Create the final container - III
 
 - `CMD` describes the command to be run by default when the container is started
-- `ADD` copies files, directories or URLs into the container's filesystem
+- `COPY` copies files, directories or URLs into the container's filesystem
 - `VOLUME` creates a volume mount point inside the container which can contain data from the host or from other containers
 - `USER` defines the user (or `UID`) with whom to run the various commands inside the container
 
