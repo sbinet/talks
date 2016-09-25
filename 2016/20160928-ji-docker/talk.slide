@@ -336,8 +336,9 @@ and then:
 
 * Docker: Dockerfile-III
 
-*NOTE:* for Windows(TM) and MacOSX(TM) users, a thin `Linux` VM is sitting
-between your machine and the container.
+*NOTE:* '_Docker Toolbox_' setups a Docker environment on older Mac and Windows systems
+that do not meet the requirements of the new '_Docker for Mac_' and '_Docker for Windows_'
+apps. In that cases, a thin `Linux` VM is sitting between your machine and the container.
 The container is running inside that VM so you need to replace `localhost` with
 the `IP` of that VM:
 
