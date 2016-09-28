@@ -100,9 +100,6 @@ Happy physicist++
 
 * Go @LSST: LSST testbench
 
-Replaced a `Java` based application to control a set of motors to rotate a (dummy for now) telescope apparatus:
-
-
 .image _figs/Camera_Layout-full.jpg 400 _
 
 * Go @LSST: LSST testbench
