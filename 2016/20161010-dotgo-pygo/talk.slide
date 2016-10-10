@@ -1,0 +1,141 @@
+pygo: Interpreters in Go and for Go
+dotGo-2016, 2016/10/10
+
+Sebastien Binet
+CNRS/IN2P3
+https://github.com/sbinet
+@0xb1ns
+
+* Go in Science
+
+- efficient and quick edit/compile/run development cycle
+- fast at runtime
+- robust scientific libraries (_e.g._ [[https://github.com/gonum][gonum/...]])
+- growing ecosystem
+- easy deployment
+- simple language that scientists can quickly master
+
+* What's missing ?
+
+- more libraries
+- more robust libraries
+- more mindshare
+
+But also:
+
+- a real interpreter and its `Read-Eval-Print` `Loop` (`REPL`).
+
+REPLs are *fantastic* for science and *exploratory* work.
+
+* Go REPL
+
+There are many Go interpreters and REPLs:
+
+- [[https://github.com/motemen/gore][motemen/gore]]
+- [[https://github.com/sbinet/go-eval][sbinet/go-eval]]
+- [[https://golang.org/x/tools/ssa/interp][golang.org/x/tools/ssa/interp]]
+- ...
+
+but none of them provide an interpreter + a `REPL` for the *full* [[https://golang.org][Go]] language.
+
+* go-interpreter
+
+[[https://github.com/go-interpreter][github.com/go-interpreter]] is a (nascent) community effort to:
+
+- design,
+- implement and
+- provide an interpreter (+ a `REPL`)
+
+for `Go`, in `Go`.
+
+We are still at the design phase and working on [[https://github.com/go-interpreter/proposal/issues/1][proposal-1]].
+
+* go-interpreter - issue
+
+Main problem (for me, at least): next to *NO* expertise in designing and building interpreters and REPLs:
+
+- components of an interpreter? of a `REPL`?
+- use a virtual machine (VM)?
+- stack-based or register-based VM?
+- opcodes?
+- bytecode format? `LLVM`, `WebAssembly`, `dis` or roll our own?
+
+* AOSA book
+
+Discovered [[http://www.aosabook.org/en/500L/a-python-interpreter-written-in-python.html]["A Python Interpreter Written in Python"]] by Allison Kaptur, in [[http://aosabook.org/en/index.html][The Architecture of Open Source Applications]] book.
+
+Great: let's do that in `Go`, for `(C)Python3`.
+
+Having a blueprint and a much more constrained design space surely will help the learning process of the basic concepts!
+
+* pygo
+
+`pygo` is a (toy) virtual machine interpreter for [[https://python.org][CPython]].
+
+A VM for `CPython3`, in [[https://golang.org][Go]].
+
+Like in the AOSA book:
+
+- use `/usr/bin/python3` to compile source code into bytecode
+- feed this bytecode to a VM that will, somehow
+- read, decode and *interpret* instructions from the bytecode
+
+  shell> python3 -m compileall -l my-file.py
+  shell> pygo ./__pycache__/my-file.cpython-35.pyc
+
+* Example
+
+Let's say we want to execute the following `python` script:
+
+.code _code/python-add.py
+
+- load a value
+- store a value
+- add 2 values
+- print resulting value
+
+`python3` bytecode looks like this:
+
+ [100, 1, 0, 125, 0, 0, 
+  100, 2, 0, 125, 1, 0, 
+  116, 0, 0, 
+  124, 0, 0, 124, 1, 0, 
+  23, 
+  131, 1, 0]
+
+
+* Example - pygo/main
+
+.code _code/pygo-add-run.go
+
+* Example - pygo/run
+
+.code _code/pygo-run-loop.go
+
+* Example - pygo/run
+
+ $> pygo
+ 3
+
+Victory!
+
+* Conclusions & Plans
+
+Full code here: [[https://github.com/sbinet/pygo]]
+
+Much more to implement and understand:
+
+- functions (definition, call)
+- frames, blocks
+- closures, classes, ...
+- REPL
+
+Might migrate the production-grade code under [[https://github.com/go-python][github.com/go-python]]
+
+Backport gained knowledge into the [[https://github.com/go-interpreter][go-interpreter]] design.
+
+Use it for Jupyter ([[https://github.com/gopherds/gophernotes][github.com/gopherds/gophernotes]])
+
+
+See you on slack [[https://gophers.slack.com/messages/go-interpreter][#go-interpreter]]?
+
