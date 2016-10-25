@@ -1,0 +1,729 @@
+Go: a different tack at building concurrent programs that grow with grace
+ESC-2016, 2016-10-26
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Preamble
+
+* Software in HEP
+
+Historically, software in HEP has been written in *FORTRAN-77*.
+
+- HEP people even wrote compilers
+- HEP community even defined a few extensions (*MORTRAN*)
+
+Mid-90's: migration to *C++*
+
+Mid-2000's: *Python* gained tremendous mindshare 
+
+- first thru the steering of *C++* binaries
+- then as complete analyses gluing *C++* libraries together
+
+
+* Software in HEP - some numbers
+
+An LHC experiment (_e.g._ ATLAS, CMS) is ~3000 physicists but only a
+fraction of those is developing code.
+
+Reconstruction frameworks grew from ~3M SLOC to ~5M
+
+Summing over all HEP software stack for e.g. ATLAS:
+
+- event generators: ~1.4M SLOC (C++, FORTRAN-77)
+- I/O libraries ~1.7M SLOC (C++)
+- simulation libraries ~1.2M SLOC (C++)
+- reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [[http://acode-browser.usatlas.bnl.gov/lxr/source/][ATLAS code]]? [[https://github.com/cms-sw/cmssw][CMS code]]?)
+
+
+
+*GCC:* ~7M SLOC
+
+*Linux* *kernel* *3.6:* 15.9M SLOC
+
+* People committing code to VCS per month
+
+Wide variety of skill level
+Large amount of churn
+Once the physics data is pouring, people go and do physics instead of software
+
+
+.image _figs/cmssw-commits.png 400 600
+
+
+* Software developers
+
+~300 active developers (per experiment)
+
+~1000 different developers integrated over the lifetime of a single LHC experiment.
+
+- few "real" s/w experts
+- some physicists with strong skill set in s/w
+- many with some experience in s/w development
+- some with *no* experience in s/w development
+
+A multi-timezone environment
+
+- Europe, North-America, Japan, Russia
+
+Many communities (core s/w people, generators, simulation, ...)
+
+Development and infrastructures usually CERN-centric
+
+Heavily Linux based ([[http://cern.ch/linux][Scientific Linux CERN]])
+
+* Software development cycle
+
+VCS (CVS, then SVN. GIT: almost there)
+
+Nightlies (Jenkins or homegrown solution)
+
+- need a sizeable cluster of build machines (distcc, ccache, ...)
+- builds the framework stack in ~8h, produces ~2000 shared libraries
+- installs them on AFS (also creates RPMs and tarballs)
+
+Devs can then test and develop off the nightly _via_ AFS
+
+Every 6 months or so a new production release is cut, validated (then patched) and deployed on the World Wide LHC Computing Grid (WLCG).
+
+Release size: *~5Gb*
+
+- binaries, libraries (externals+framework stack)
+- extra data (sqlite files, physics processes' modelisation data, ...)
+
+
+* Software runtime ?
+
+Big science, big data, big software, big numbers
+
+- ~1min to initialize the application
+- loading >500 shared libraries
+- connecting to databases (detector description, geometry, ...)
+- instantiating ~2000 C++ components
+- 2Gb/4Gb memory footprint per process
+
+* (obligatory xkcd reference)
+
+.image _figs/xkcd-compiling.png 550 550
+
+* 
+
+We learn to love hating our framework. (every step of the way)
+
+And even more so in the future:
+
+- work to make our software stack thread-safe
+- or at least parts of it multithread friendly to harness multicore machines
+- quite a lot of fun ahead
+
+* Software in HEP
+
+- big C++/python software stacks
+- hard to compile (dependencies, build systems, ...)
+- slow to compile
+- hard to master (or even just understand)
+- hard to read
+- hard to deploy
+- not multicore/manycore-friendly
+
+Google had similar issues...
+Engineers @Google created `Go` while waiting for `C++` programs to compile.
+
+* Let's Go
+
+* The raison d'etre of Go
+
+Goals:
+
+- eliminate slowness (compilation, runtime)
+- eliminate clumsiness
+- improve effectiveness
+- maintain (even improve) scale
+
+Go was designed by and for people who write — and read and debug and maintain — large software systems.
+
+Go's purpose is _not_ research into programming language design.
+
+Go's purpose is to make its designers' programming lives better.
+
+* What is Go ?
+
+.play _code/hello.go
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+* Go in a nutshell
+
+[[https://golang.org][Go]] is a new, general-purpose programming language.
+
+- Compiled
+- Statically typed
+- Concurrent
+- Simple
+- Productive
+
+"Go is a wise, clean, insightful, fresh thinking approach to the greatest-hits subset of the well understood."
+- Michael T. Jones
+
+
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 700 contributors have joined the project
+- Version 1.0 release in March 2012
+- Version 1.1 release in May 2013
+- Version 1.2 release in December 2013
+- Version 1.3 release in June 2014
+- Version 1.4 release in December 2014
+- Version 1.5 release in August 2015
+- Version 1.6 release in February 2016
+- Version 1.7 release in August 2016
+
+* Elements of Go
+
+- Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+* Packages
+
+* Packages
+
+Every Go source file, e.g. `"encoding/json/json.go"`, starts like:
+
+  package json
+
+where `json` is the "package name", an identifier.
+Package names are usually concise.
+
+To use a package, need to identify it by path:
+
+  import "encoding/json"
+
+And then the package name is used to qualify items from package:
+
+  var dec = json.NewDecoder(reader)
+
+Clarity: can always tell if name is local to package from its syntax: `Name` vs. `pkg.Name`.
+(More on this later.)
+Package combines properties of library, name space, and module.
+
+* Package paths are unique, not package names
+
+The path is `"encoding/json"` but the package name is `json`.
+The path identifies the package and must be unique. 
+Project or company name at root of name space.
+
+  import "go-hep/rand"
+
+Package name might not be unique; can be overridden. These are both package `rand`:
+
+  import "math/rand"           // Standard package
+  import heprand "go-hep/rand" // HEP-specific package
+
+Every HEP experiment might have its own `rand` package; no need to make the package name unique.
+
+* Remote packages
+
+Package path syntax works with remote repositories. 
+The import path is just a string.
+
+Can be a file, can be a URL:
+
+  $> go get github.com/go-hep/hbook  ## Command to fetch, compile+install a package
+                                     ## (and its dependencies)
+
+  import "github.com/go-hep/hbook"   // go-hep HBOOK's import statement
+
+  var hist hbook.H1D                 // Client's use of package
+
+* Syntax
+
+* Syntax
+
+Syntax is not important...
+
+- unless you're programming
+- or writing tools
+
+Tooling is essential, so Go has a clean syntax. 
+Not super small, just clean:
+
+- regular (mostly)
+- only 25 keywords
+- straightforward to parse (no type-specific context required)
+- easy to predict, reason about
+
+_The_readability_of_programs_is_immeasurably_more_important_than_their_writeability._
+Hints on Programming Language Design 
+C. A. R. Hoare 1973
+
+* Declarations
+
+Uses Pascal/Modula-style syntax: name before type, more type keywords.
+
+  var fn func([]int) int
+  type T struct { a, b int }
+
+not
+
+  int (*fn)(int[]);
+  struct T { int a, b; }
+
+Easier to parse—no symbol table needed. Tools become easier to write.
+One nice effect: can drop var and derive type of variable from expression:
+
+  var buf *bytes.Buffer = bytes.NewBuffer(x) // explicit
+  buf := bytes.NewBuffer(x)                  // derived
+
+For more information:
+
+.link https://golang.org/s/decl-syntax
+
+* Function syntax
+
+Function on type T:
+
+  func Abs(t T) float64
+
+Method of type T:
+
+  func (t T) Abs() float64
+
+Variable (closure) of type T:
+
+  negAbs := func(t T) float64 { return -Abs(t) }
+
+In Go, functions can return multiple values. Common case: `error`.
+
+  func ReadByte() (c byte, err error)
+  
+  c, err := ReadByte()
+  if err != nil { ... }
+
+* Naming
+
+* Export syntax
+
+Simple rule:
+
+- upper case initial letter: `Name` is visible to clients of package
+- otherwise: `name` (or `_Name`) is not visible to clients of package
+
+Applies to variables, types, functions, methods, constants, fields....
+
+That Is It.
+
+Not an easy decision. 
+One of the most important things about the language.
+
+Can see the visibility of an identifier without discovering the declaration.
+
+Clarity.
+
+* Object-oriented programming
+
+* OOP requires very little extra programming language support
+
+We only need:
+
+- the notion of an _Object_,
+- a mechanism to interact with these objects (_Methods_),
+- and support for polymorphism (_Interfaces_).
+
+* Object-oriented programming in Go
+
+Methods without classes
+Interfaces without hierarchies
+Code reuse without inheritance
+
+Specifically:
+
+- Any _value_ can be an _object_
+- Any _type_ can play the role of a _class_
+- _Methods_ can be attached to any _type_
+- _Interfaces_ implement polymorphism.
+
+* Methods
+
+.play _code/methods.go
+
+* Methods can be attached to any type
+
+.play _code/methods-any-type.go
+
+* Interfaces
+
+.code _code/ifaces.go
+
+An interface defines a set of methods. 
+A type that implements all methods of an interface is said to implement the interface. 
+All types implement the empty interface `interface{}`.
+
+* Dynamic dispatch
+
+.play _code/interface.go /START/,/STOP/
+
+A value (here: `corner`, `boiling`) of a type (`Point`, `Celsius`) that implements 
+an interface (`Stringer`) can be assigned to a variable (`v`) of that interface type.
+
+* Composition and chaining
+
+Typically, interfaces are small (1-3 methods).
+
+Pervasive use of key interfaces in the standard library make it easy to chain APIs together.
+
+  package io
+  func Copy(dst Writer, src Reader) (int64, error)
+
+The `io.Copy` function copies by reading from any `Reader` and writing to any `Writer`.
+
+Interfaces are often introduced ad-hoc, and after the fact.
+
+There is no explicit hierarchy and thus no need to design one!
+
+* go-gunzip
+
+.code _code/gunzip.go
+
+* Interfaces in practice
+
+Methods on any types and _ad_hoc_ interfaces make for a light-weight OO programming style.
+
+Go interfaces enable post-facto abstraction.
+
+No explicit type hierarchies.
+
+"Plug'n play" in a type-safe way.
+
+* Concurrency
+
+* Interlude: concurrency & parallelism
+
+- *Concurrency* is about _dealing_ with lots of things at once.
+- *Parallelism* is about _doing_ lots of things at once.
+- Not the same, but related.
+- Concurrency is about _structure_, parallelism is about _execution_.
+
+.image _figs/conc-para.png 200 600
+
+Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
+Communication is the means to coordinate the independent executions.
+
+* Concurrency vs Parallelism
+
+Concurrency is about dealing with lots of things at once.
+Parallelism is about doing lots of things at once.
+
+Concurrency is about (program) *structure*.
+Parallelism is about (program) *execution*.
+
+.image _figs/conc-vs-par-prog.png 300 _
+
+Concurrency is *not* parallelism, it's better :)
+
+* Concurrency plus communication
+
+Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
+
+Communication is the means to coordinate the independent executions.
+
+This is the Go model and (like Erlang and others) it's based on CSP:
+
+C. A. R. Hoare: Communicating Sequential Processes (CACM 1978)
+
+* A model for software construction
+
+Easy to understand.
+
+Easy to use.
+
+Easy to reason about.
+
+You don't need to be an expert!
+
+(Much nicer than dealing with the minutiae of parallelism (threads, semaphores, locks, barriers, etc.))
+
+* Basic examples
+
+* A boring function
+
+We need an example to show the interesting properties of the concurrency primitives.
+To avoid distraction, we make it a boring example.
+
+.play _code/boring.go /START/,/STOP/
+
+* Slightly less boring
+
+Make the intervals between messages unpredictable (still under a second).
+
+.play _code/lessboring.go /START/,/STOP/
+
+* Running it
+
+The boring function runs on forever, like a boring party guest.
+
+.play _code/lessboring.go /^func.main/,$
+
+* Ignoring it
+
+The `go` statement runs the function as usual, but doesn't make the caller wait.
+
+It launches a goroutine.
+
+The functionality is analogous to the `&` on the end of a shell command.
+
+.play _code/goboring.go 1,/^}/
+
+
+* Ignoring it a little less
+
+When `main` returns, the program exits and takes the boring function down with it.
+
+We can hang around a little, and on the way show that both main and the launched goroutine are running.
+
+.play _code/waitgoboring.go /func.main/,/^}/
+
+* Goroutines
+
+What is a goroutine? It's an independently executing function, launched by a go statement.
+
+It has its own call stack, which grows and shrinks as required.
+
+It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+
+But if you think of it as a very cheap thread, you won't be far off.
+
+* Communication
+
+Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+
+It was just printed to the screen, where we pretended we saw a conversation.
+
+Real conversations require communication.
+
+* Channels
+
+A channel in Go provides a connection between two goroutines, allowing them to communicate.
+
+.code _code/helpers.go /START1/,/STOP1/
+.code _code/helpers.go /START2/,/STOP2/
+.code _code/helpers.go /START3/,/STOP3/
+
+* Using channels
+
+A channel connects the main and boring goroutines so they can communicate.
+
+.play _code/changoboring.go /START1/,/STOP1/
+.code _code/changoboring.go /START2/,/STOP2/
+
+* Synchronization
+
+When the main function executes <–c, it will wait for a value to be sent.
+
+Similarly, when the boring function executes c <– value, it waits for a receiver to be ready.
+
+A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+
+Thus channels both communicate and synchronize.
+
+* The Go approach
+
+Don't communicate by sharing memory, share memory by communicating.
+
+* "Patterns"
+
+* Generator: function that returns a channel
+
+Channels are first-class values, just like strings or integers.
+
+.play _code/generatorboring.go /START1/,/STOP1/
+.code _code/generatorboring.go /START2/,/STOP2/
+
+* Channels as a handle on a service
+
+Our boring function returns a channel that lets us communicate with the boring service it provides.
+
+We can have more instances of the service.
+
+.play _code/generator2boring.go /START1/,/STOP1/
+
+* Multiplexing
+
+These programs make Joe and Ann count in lockstep.
+We can instead use a fan-in function to let whosoever is ready talk.
+
+.code _code/faninboring.go /START3/,/STOP3/
+.play _code/faninboring.go /START1/,/STOP1/
+
+* Fan-in
+
+.image _figs/gophermegaphones.jpg
+
+* Restoring sequencing
+
+Send a channel on a channel, making goroutine wait its turn.
+
+Receive all messages, then enable them again by sending on a private channel.
+
+First we define a message type that contains a channel for the reply.
+
+.code _code/sequenceboring.go /START0/,/STOP0/
+
+* Restoring sequencing.
+
+Each speaker must wait for a go-ahead.
+
+.code _code/sequenceboring.go /START1/,/STOP1/
+.code _code/sequenceboring.go /START2/,/STOP2/
+.play _code/sequenceboring.go /START3/,/STOP3/
+
+* Select
+
+A control structure unique to concurrency.
+
+The reason channels and goroutines are built into the language.
+
+* Select
+
+The select statement provides another way to handle multiple channels.
+It's like a switch, but each case is a communication:
+
+- All channels are evaluated.
+- Selection blocks until one communication can proceed, which then does.
+- If multiple can proceed, select chooses pseudo-randomly.
+- A default clause, if present, executes immediately if no channel is ready.
+
+.code _code/select.go /START0/,/STOP0/
+
+* Fan-in again
+
+Rewrite our original fanIn function. Only one goroutine is needed. Old:
+
+.code _code/faninboring.go /START3/,/STOP3/
+
+* Fan-in using select
+
+Rewrite our original fanIn function. Only one goroutine is needed. New:
+
+.play _code/selectboring.go /START3/,/STOP3/
+
+* Timeout using select
+
+The time.After function returns a channel that blocks for the specified duration.
+After the interval, the channel delivers the current time, once.
+
+.play _code/timeout.go /START1/,/STOP1/
+
+* Timeout for whole conversation using select
+
+Create the timer once, outside the loop, to time out the entire conversation.
+(In the previous program, we had a timeout for each message.)
+
+.play _code/timeoutall.go /START1/,/STOP1/
+
+
+* Quit channel
+
+We can turn this around and tell Joe to stop when we're tired of listening to him.
+
+.code _code/quit.go /START1/,/STOP1/
+.play _code/quit.go /START2/,/STOP2/
+
+
+* Receive on quit channel
+
+How do we know it's finished? Wait for it to tell us it's done: receive on the quit channel
+
+.code _code/rcvquit.go /START1/,/STOP1/
+.play _code/rcvquit.go /START2/,/STOP2/
+
+* Daisy-chain
+
+.play _code/daisy.go /func/,$
+
+* Chinese whispers, gopher style
+
+.image _figs/gophereartrumpet.jpg
+
+* Conclusions
+
+Goroutines and channels make it easy to express complex operations dealing with:
+
+- multiple inputs
+- multiple outputs
+- timeouts
+- failure
+
+And they're fun to use.
+
+* Go in science
+
+* Science-y packages
+
+Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [[https://github.com/gonum][gonum]] community:
+
+- [[https://github.com/gonum/blas][gonum/blas]], a `go` based implementation of Basic Linear Algebra Subprograms
+- [[https://github.com/gonum/lapack][gonum/lapack]], a lapack implementation for `go`
+- [[https://github.com/gonum/matrix][gonum/matrix]], to work with matrices
+- [[https://github.com/gonum/graph][gonum/graph]], to work with graphs
+- [[https://github.com/gonum/optimize][gonum/optimize]], for finding the optimum value of functions
+- [[https://github.com/gonum/integrate][gonum/integrate]], provides routines for numerical integration
+- [[https://github.com/gonum/diff][gonum/diff]], for computing derivatives of a function
+- [[https://github.com/gonum/stat][gonum/stat]], for statistics and distributions
+- ...
+
+
+* I/O & Making plots
+
+Plotting data is also rather easy:
+
+- [[http://github.com/gonum/plot][gonum/plot]] (most of the plots seen later are made w/ `gonum/plot`)
+- [[https://github.com/sbinet/go-gnuplot][github.com/sbinet/go-gnuplot]]
+
+I/O support for some formats:
+
+- [[https://github.com/sbinet/npyio][sbinet/npyio]]: read/write support for [[http://docs.scipy.org/doc/numpy/neps/npy-format.html][NumPy data files]]
+- [[https://github.com/ready-steady/mat][ready-steady/mat]], [[https://github.com/sbinet/matfio][sbinet/matfio]]: r/w support for [[http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf][MATLAB files]]
+- [[https://github.com/sbinet/go-hdf5][sbinet/go-hdf5]]: access to [[https://www.hdfgroup.org/HDF5][HDF5]]
+
+
+* Go for Data Science
+
+A data science community is gathering around [[https://github.com/gopherds][github.com/gopherds]].
+
+- [[https://github.com/gopherds/gophernotes][gopherds/gophernotes]], a [[http://jupyter.org][Jupyter]] kernel for [[https://golang.org][Go]]
+- [[https://github.com/gopherds/mybinder-go][gopherds/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
+- [[https://github.com/gopherds/resources/tree/master/tooling][gopherds/resources]]: many resources for machine learning, classifiers, neural networks, ...
+
+* Resources
+
+.link https://tour.golang.org
+.link https://talks.golang.org/2012/splash.slide
+.link https://talks.golang.org/2012/goforc.slide
+.link https://talks.golang.org/2012/waza.slide
+
+
