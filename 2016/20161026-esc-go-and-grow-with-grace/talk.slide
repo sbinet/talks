@@ -54,26 +54,26 @@ Once the physics data is pouring, people go and do physics instead of software
 .image _figs/cmssw-commits.png 400 600
 
 
-* Software developers
-
-~300 active developers (per experiment)
-
-~1000 different developers integrated over the lifetime of a single LHC experiment.
-
-- few "real" s/w experts
-- some physicists with strong skill set in s/w
-- many with some experience in s/w development
-- some with *no* experience in s/w development
-
-A multi-timezone environment
-
-- Europe, North-America, Japan, Russia
-
-Many communities (core s/w people, generators, simulation, ...)
-
-Development and infrastructures usually CERN-centric
-
-Heavily Linux based ([[http://cern.ch/linux][Scientific Linux CERN]])
+#* Software developers
+#
+#~300 active developers (per experiment)
+#
+#~1000 different developers integrated over the lifetime of a single LHC experiment.
+#
+#- few "real" s/w experts
+#- some physicists with strong skill set in s/w
+#- many with some experience in s/w development
+#- some with *no* experience in s/w development
+#
+#A multi-timezone environment
+#
+#- Europe, North-America, Japan, Russia
+#
+#Many communities (core s/w people, generators, simulation, ...)
+#
+#Development and infrastructures usually CERN-centric
+#
+#Heavily Linux based ([[http://cern.ch/linux][Scientific Linux CERN]])
 
 * Software development cycle
 
@@ -109,23 +109,13 @@ Big science, big data, big software, big numbers
 
 .image _figs/xkcd-compiling.png 550 550
 
-* 
-
-We learn to love hating our framework. (every step of the way)
-
-And even more so in the future:
-
-- work to make our software stack thread-safe
-- or at least parts of it multithread friendly to harness multicore machines
-- quite a lot of fun ahead
-
 * Software in HEP
 
 - big C++/python software stacks
 - hard to compile (dependencies, build systems, ...)
 - slow to compile
 - hard to master (or even just understand)
-- hard to read
+- hard to read (because everybody is using their own subset of `C++`)
 - hard to deploy
 - not multicore/manycore-friendly
 
@@ -141,13 +131,15 @@ Goals:
 - eliminate slowness (compilation, runtime)
 - eliminate clumsiness
 - improve effectiveness
-- maintain (even improve) scale
+- maintain (even improve) scale in a multicore/manycore world
 
 Go was designed by and for people who write — and read and debug and maintain — large software systems.
 
 Go's purpose is _not_ research into programming language design.
 
-Go's purpose is to make its designers' programming lives better.
+Go's purpose is to make its designers' (and users') programming lives better.
+
+.link https://golang.org
 
 * What is Go ?
 
@@ -159,20 +151,6 @@ Go's purpose is to make its designers' programming lives better.
 A nice language with a nice mascot.
 
 .image _figs/golang-logo.png 200 400
-
-* Go in a nutshell
-
-[[https://golang.org][Go]] is a new, general-purpose programming language.
-
-- Compiled
-- Statically typed
-- Concurrent
-- Simple
-- Productive
-
-"Go is a wise, clean, insightful, fresh thinking approach to the greatest-hits subset of the well understood."
-- Michael T. Jones
-
 
 * History
 
@@ -247,7 +225,7 @@ The import path is just a string.
 
 Can be a file, can be a URL:
 
-  $> go get github.com/go-hep/hbook  ## Command to fetch, compile+install a package
+  $> go get github.com/go-hep/hbook  ## Command to fetch, compile and install a package
                                      ## (and its dependencies)
 
   import "github.com/go-hep/hbook"   // go-hep HBOOK's import statement
@@ -331,7 +309,6 @@ Applies to variables, types, functions, methods, constants, fields....
 
 That Is It.
 
-Not an easy decision. 
 One of the most important things about the language.
 
 Can see the visibility of an identifier without discovering the declaration.
@@ -399,7 +376,7 @@ Interfaces are often introduced ad-hoc, and after the fact.
 
 There is no explicit hierarchy and thus no need to design one!
 
-* go-gunzip
+* my-gunzip
 
 .code _code/gunzip.go
 
@@ -719,11 +696,192 @@ A data science community is gathering around [[https://github.com/gopherds][gith
 - [[https://github.com/gopherds/mybinder-go][gopherds/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
 - [[https://github.com/gopherds/resources/tree/master/tooling][gopherds/resources]]: many resources for machine learning, classifiers, neural networks, ...
 
+* Go in HEP
+
+[[https://go-hep.github.io][go-hep.github.io]] gathers a few HEP-oriented packages:
+
+
+- [[https://github.com/go-hep/fads][go-hep/fads]]: a fast detector simulation toolkit
+#- [[https://github.com/go-hep/fastjet][go-hep/fastjet]]: a jet clustering algorithms package (WIP)
+- [[https://github.com/go-hep/fmom][go-hep/fmom]]: a 4-vectors library
+- [[https://github.com/go-hep/fwk][go-hep/fwk]]: a concurrency-enabled framework
+- [[https://github.com/go-hep/hbook][go-hep/hbook]]: histograms and n-tuples (WIP)
+- [[https://github.com/go-hep/hplot][go-hep/hplot]]: interactive plotting (WIP)
+- [[https://github.com/go-hep/hepmc][go-hep/hepmc]]: HepMC in pure Go (EDM + I/O)
+- [[https://github.com/go-hep/hepevt][go-hep/hepevt]],[[https://github.com/go-hep/heppdt][go-hep/heppdt]]: HEPEVT bindings and HEP particle data table
+- [[https://github.com/go-hep/lhef][go-hep/lhef]], [[https://github.com/go-hep/slha][go-hep/slha]]: Les Houches Event File format and SUSY Les Houches Accord I/O
+- [[https://github.com/go-hep/croot][go-hep/croot]]: bindings to a subset of ROOT I/O
+- [[https://github.com/go-hep/rio][go-hep/rio]], [[https://github.com/go-hep/sio][go-hep/sio]]: go-hep record oriented I/O and LCIO I/O
+
+* Application to HEP-offline
+
+* fads
+
+`fads` is a "FAst Detector Simulation" toolkit.
+
+- morally a translation of [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]] into Go
+- uses [[https://github.com/go-hep/fwk][go-hep/fwk]] to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
+- uses [[https://github.com/go-hep/hbook][go-hep/hbook]] for histogramming, [[htpps://github.com/go-hep/hepmc][go-hep/hepmc]] for `HepMC` input/output
+
+Code is on github (BSD-3):
+
+.link https://github.com/go-hep/fwk
+.link https://github.com/go-hep/fads
+
+Documentation is served by [[https://godoc.org][godoc.org]]:
+
+.link https://godoc.org/github.com/go-hep/fwk
+.link https://godoc.org/github.com/go-hep/fads
+
+* go-hep/fads - Installation
+
+As easy as:
+
+  $> export GOPATH=$HOME/dev/gocode
+  $> export PATH=$GOPATH/bin:$PATH
+  
+  $> go get github.com/go-hep/fads/...
+
+Yes, with the ellipsis at the end, to also install sub-packages.
+
+- `go` `get` will recursively download and install all the packages that [[https://github.com/go-hep/fads][go-hep/fads]] depends on. (no `Makefile` needed)
+
+Cross-compilation to `linux/arm64`:
+
+  $> GOOS=linux GOARCH=arm64 go get github.com/go-hep/fads/...
+
+Cross-compilation to `windows/amd64`:
+
+  $> GOOS=windows GOARCH=amd64 go get github.com/go-hep/fads/...
+
+* go-hep/fwk - Concurrency
+
+[[https://github.com/go-hep/fwk][fwk]] enables:
+- event-level concurrency
+- tasks-level concurrency
+
+[[https://github.com/go-hep/fwk][fwk]] relies on [[https://golang.org][Go]]'s runtime to properly schedule _goroutines_.
+
+For sub-task concurrency, users are by construction required to use [[https://golang.org][Go]]'s constructs (_goroutines_ and _channels_) so everything is consistent *and* the _runtime_ has the *complete* *picture*.
+
+
+* go-hep/fads - real world use case
+
+- translated [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]]' ATLAS data-card into Go
+- [[https://github.com/go-hep/fads/blob/master/cmd/fads-app/main.go][go-hep/fads-app]]
+- installation:
+
+  $ go get github.com/go-hep/fads/cmd/fads-app
+  $ fads-app -help
+  Usage: fads-app [options] <hepmc-input-file>
+  
+  ex:
+   $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
+  
+  options:
+    -cpu-prof=false: enable CPU profiling
+    -evtmax=-1: number of events to process
+    -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
+    -nprocs=0: number of concurrent events to process
+
+* go-hep/fads - components
+
+- a `HepMC` converter
+- particle propagator
+- calorimeter simulator
+- energy rescaler, momentum smearer
+- isolation
+- b-tagging, tau-tagging
+- jet-finder (reimplementation of FastJet in Go: [[https://github.com/go-hep/fastjet][go-hep/fastjet]])
+- histogram service (from [[https://github.com/go-hep/fwk][go-hep/fwk]])
+
+Caveats:
+
+- no real persistency to speak of (_i.e.:_ `JSON`, `ASCII` and `Gob`)
+- jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
+
+* 
+
+
+.image _figs/fads-dflow.png 600 600
+
+
+* Results - testbenches
+
+- Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
+- MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
+- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+- Linux: Westmere E56xx/L56xx/X56xx (Nehalem-C) (3066.774 MHz), 20-cores, 40Gb RAM
+
+* Linux (20 cores) testbench: memory (smaller==better)
+
+.image _figs/linux-rss.png 550 800
+
+
+* Linux (20 cores) testbench: event throughput (higher==better)
+
+.image _figs/linux-cpu.png 550 800
+
+
+* fads: Results & Conclusions
+
+- good RSS scaling
+- good CPU scaling
+
+- bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
+- no need to merge output files, less chaotic I/O, less I/O wait
+
+Also addresses `C++` and `python` deficiencies:
+
+- code distribution
+- code installation
+- compilation/development speed
+- runtime speed
+- simple language
+
+* Go in Cosmology
+
+* Go in Cosmology
+
+Relatively new activity at LPC-Clermont-Ferrand: Large Synoptic Survey Telescope ([[https://www.lsst.org][LSST]])
+
+- hardware development activities
+- software (analysis, simulation, db) development activities
+
+.image _figs/Facility_CutawayMD.jpg 400 _
+
+* Go in Cosmology (and medical applications)
+
+- developed a supernovae fusion simulation (replacing an Excel-based one)
+- developed a control command application (+GUI) to steer a testbench (replacing a Java-based one)
+- developed (not by me, actually) a data acquisition (+GUI) for a medical detector (replacing a `C++03-pthreads` one)
+
+.link https://github.com/astrogo/snfusion
+.link https://github.com/go-lsst/fcs-lpc-motor-ctl
+.link https://gitlab.in2p3.fr/avirm/analysis-go
+
+* Conclusion
+
+Don't communicate by sharing memory, share memory by communicating.
+
+Go is great at writing small and large (concurrent) programs.
+Also true for science-y programs, even if the amount of HEP-oriented libraries can still be improved.
+
+.image _figs/funfast.svg 320 _
+
+Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]?
+
 * Resources
 
 .link https://tour.golang.org
 .link https://talks.golang.org/2012/splash.slide
 .link https://talks.golang.org/2012/goforc.slide
 .link https://talks.golang.org/2012/waza.slide
+.link https://talks.golang.org/2012/concurrency.slide
+.link https://talks.golang.org/2013/advconc.slide
+.link https://talks.golang.org/2014/gocon-tokyo.slide
+.link https://talks.golang.org/2015/simplicity-is-complicated.slide
+.link https://talks.golang.org/2016/applicative.slide
+.link https://agenda.infn.it/getFile.py/access?contribId=24&sessionId=3&resId=0&materialId=slides&confId=11680
 
 
