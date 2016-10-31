@@ -723,7 +723,7 @@ Then:
        -e DISPLAY=$DISPLAY \
        -v /tmp/.X11-unix:/tmp/.X11-unix \
        ubuntu bash
- docker> apt-get update -y && apt-get install -y xclock && xclock
+ docker> apt-get update -y && apt-get install -y x11-apps && xclock
 
 Don't forget to re-enable `X11` access control afterwards:
 
