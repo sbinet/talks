@@ -296,6 +296,217 @@ A nice language with a nice mascot.
 
 Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
 
+* Packages
+
+* Packages
+
+Every Go source file, e.g. `"encoding/json/json.go"`, starts like:
+
+  package json
+
+where `json` is the "package name", an identifier.
+Package names are usually concise.
+
+To use a package, need to identify it by path:
+
+  import "encoding/json"
+
+And then the package name is used to qualify items from package:
+
+  var dec = json.NewDecoder(reader)
+
+Clarity: can always tell if name is local to package from its syntax: `Name` vs. `pkg.Name`.
+(More on this later.)
+Package combines properties of library, name space, and module.
+
+* Package paths are unique, not package names
+
+The path is `"encoding/json"` but the package name is `json`.
+The path identifies the package and must be unique. 
+Project or company name at root of name space.
+
+  import "github.com/go-hep/rand"
+
+Package name might not be unique; can be overridden. These are both package `rand`:
+
+  import "math/rand"                      // Standard package
+  import heprand "github.com/go-hep/rand" // HEP-specific package
+
+Every HEP experiment might have its own `rand` package; no need to make the package name unique.
+
+* Remote packages
+
+Package path syntax works with remote repositories. 
+The import path is just a string.
+
+Can be a file, can be a URL:
+
+  $> go get github.com/go-hep/hbook  ## Command to fetch, compile and install a package
+                                     ## (and its dependencies)
+
+  import "github.com/go-hep/hbook"   // go-hep HBOOK's import statement
+
+  var hist hbook.H1D                 // Client's use of package
+
+* Syntax
+
+* Syntax
+
+Syntax is not important...
+
+- unless you're programming
+- or writing tools
+
+Tooling is essential, so Go has a clean syntax. 
+Not super small, just clean:
+
+- regular (mostly)
+- only 25 keywords
+- straightforward to parse (no type-specific context required)
+- easy to predict, reason about
+
+_The_readability_of_programs_is_immeasurably_more_important_than_their_writeability._
+Hints on Programming Language Design 
+C. A. R. Hoare 1973
+
+* Declarations
+
+Uses Pascal/Modula-style syntax: name before type, more type keywords.
+
+  var fn func([]int) int
+  type T struct { a, b int }
+
+not
+
+  int (*fn)(int[]);
+  struct T { int a, b; }
+
+Easier to parse—no symbol table needed. Tools become easier to write.
+One nice effect: can drop var and derive type of variable from expression:
+
+  var buf *bytes.Buffer = bytes.NewBuffer(x) // explicit
+  buf := bytes.NewBuffer(x)                  // derived
+
+For more information:
+
+.link https://golang.org/s/decl-syntax
+
+* Function syntax
+
+Function on type T:
+
+  func Abs(t T) float64
+
+Method of type T:
+
+  func (t T) Abs() float64
+
+Variable (closure) of type T:
+
+  negAbs := func(t T) float64 { return -Abs(t) }
+
+In Go, functions can return multiple values. Common case: `error`.
+
+  func ReadByte() (c byte, err error)
+  
+  c, err := ReadByte()
+  if err != nil { ... }
+
+* Naming
+
+* Export syntax
+
+Simple rule:
+
+- upper case initial letter: `Name` is visible to clients of package
+- otherwise: `name` (or `_Name`) is not visible to clients of package
+
+Applies to variables, types, functions, methods, constants, fields....
+
+That Is It.
+
+One of the most important things about the language.
+
+Can see the visibility of an identifier without discovering the declaration.
+
+Clarity.
+
+* Object-oriented programming
+
+* OOP requires very little extra programming language support
+
+We only need:
+
+- the notion of an _Object_,
+- a mechanism to interact with these objects (_Methods_),
+- and support for polymorphism (_Interfaces_).
+
+* Object-oriented programming in Go
+
+Methods without classes
+Interfaces without hierarchies
+Code reuse without inheritance
+
+Specifically:
+
+- Any _value_ can be an _object_
+- Any _type_ can play the role of a _class_
+- _Methods_ can be attached to any _type_
+- _Interfaces_ implement polymorphism.
+
+* Methods
+
+.play _code/methods.go
+
+* Methods can be attached to any type
+
+.play _code/methods-any-type.go
+
+* Interfaces
+
+.code _code/ifaces.go
+
+An interface defines a set of methods. 
+A type that implements all methods of an interface is said to implement the interface. 
+All types implement the empty interface `interface{}`.
+
+* Dynamic dispatch
+
+.play _code/interface.go /START/,/STOP/
+
+A value (here: `corner`, `boiling`) of a type (`Point`, `Celsius`) that implements 
+an interface (`Stringer`) can be assigned to a variable (`v`) of that interface type.
+
+* Composition and chaining
+
+Typically, interfaces are small (1-3 methods).
+
+Pervasive use of key interfaces in the standard library make it easy to chain APIs together.
+
+  package io
+  func Copy(dst Writer, src Reader) (int64, error)
+
+The `io.Copy` function copies by reading from any `Reader` and writing to any `Writer`.
+
+Interfaces are often introduced ad-hoc, and after the fact.
+
+There is no explicit hierarchy and thus no need to design one!
+
+* my-gunzip
+
+.code _code/gunzip.go
+
+* Interfaces in practice
+
+Methods on any types and _ad_hoc_ interfaces make for a light-weight OO programming style.
+
+Go interfaces enable post-facto abstraction.
+
+No explicit type hierarchies.
+
+"Plug'n play" in a type-safe way.
+
+
 * Concurrency: basic examples
 
 * A boring function
