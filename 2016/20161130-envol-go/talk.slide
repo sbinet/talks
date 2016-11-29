@@ -798,6 +798,11 @@ Community is just starting to gather:
 - [[https://github.com/go-hep/rio][go-hep/rio]], [[https://github.com/go-hep/sio][go-hep/sio]]: go-hep record oriented I/O and LCIO I/O
 - [[https://github.com/astrogo/fitsio][astrogo/fitsio]]: r/w access to `FITS` files
 
+* Go in science
+
+- Biology: [[https://github.com/biogo/biogo][biogo]]
+- Chemistry: [[http://gochem.org/][gochem]]
+
 * Conclusions
 
 [[https://golang.org][Go]] improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
