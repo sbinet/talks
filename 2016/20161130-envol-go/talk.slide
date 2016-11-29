@@ -562,6 +562,15 @@ A data science community is gathering around [[https://github.com/gopherds][gith
 - [[https://github.com/gopherds/mybinder-go][gopherds/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
 - [[https://github.com/gopherds/resources/tree/master/tooling][gopherds/resources]]: many resources for machine learning, classifiers, neural networks, ...
 
+* Go for data acquisition (DAQ) & monitoring
+
+Community is just starting to gather:
+
+- [[https://github.com/go-daq/canbus][go-daq/canbus]]: CAN bus via `SocketCAN`
+- [[https://gitlab.in2p3.fr/avirm/analysis-go][avirm/analysis-go]]: DAQ+monitoring s/w for a medical application
+- [[https://github.com/go-lsst/fcs-lpc-motor-ctl][go-lsst/fcs-lpc-motor-ctl]]: a slow control application for LSST (telescope in Chile)
+- [[https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf][SoLiD DAQ (PDF)]]
+
 * Go in HEP & Astro
 
 [[https://go-hep.github.io][go-hep.github.io]] gathers a few HEP-oriented packages, [[https://github.com/astrogo][astrogo]] for Astro/Cosmo:
