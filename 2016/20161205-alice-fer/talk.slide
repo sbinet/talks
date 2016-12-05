@@ -64,15 +64,13 @@ One can mix and match `C++` and `Go` devices, see:
 
 * fer - device
 
-.code _code/fer-device.go
+.code _code/fer-device.go /START RUN/,/STOP RUN/
 
 Users need to implement this interface.
 
-A future version of `fer` will probably only require to implement:
+Optionally, they may also implement:
 
-  type Device interface {
-      Run(ctl Controler) error
-  }
+.code _code/fer-device.go /START CFG/,/STOP CFG/
 
 * fer - controler
 
