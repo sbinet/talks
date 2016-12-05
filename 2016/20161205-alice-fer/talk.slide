@@ -108,6 +108,22 @@ More docs:
 
 .link https://godoc.org/github.com/sbinet-alice/fer
 
+* fer features
+
+- `ZeroMQ` (push/pull, pub/sub, ...), needs the `C++` library installed
+- `nanomsg` (push/pull, pub/sub, ...), pure-Go
+- shared-memory: not there yet
+- devices' executables statically compiled (except with `ZeroMQ`)
+- `tcp` and `ipc` supported
+- with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
+- `FairMQ`-compatible program options (but probably not all of them)
+
+Non-features:
+
+- plugins for DDS
+- state machine more limited that FairMQ's
+- ROOT I/O (except via [[https://github.com/go-hep/croot][go-hep/croot]])
+
 * Conclusions
 
 [[https://github.com/sbinet-alice/fer][fer]] is a `FairMQ`-compatible toolkit, written in [[https://golang.org][Go]].
