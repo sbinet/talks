@@ -1,0 +1,134 @@
+fer: a Go-based FairMQ compatible toolkit
+Alice-MRRTF, 2016-12-05
+
+Sébastien Binet
+CNRS/IN2P3/LPC
+sebastien.binet@clermont.in2p3.fr
+https://github.com/sbinet
+@0xb1ns
+
+* FairMQ
+
+FairMQ is a distributed processing toolkit, written in `C++`, with pluggable transports (`ZeroMQ`, `nanomsg`).
+
+.image _figs/fairmq-example-topology.png 200 _
+
+* FairMQ
+
+FairMQ has a concept of `Devices` which are executed and connected together to form various topologies:
+
+ class FairMQDevice : <...> {
+  public:
+   int
+   Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+   int
+   Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  protected:
+    virtual void Init();
+    virtual void InitTask();
+    virtual void Run();
+    virtual void Pause();
+    virtual void ResetTask();
+    virtual void Reset();
+ };
+
+Users are supposed to *at* *least* override `FairMQDevice::Run()`.
+
+* FairMQ
+
+Topologies are created and described via `JSON` files:
+
+.code _code/fair-config.json.txt
+
+* fer
+
+* fer
+
+As FairMQ is distributed with each device talking over `ZeroMQ` or `nanomsg`, one can write each device in any language (which has support for `nanomsg` or `ZeroMQ`).
+
+Let's do that in `Go`:
+
+.link https://github.com/sbinet-alice/fer
+
+- create `fer.Device`
+- create topologies using the same `JSON` files
+- connect devices via `ZeroMQ` (needs the `C++` libzmq installed: restriction might be lifted at some point)
+- connect devices via `nanomsg` (pure-Go)
+
+All topologies supported by `FairMQ` should be supported by `fer` too.
+One can mix and match `C++` and `Go` devices, see:
+
+.link https://github.com/FairRootGroup/FairRoot/tree/dev/examples/advanced/GoTutorial
+
+* fer - device
+
+.code _code/fer-device.go
+
+Users need to implement this interface.
+
+A future version of `fer` will probably only require to implement:
+
+  type Device interface {
+      Run(ctl Controler) error
+  }
+
+* fer - controler
+
+.code _code/fer-controler.go /START CTL/,/STOP CTL/
+
+`Controler` is used to give access to input/output channels to the user device.
+The `Done()` channel is used to signal user devices that processing should be somehow interrupted or paused.
+
+Messages and commands are defined as:
+
+.code _code/fer-controler.go /START MSG/,/STOP MSG/
+
+* fer tutorial
+
+* fer - processor
+
+.code _code/fer-processor.go /START CFG/,/STOP CFG/
+
+* fer - processor
+
+.code _code/fer-processor.go /START RUN/,/STOP RUN/
+
+* fer - processor
+
+.code _code/fer-processor.go /START MAIN/,/STOP MAIN/
+
+Build and run like so:
+
+ $> go install ./my-device
+ $> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
+
+Of course, `fer` is compatible with `JSON` files from `FairMQ`...
+
+More docs:
+
+.link https://godoc.org/github.com/sbinet-alice/fer
+
+* Conclusions
+
+[[https://github.com/sbinet-alice/fer][fer]] is a `FairMQ`-compatible toolkit, written in [[https://golang.org][Go]].
+
+Straightforward installation:
+
+- install [[https://golang.org/doc/install][Go]] for your platform (macOS, linux, windows, ...)
+- install [[http://zeromq.org][C++ ZeroMQ]] (a pure Go package will be used at some point)
+- install [[https://github.com/sbinet-alice/fer][fer]]:
+
+  $> go get github.com/sbinet-alice/fer
+
+and voila!
+
+Give it a try? and let me know.
+
+(Constructive) feedback more than welcomed :)
+
+Possible topics for feedback:
+
+- API, Docs, installation procedure, perfs ?
+
