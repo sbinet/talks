@@ -15,6 +15,8 @@ sebastien.binet@clermont.in2p3.fr
 
 Software in HEP is mostly `C++/Python` (with pockets of `Java` and `Fortran`.)
 
+.image _figs/data-flux-summary-all.png 300 _
+
 * Software in HEP is painful
 
 *Painful* to develop:
@@ -112,7 +114,7 @@ What can [[https://golang.org][Go]] bring to science and HEP?
 - a *simple* language anybody can learn (and be productive) in days, be an expert in months
 - *standard* tool to handle *dependencies* (across OSes, architectures)
 - *fast* edit-compile-run development cycle
-- *simple* deployment (on clusters, laptops, ...), easiest cross-compilation system to date
+- *simple* deployment (on clusters, laptops, ...), *easiest* *cross-compilation* system to date
 - fast at runtime
 - support for *concurrency* programming and multi-core machines
 - no magic, no voodoo, *reduce* disconnect b/w HEP sw experts and HEP users
@@ -195,7 +197,7 @@ Non-code:
 - Provide reusable building blocks for robust, reliable, comprehensible and concurrent software for HEP
 - Provide software to produce better science, faster
 - Provide the Go scientific community, [[https://github.com/gonum][Gonum]], with input and use cases from HEP
-- Improve cross-pollination among scientific communities (via [[http://www.numfocus.org/][NumFOCUS]] ?)
+- Improve cross-pollination among scientific communities (via [[http://www.numfocus.org/][NumFOCUS]]? [[http://diana-hep.org/][DIANA-HEP]]?)
 
 
 * Extra
