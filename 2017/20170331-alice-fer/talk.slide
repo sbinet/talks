@@ -1,0 +1,246 @@
+fer: a Go-based FairMQ compatible toolkit
+Alice Offline Week, 2017-03-31
+
+Sébastien Binet
+CNRS/IN2P3/LPC
+sebastien.binet@clermont.in2p3.fr
+https://github.com/sbinet
+@0xb1ns
+
+* FairMQ
+
+FairMQ is a distributed processing toolkit, written in `C++`, with pluggable transports (`ZeroMQ`, `nanomsg`).
+
+.image _figs/fairmq-example-topology.png 200 _
+
+* FairMQ
+
+FairMQ has a concept of `Devices` which are executed and connected together to form various topologies:
+
+ class FairMQDevice : <...> {
+ public:
+  int
+  Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  int
+  Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  // + new callback-based API
+
+ protected:
+   virtual void Init();    virtual void InitTask();
+   virtual void Run();
+   virtual bool ConditionalRun();
+   virtual void Pause();
+   virtual void Reset();   virtual void ResetTask();
+ };
+
+Users are supposed to *at* *least* override `FairMQDevice::Run()` (with the old API.)
+
+* FairMQ
+
+Topologies are created and described via `JSON` files:
+
+.code _code/fair-config.json.txt
+
+* fer
+
+* fer
+
+As FairMQ is distributed with each device talking over `ZeroMQ` or `nanomsg`, one can write each device in any language (which has support for `nanomsg` or `ZeroMQ`).
+
+`$OTHER_LANGUAGE` could be:
+
+- `Perl`
+- `Python`
+- `Java`
+- ... 
+
+or even just `bash` + `netcat` :)
+
+
+Let's do that in [[https://golang.org][Go]].
+
+* Interlude: Go
+
+* What is Go ?
+
+.play _code/hello.go
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 770 contributors have joined the project
+- Version 1.0 release in March 2012
+- Version 1.1 release in May 2013
+- Version 1.2 release in December 2013
+- Version 1.3 release in June 2014
+- Version 1.4 release in December 2014
+- Version 1.5 release in August 2015
+- Version 1.6 release in February 2016
+- Version 1.7 release in August 2016
+- Version 1.8 release in February 2017
+
+.link https://golang.org
+
+* Elements of Go
+
+- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `386`, `s390x`, `mips64`, ...)
+
+* fer
+
+Ok, let's write a `FairMQ` compatible, inter-operable, toolkit in [[https://golang.org][Go]]:
+
+.link https://github.com/sbinet-alice/fer
+
+- create `fer.Device`
+- create topologies using the same `JSON` files
+- connect devices via `ZeroMQ` (needs the `C++` libzmq installed: restriction might be lifted at some point)
+- connect devices via `nanomsg` (pure-Go)
+
+All topologies supported by `FairMQ` should be supported by `fer` too.
+One can mix and match `C++` and `Go` devices, see:
+
+.link https://github.com/FairRootGroup/FairRoot/tree/dev/examples/advanced/GoTutorial
+
+* fer - device
+
+.code _code/fer-device.go /START RUN/,/STOP RUN/
+
+Users need to implement this interface.
+
+Optionally, they may also implement:
+
+.code _code/fer-device.go /START CFG/,/STOP CFG/
+
+* fer - controler
+
+.code _code/fer-controler.go /START CTL/,/STOP CTL/
+
+`Controler` is used to give access to input/output channels to the user device.
+The `Done()` channel is used to signal user devices that processing should be somehow interrupted or paused.
+
+Messages and commands are defined as:
+
+.code _code/fer-controler.go /START MSG/,/STOP MSG/
+
+* fer tutorial
+
+* fer - processor
+
+.code _code/fer-processor.go /START CFG/,/STOP CFG/
+
+* fer - processor
+
+.code _code/fer-processor.go /START RUN/,/STOP RUN/
+
+* fer - processor
+
+.code _code/fer-processor.go /START MAIN/,/STOP MAIN/
+
+Build and run like so:
+
+ $> go install ./my-device
+ $> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
+
+Of course, `fer` is compatible with `JSON` files from `FairMQ`...
+
+More docs:
+
+.link https://godoc.org/github.com/sbinet-alice/fer
+
+* fer: (web) demo time
+
+After talking with Predrag, I figured I could show some of the interesting features of [[https://golang.org][Go]]:
+
+- static compilation, "duck-typing" *interfaces*, easy cross-compilation
+- easy concurrency (*goroutines*, *channels*), garbage collector
+- fast development, fast runtime, easy deployment
+- network programming
+
+Created a little web browser based driver for the standard `sampler/processor/sink` example:
+
+.link https://github.com/sbinet-alice/fer/blob/master/example/cmd/fer-ex-web-ctl/main.go
+
+ $> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
+ $> fer-ex-web-ctl &
+ $> open localhost:8080
+
+* fer: (web) demo time
+
+You can try it now, w/o any [[https://golang.org][Go]] toolchain.
+
+Download it (for your OS/arch) from [[https://cern.ch/binet/alice/fer]]
+
+ $> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
+ $> ./fer-ex-web-ctl-linux-amd64.exe
+
+Buzz words compliant:
+
+- WebSockets
+- JSON & binary serialization via (runtime type) reflection
+- concurrency (via goroutines+channels)
+- cloud friendly
+
+* fer: (web) demo time
+
+.image _figs/fer-ex-web-ctl.png 555 _
+
+* fer features
+
+- `ZeroMQ` (push/pull, pub/sub, ...), needs the `C++` library installed
+- `nanomsg` (push/pull, pub/sub, ...), pure-Go
+- shared-memory: not there yet
+- devices' executables statically compiled (except with `ZeroMQ`)
+- `tcp` and `ipc` supported
+- with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
+- `FairMQ`-compatible program options (but probably not all of them)
+
+Non-features:
+
+- plugins for DDS
+- state machine more limited than FairMQ's
+- ROOT I/O (except via [[https://github.com/go-hep/croot][go-hep/croot]] -- reading of (flat) `TTree`, `TH1x`, `TH2x` possible via [[https://go-hep.org/x/hep/rootio][go-hep.org/x/hep/rootio]])
+
+* Conclusions
+
+[[https://github.com/sbinet-alice/fer][fer]] is a `FairMQ`-compatible toolkit, written in [[https://golang.org][Go]].
+
+Straightforward installation:
+
+- install [[https://golang.org/doc/install][Go]] for your platform (macOS, linux, windows, ...)
+- install [[http://zeromq.org][C++ ZeroMQ]] (a pure Go package will be used at some point)
+- install [[https://github.com/sbinet-alice/fer][fer]]:
+
+  $> go get github.com/sbinet-alice/fer
+
+and voila!
+
+Give it a try? and let me know.
+
+(Constructive) feedback more than welcomed :)
+
+Possible topics for feedback:
+
+- API, Docs, installation procedure, perfs ?
+
