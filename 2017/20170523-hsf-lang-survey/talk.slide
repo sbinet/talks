@@ -1,0 +1,213 @@
+Survey of languages for analysis
+HEP analysis ecosystem workshop, 2017-05-23
+
+Sébastien Binet
+CNRS/IN2P3/LPC
+sebastien.binet@clermont.in2p3.fr
+https://github.com/sbinet
+@0xb1ns
+
+
+* Popular programming languages
+
+* Metrics
+
+What is a popular programming language?
+
+How to define *"popular"* ?
+
+- People use it (questions/queries on the internets)
+- People develop with it, develop for it (pull requests)
+
+* TIOBE Programming Community index
+
+.image _figs/tiobe-2017.png 550 _
+
+* 
+
+.image _figs/tiobe-2017-time.png
+
+
+* 
+
+.image _figs/lang.rank_.117.wm_.png 570 _
+.caption [[http://redmonk.com/sogrady/2017/03/17/language-rankings-1-17/][RedMonk Language rankings]]
+
+* RedMonk - Q1 2017
+
+.image _figs/redmonk-ranking.png
+
+- language rankings from GitHub+SO
+- derive a single proxy for code (GitHub) + discussion (SO) traction
+
+* Migration to another language
+
+* Why another language
+
+.image _figs/funfast-nogo.svg
+
+* Why a new language: driving forces
+
+Improve on a given metric:
+
+- development time, time-to-market
+- performances at runtime
+- better engineering (reproducibility, deployment, refactoring tools, type safety)
+- easier (to teach, to debug, to develop)
+
+New paradigm:
+
+- new hardware
+- new programming model
+- new killer feature / new killer library
+- library ecosystem, community
+
+But: still need to interop with legacy s/w, data files, ...
+
+* Case studies
+
+* Matlab
+
+- announced in 1984, `MATLAB-9` released in 2016
+- proprietary, multi-paradigm numerical computing environment
+- 1M users
+- interfaces with C, C++, C#, Java, FORTRAN, Python, ...
+- weakly-typed, OOP support
+- REPL
+- open-source equivalant: GNU Octave
+
+[[https://en.wikipedia.org/wiki/MATLAB][Wikipedia]]
+
+
+* StackOverflow trends (data science)
+
+.image _figs/stackoverflow-datascience.png
+.caption [[https://insights.stackoverflow.com/trends?tags=r%2Cpandas%2Cmatlab%2Ctensorflow][SO trends]]
+ 
+* StackOverflow trends (data science + python)
+
+.image _figs/stackoverflow-datascience-python.png
+.caption [[https://insights.stackoverflow.com/trends?tags=r%2Cpandas%2Cmatlab%2Ctensorflow%2Cpython%2Cscala][SO trends]]
+
+* Python
+
+- announced in 1991, stable releases every ~18 months
+- high-level dynamic, multi-paradigm programming language (OOP, AOP, ...)
+- fast turn-around cycle, REPL
+- ported/access to many architectures
+- rather poor runtime performances
+- access to C (`ctypes`, `cffi`, `Cython`)
+- access to Java (from `Jython`), `C#` (from `IronPython`) eco-systems
+- access to `R` libraries (`rpy2`)
+- access to every single science-y library
+
+- poor multithreading performances
+- Py3 (initial) debacle, splitting community and libraries
+
+* Julia
+
+- announced in 2012, no stable release yet
+- high-level dynamic language, "a better Python"
+- GC'ed, multiple dispatch
+- good performance (JIT'ed, LLVM-based)
+- archs: x86 (32/64), ARM (32/64), POWER8
+- built-in package manager
+- call into C, Python
+- designed for parallel and distributed computing
+- built-in REPL
+
+- 1-indexed, column-major arrays
+- limited access to ROOT
+ 
+[[https://en.wikipedia.org/wiki/Julia_(programming_language)][Wikipedia]]
+
+* Scala
+
+- announced in 2004, v2.12.0 in 2016
+- general-purpose programming language, FP support, strong static type system
+- targets JVM, access to Java eco-system
+- type inference, lazy evaluation, higher order functions, currying, ...
+- REPL
+- package manager (maven, sbt)
+- concurrency support (actor model, futures/promises, STM)
+- cluster computing, Big Data ([[https://en.wikipedia.org/wiki/Spark_(cluster_computing_framework)][Spark]])
+
+ // hello.scala
+ object HelloWorld extends App {
+   println("Hello, World!")
+ }
+
+[[https://en.wikipedia.org/wiki/Scala_(programming_language)][Wikipedia]]
+
+* Haskell
+
+- announced in 1990, latest stable release in 2010
+- pure, lazy, FP language
+- compiled (GHC: now based off LLVM), strong static type system, type inference
+- high performance concurrency and parallelism libraries
+- package manager (Cabal/Hackage) for Haskell libraries
+- REPL (GHCi)
+- FFI for C, C++
+- access to ROOT w/ [[http://hackage.haskell.org/package/HROOT][HROOT]], [[https://indico.cern.ch/event/594180/contributions/2401464/attachments/1387313/2111756/2016-12-Diana_Mtg.pdf][Haskell for HEP]]
+
+ -- hello.hs
+ module Main where
+ main :: IO ()
+ main = putStrLn "Hello, World!"
+
+[[https://en.wikipedia.org/wiki/Haskell_(programming_language)][Wikipedia]]
+
+* Rust
+
+- announced in 2010, v1.0 in 2015
+- create highly concurrent, highly safe systems: a better `C++`
+- C/C++-like syntax, backed by Mozilla
+- automatic memory management, w/o need for a GC
+- compiled (toolchain based on LLVM)
+- good performances at runtime
+- package manager: [[https://crates.io/][Cargo/Crates]]
+
+ // hello.rs
+ fn main() {
+    println!("Hello, world!");
+ }
+
+
+[[https://en.wikipedia.org/wiki/Rust_(programming_language)][Wikipedia]]
+
+* Go
+
+- announced in 2009, v1.0 in 2012, 1 release every 6 months
+- concurrent, garbage-collected, general programming language
+- static type system, inference type system
+- compiled (2 mature toolchains: gc, gccgo), available on all major platforms
+- very fast compilation, good performances at runtime
+- backed by Google, "a better C", "the language of the Cloud"
+- package manager (godoc/go-get)
+- no (real/robust) REPL yet (but Jupyter support)
+- C/Go FFI, Go/python interop
+- access to numerical libraries w/ [[https://github.com/gonum][Gonum]], access to ROOT files w/ [[https://go-hep.org/x/hep/rootio][go-hep/rootio]]
+
+[[https://en.wikipedia.org/wiki/Go_(programming_language)][Wikipedia]]
+
+* 
+
+.image _figs/funfast.svg
+
+# * 
+# 
+# .image _figs/stackoverflow-haskell-go-rust.png
+# 
+# * StackOverflow trends (data science)
+# 
+# .image _figs/stackoverflow-datascience.png
+# .caption [[https://insights.stackoverflow.com/trends?tags=r%2Cpandas%2Cmatlab%2Ctensorflow][SO trends]]
+# 
+# 
+# * StackOverflow trends (data science + python)
+# 
+# .image _figs/stackoverflow-datascience-python.png
+# .caption [[https://insights.stackoverflow.com/trends?tags=r%2Cpandas%2Cmatlab%2Ctensorflow%2Cpython%2Cscala][SO trends]]
+# 
+
+
