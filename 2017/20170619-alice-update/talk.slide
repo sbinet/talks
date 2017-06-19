@@ -1,0 +1,74 @@
+fer: update
+ALICE LPC, 2017-06-19
+
+Sébastien Binet
+CNRS/IN2P3/LPC
+sebastien.binet@clermont.in2p3.fr
+https://github.com/sbinet
+@0xb1ns
+
+* fer
+
+`fer` is a Go-based toolkit compatible with the `C++` `O2` framework, developed for Run-3.
+
+.link https://github.com/sbinet-alice/fer
+.link https://github.com/FairRootGroup/FairRoot/tree/master/examples/advanced/GoTutorial
+
+.image _figs/fairmq-example-topology.png 200 _
+
+
+
+* fer - update
+
+`fer` was presented at last ALICE Offline week: [[https://indico.cern.ch/event/624025/][here]].
+
+- no tomatoes were thrown,
+- ALICE software coordinator enthusiastic,
+- FAIR software coordinator, ditto.
+
+Success.
+
+* fer - update II
+
+For the ALICE Offline week presentation, developed a program to show the interesting features of [[https://golang.org][Go]]:
+
+- static compilation, "duck-typing" *interfaces*, easy cross-compilation
+- easy concurrency (*goroutines*, *channels*), garbage collector
+- fast development, fast runtime, easy deployment
+- network programming
+
+Created a little web browser based driver for the standard `sampler/processor/sink` example:
+
+.link https://github.com/sbinet-alice/fer/blob/master/example/cmd/fer-ex-web-ctl/main.go
+
+ $> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
+ $> fer-ex-web-ctl &
+ $> open localhost:8080
+
+* fer: (web) demo time
+
+You can try it now, w/o any [[https://golang.org][Go]] toolchain.
+
+Download it (for your OS/arch) from [[https://cern.ch/binet/alice/fer]]
+
+ $> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
+ $> ./fer-ex-web-ctl-linux-amd64.exe
+
+Buzz words compliant:
+
+- WebSockets
+- JSON & binary serialization via (runtime type) reflection
+- concurrency (via goroutines+channels)
+- cloud friendly
+
+* fer: (web) demo time
+
+.image _figs/fer-ex-web-ctl.png 555 _
+
+* fer - update III
+
+Developed more I/O capabilities _wrt_ `ROOT` during last MRRTF hackathon.
+Now can read `ROOT` `TFiles` and `TTrees` that contain data like (see [[https://go-hep.org/x/hep/rootio][go-hep.org]]):
+
+.code _code/event.cxx
+
