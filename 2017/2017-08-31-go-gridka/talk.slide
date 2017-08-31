@@ -1,0 +1,482 @@
+Grow concurrent programs with grace and Go
+Go@GridKA, 2017-08-31
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Parallelism: why?
+
+.image _figs/cpu-free-lunch.png 550 550
+
+* (a brief) History of software in HEP
+
+* 50's-90's: FORTRAN77
+
+.code _code/hello.f
+#.play _code/hello.f.go /START OMIT/,/END OMIT/
+
+ $ gfortran -c hello.f && gfortran -o hello hello.o
+ $ ./hello
+ Hello from FORTRAN
+
+- `FORTRAN77` is the *king*
+- 1964: *CERNLIB*
+- REAP (paper tape measurements), THRESH (geometry reconstruction)
+- SUMX, *HBOOK* (statistical analysis chain)
+- ZEBRA (memory management, I/O, ...)
+- GEANT3, *PAW*
+
+* 90's-...: C++
+
+.code _code/hello.cxx
+#.play _code/hello.cxx.go /START OMIT/,/END OMIT/
+
+ $ c++ -o hello hello.cxx && ./hello
+ Hello from C++
+ 
+.image _figs/my-root6splash.png 190 190
+
+- object-oriented programming (OOP) is the cool kid on the block
+- *ROOT*, POOL, LHC++, AIDA, *Geant4*
+- `C++` takes roots in HEP
+
+* 00's-...: python
+
+.code _code/hello.py
+#.play _code/hello.py.go /START OMIT/,/END OMIT/
+
+ $ python ./hello.py
+ Hello from python
+ 
+.image _figs/my-python-logo.png 100 250
+
+- `python` becomes the _de_ _facto_ scripting language in HEP
+- framework data-cards
+- analysis glue, (whole) analyses in `python`
+- *PyROOT*, rootpy
+- numpy, scipy, matplotlib, *IPython/Jupyter*
+
+* Current software in a nutshell
+
+- *Generators*: generation of true particles from fondamental physics first principles
+- *Full* *Simulation*: tracking of all stable particles in magnetic field through the detector simulating interaction, recording energy deposition (*CPU* *intensive*)
+- *Reconstruction*: from real data, or from `Monte-Carlo` simulation data as above
+- *Fast* *Simulation*: parametric simulation, faster, coarser
+- *Analysis*: daily work of physicists, running on output of reconstruction to derive analysis specific information (*I/O* *intensive*)
+- everything in the same `C++` offline control framework (except analysis)
+
+.image _figs/data-flux-summary-all.png 210 800
+
+
+* 
+
+- `C++`: *slow* (very slow?) to compile/develop, *fast* to execute
+- `python`: *fast* development cycle (no compilation), *slow* to execute
+# (can be mitigated if leveraging/rewriting(parts in) `C++`. more work)
+
+.image _figs/xkcd-compiling.png 400 400
+
+* Other software engineering problems
+
+- scalability (development, teaching, maintenance, build)
+- installation of dependencies
+- code deployment
+- code robustness
+- code readability
+- multicores/manycores, multithreading
+- distributed programming
+- etc...
+
+.link https://talks.golang.org/2012/splash.slide
+.link https://talks.golang.org/2012/splash.article
+
+* Are those our only options ?
+
+.image _figs/funfast-nogo.svg 500 _
+
+* Let's Go
+
+* What is Go ?
+
+.play _code/hello.go
+#.play _code/hello.go.go /START OMIT/,/END OMIT/
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 850 contributors have joined the project
+- Version 1.0 release in March 2012
+- Version 1.1 release in May 2013
+- _[...]_
+- Version 1.6 release in February 2016
+- Version 1.7 release in August 2016
+- Version 1.8 release in February 2017
+- Version 1.9 release in August 2017
+
+.link https://golang.org
+
+* Elements of Go
+
+- Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
+
+* Concurrency in Go: basic examples
+
+* A boring function
+
+We need an example to show the interesting properties of the concurrency primitives.
+To avoid distraction, we make it a boring example.
+
+.play _code/boring.go /START/,/STOP/
+
+* Slightly less boring
+
+Make the intervals between messages unpredictable (still under a second).
+
+.play _code/lessboring.go /START/,/STOP/
+
+* Running it
+
+The boring function runs on forever, like a boring party guest.
+
+.play _code/lessboring.go /^func.main/,$
+
+* Ignoring it
+
+The `go` statement runs the function as usual, but doesn't make the caller wait.
+
+It launches a goroutine.
+
+The functionality is analogous to the `&` on the end of a shell command.
+
+.play _code/goboring.go 1,/^}/
+
+
+* Ignoring it a little less
+
+When `main` returns, the program exits and takes the boring function down with it.
+
+We can hang around a little, and on the way show that both main and the launched goroutine are running.
+
+.play _code/waitgoboring.go /func.main/,/^}/
+
+* Goroutines
+
+What is a goroutine? It's an independently executing function, launched by a go statement.
+
+It has its own call stack, which grows and shrinks as required.
+
+It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+
+But if you think of it as a very cheap thread, you won't be far off.
+
+* Communication
+
+Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+
+It was just printed to the screen, where we pretended we saw a conversation.
+
+Real conversations require communication.
+
+* Channels
+
+A channel in Go provides a connection between two goroutines, allowing them to communicate.
+
+.code _code/helpers.go /START1/,/STOP1/
+.code _code/helpers.go /START2/,/STOP2/
+.code _code/helpers.go /START3/,/STOP3/
+
+* Using channels
+
+A channel connects the main and boring goroutines so they can communicate.
+
+.play _code/changoboring.go /START1/,/STOP1/
+.code _code/changoboring.go /START2/,/STOP2/
+
+* Synchronization
+
+When the main function executes <–c, it will wait for a value to be sent.
+
+Similarly, when the boring function executes c <– value, it waits for a receiver to be ready.
+
+A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+
+Thus channels both communicate and synchronize.
+
+* The Go approach
+
+Don't communicate by sharing memory, share memory by communicating.
+
+* "Patterns"
+
+* Generator: function that returns a channel
+
+Channels are first-class values, just like strings or integers.
+
+.play _code/generatorboring.go /START1/,/STOP1/
+.code _code/generatorboring.go /START2/,/STOP2/
+
+* Channels as a handle on a service
+
+Our boring function returns a channel that lets us communicate with the boring service it provides.
+
+We can have more instances of the service.
+
+.play _code/generator2boring.go /START1/,/STOP1/
+
+* Multiplexing
+
+These programs make Joe and Ann count in lockstep.
+We can instead use a fan-in function to let whosoever is ready talk.
+
+.code _code/faninboring.go /START3/,/STOP3/
+.play _code/faninboring.go /START1/,/STOP1/
+
+* Fan-in
+
+.image _figs/gophermegaphones.jpg
+
+* Restoring sequencing
+
+Send a channel on a channel, making goroutine wait its turn.
+
+Receive all messages, then enable them again by sending on a private channel.
+
+First we define a message type that contains a channel for the reply.
+
+.code _code/sequenceboring.go /START0/,/STOP0/
+
+* Restoring sequencing.
+
+Each speaker must wait for a go-ahead.
+
+.code _code/sequenceboring.go /START1/,/STOP1/
+.code _code/sequenceboring.go /START2/,/STOP2/
+.play _code/sequenceboring.go /START3/,/STOP3/
+
+* Select
+
+A control structure unique to concurrency.
+
+The reason channels and goroutines are built into the language.
+
+* Select
+
+The select statement provides another way to handle multiple channels.
+It's like a switch, but each case is a communication:
+
+- All channels are evaluated.
+- Selection blocks until one communication can proceed, which then does.
+- If multiple can proceed, select chooses pseudo-randomly.
+- A default clause, if present, executes immediately if no channel is ready.
+
+.code _code/select.go /START0/,/STOP0/
+
+* Fan-in again
+
+Rewrite our original fanIn function. Only one goroutine is needed. Old:
+
+.code _code/faninboring.go /START3/,/STOP3/
+
+* Fan-in using select
+
+Rewrite our original fanIn function. Only one goroutine is needed. New:
+
+.play _code/selectboring.go /START3/,/STOP3/
+
+* Timeout using select
+
+The time.After function returns a channel that blocks for the specified duration.
+After the interval, the channel delivers the current time, once.
+
+.play _code/timeout.go /START1/,/STOP1/
+
+* Timeout for whole conversation using select
+
+Create the timer once, outside the loop, to time out the entire conversation.
+(In the previous program, we had a timeout for each message.)
+
+.play _code/timeoutall.go /START1/,/STOP1/
+
+
+* Quit channel
+
+We can turn this around and tell Joe to stop when we're tired of listening to him.
+
+.code _code/quit.go /START1/,/STOP1/
+.play _code/quit.go /START2/,/STOP2/
+
+
+* Receive on quit channel
+
+How do we know it's finished? Wait for it to tell us it's done: receive on the quit channel
+
+.code _code/rcvquit.go /START1/,/STOP1/
+.play _code/rcvquit.go /START2/,/STOP2/
+
+* Daisy-chain
+
+.play _code/daisy.go /func/,$
+
+* Chinese whispers, gopher style
+
+.image _figs/gophereartrumpet.jpg
+
+* Conclusions
+
+Goroutines and channels make it easy to express complex operations dealing with:
+
+- multiple inputs
+- multiple outputs
+- timeouts
+- failure
+
+And they're fun to use.
+
+* Real-world application?
+
+OK, [[https://golang.org][Go]] is great.
+
+And it's being used by [[https://github.com/golang/go/wiki/GoUsers][many companies]] (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
+
+But what about science?
+
+* Go in science
+
+* Science-y packages
+
+Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [[https://gonum.org][gonum]] community:
+
+- [[https://godoc.org/gonum.org/v1/gonum/blas][gonum/blas]], a `go` based implementation of Basic Linear Algebra Subprograms
+- [[https://godoc.org/gonum.org/v1/gonum/lapack][gonum/lapack]], a lapack implementation for `go`
+- [[https://godoc.org/gonum.org/v1/gonum/mat][gonum/mat]], to work with matrices
+- [[https://godoc.org/gonum.org/v1/gonum/graph][gonum/graph]], to work with graphs
+- [[https://godoc.org/gonum.org/v1/gonum/optimize][gonum/optimize]], for finding the optimum value of functions
+- [[https://godoc.org/gonum.org/v1/gonum/integrate][gonum/integrate]], provides routines for numerical integration
+- [[https://godoc.org/gonum.org/v1/gonum/diff][gonum/diff]], for computing derivatives of a function
+- [[https://godoc.org/gonum.org/v1/gonum/stat][gonum/stat]], for statistics and distributions
+- ...
+
+
+* I/O & Making plots
+
+Plotting data is also rather easy:
+
+- [[http://github.com/gonum/plot][gonum/plot]] (most of the plots seen earlier are made w/ `gonum/plot`)
+- [[https://github.com/sbinet/go-gnuplot][github.com/sbinet/go-gnuplot]]
+
+I/O support for some formats:
+
+- [[https://github.com/sbinet/npyio][sbinet/npyio]]: read/write support for [[http://docs.scipy.org/doc/numpy/neps/npy-format.html][NumPy data files]]
+- [[https://github.com/ready-steady/mat][ready-steady/mat]], [[https://github.com/sbinet/matfio][sbinet/matfio]]: r/w support for [[http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf][MATLAB files]]
+- [[https://godoc.org/gonum.org/v1/hdf5][gonum/hdf5]]: access to [[https://www.hdfgroup.org/HDF5][HDF5]]
+
+
+* Go for Data Science
+
+A data science community is gathering around [[http://gopherdata.io/][gopherdata.io]].
+
+- [[https://github.com/gopherdata/gophernotes][gopherdata/gophernotes]], a [[http://jupyter.org][Jupyter]] kernel for [[https://golang.org][Go]]
+- [[https://github.com/gopherdata/mybinder-go][gopherdata/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
+- [[https://github.com/gopherdata/resources/tree/master/tooling][gopherdata/resources]]: many resources for machine learning, classifiers, neural networks, ...
+
+* Go for data acquisition (DAQ) & monitoring
+
+Community is just starting to gather:
+
+- [[https://github.com/go-daq/canbus][go-daq/canbus]]: CAN bus via `SocketCAN`
+- [[https://github.com/go-daq/smbus][go-daq/smbus]]: SMBus (I2C)
+- [[https://gitlab.in2p3.fr/avirm/analysis-go][avirm/analysis-go]]: DAQ+monitoring s/w for a medical application
+- [[https://github.com/go-lsst/fcs-lpc-motor-ctl][go-lsst/fcs-lpc-motor-ctl]]: a slow control application for LSST (telescope in Chile)
+- [[https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf][SoLiD DAQ (PDF)]]
+- [[https://github.com/sbinet-solid/tcp-srv][sbinet-solid/tcp-srv]]: a sensor monitoring application for RaspBerry-3 (LPC SoLid)
+
+* Go in HEP & Astro
+
+[[https://go-hep.org][go-hep.org]] gathers a few HEP-oriented packages, [[https://github.com/astrogo][astrogo]] for Astro/Cosmo:
+
+- [[https://go-hep.org/x/hep/fads][hep/fads]]: a fast detector simulation toolkit, built on top of [[https://go-hep.org/x/hep/fwk][hep/fwk]]
+- [[https://go-hep.org/x/hep/fit][hep/fit]]: a WIP package for fitting data
+- [[https://go-hep.org/x/hep/fmom][hep/fmom]]: a 4-vectors library
+- [[https://go-hep.org/x/hep/hbook][hep/hbook]]: histograms and n-tuples (WIP)
+- [[https://go-hep.org/x/hep/hplot][hep/hplot]]: interactive plotting (WIP)
+- [[https://go-hep.org/x/hep/hepmc][hep/hepmc]]: HepMC in pure Go (EDM + I/O)
+- [[https://go-hep.org/x/hep/hepevt][hep/hepevt]],[[https://go-hep.org/x/hep/heppdt][hep/heppdt]]: HEPEVT bindings and HEP particle data table
+- [[https://go-hep.org/x/hep/lhef][hep/lhef]], [[https://go-hep.org/x/hep/slha][hep/slha]]: Les Houches Event File format and SUSY Les Houches Accord I/O
+- [[https://go-hep.org/x/hep/rootio][hep/rootio]]: pure-Go implementation of a subset of ROOT I/O
+- [[https://go-hep.org/x/hep/rio][hep/rio]], [[https://go-hep.org/x/hep/sio][hep/sio]]: go-hep record oriented I/O and LCIO I/O
+- [[https://github.com/astrogo/fitsio][astrogo/fitsio]]: r/w access to `FITS` files
+
+* Go in science
+
+- Biology: [[https://github.com/biogo/biogo][biogo]]
+- Chemistry: [[http://gochem.org/][gochem]]
+
+* Conclusions
+
+[[https://golang.org][Go]] improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
+
+- code distribution
+- code installation
+- compilation/development speed
+- runtime speed
+- simple language
+
+and:
+
+- serviceable standard library ([[https://golang.org/pkg][stdlib doc]])
+- builtin facilities to tackle concurrency programming
+
+* Conclusions
+
+Don't communicate by sharing memory, share memory by communicating.
+
+Go is great at writing small and large (concurrent) programs.
+Also true for *science-y* programs, even if the amount of libraries can still be improved.
+
+.image _figs/funfast.svg 320 _
+
+Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]?
+
+* Acknowledgements / resources
+
+.link https://tour.golang.org
+.link https://talks.golang.org/2012/splash.slide
+.link https://talks.golang.org/2012/goforc.slide
+.link https://talks.golang.org/2012/waza.slide
+.link https://talks.golang.org/2012/concurrency.slide
+.link https://talks.golang.org/2013/advconc.slide
+.link https://talks.golang.org/2014/gocon-tokyo.slide
+.link https://talks.golang.org/2015/simplicity-is-complicated.slide
+.link https://talks.golang.org/2016/applicative.slide
+.link https://agenda.infn.it/getFile.py/access?contribId=24&sessionId=3&resId=0&materialId=slides&confId=11680
+
