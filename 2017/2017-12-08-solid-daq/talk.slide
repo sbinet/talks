@@ -77,23 +77,19 @@ Initial plan (NickR) was to turn `runXXchtrig` into a server/daemon to start/sto
   $> wc -l ./rundetector/rundetector.go 
   368 ./rundetector/rundetector.go
 
-* rundetector/rundetector.go
+Build:
 
-  package main
-   
-  import (
-  	"bitbucket.org/solidexperiment/readout-software/event"
-  	"bitbucket.org/solidexperiment/readout-software/frontend"
-  	"bitbucket.org/solidexperiment/readout-software/out"
-  	"bitbucket.org/solidexperiment/readout-software/trigger"
-  	"database/sql"
-  	// ...
-  )
-  
-  func main() {
-  	notifyDQM("[DAQ]: DAQ Started")
-  	// ...
-  }
+  $> go get -v ./rundetector
+  bitbucket.org/solidexperiment/readout-software/trigger
+  github.com/go-sql-driver/mysql
+  bitbucket.org/solidexperiment/readout-software/vendor/bitbucket.org/NickRyder/goipbus/ipbus
+  bitbucket.org/solidexperiment/readout-software/event
+  bitbucket.org/solidexperiment/readout-software/frontend/comms
+  bitbucket.org/solidexperiment/readout-software/frontend/ics
+  bitbucket.org/solidexperiment/readout-software/database
+  bitbucket.org/solidexperiment/readout-software/out
+  bitbucket.org/solidexperiment/readout-software/frontend
+  bitbucket.org/solidexperiment/readout-software/rundetector
 
 * rundetector/rundetector.go
 
@@ -203,3 +199,4 @@ The current `python` GUI lives at:
 - `/subscribe` (to get notifications)
 - `/update_log_entry`
 
+Spawns a sub-process `"DAQ_symlink/rundetector"`
