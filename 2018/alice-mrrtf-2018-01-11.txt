@@ -1,0 +1,25 @@
+MRRTF Status Meeting - 2018-01-09
+=================================
+
+- fer didn't see much activity in its repo
+- go-hep/rootio updates
+- development of a C/C++-free library for ZeroMQ
+  - not everything is there yet
+  - no performance numbers yet
+  - but easy installation step (singular! `go get zeromq`)
+  - this was done in the context of neugram, a Go interpreter
+
+- nice secondary benefits:
+  - Go can be run in Jupyter
+  - go-fer can be run in Jupyter (not tested!)
+  - go-hep/rootio can be run in Jupyter
+
+- demo:
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F01-display-data.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F02-gonum-stat.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F03-go-hep-hplot.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F04-go-hep-rootio.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F05-astrogo-fitsio.ipynb
+
+enjoy:
+ - https://mybinder.org/v2/gh/go-hep/binder/master

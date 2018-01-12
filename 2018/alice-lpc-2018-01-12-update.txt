@@ -1,0 +1,63 @@
+ALICE-LPC - 2018-01-12
+======================
+
+Recap: the new O2 framework is a distributed framework.
+It means that the default modus operandi is to have many small/not-so-small
+processes (possibly on different machines) that exchange data through queues
+over UNIX sockets.
+One interesting side benefit is that one can write one process in one language
+(e.g. C++) and another one in yet another language (e.g. Go).
+The only requirement is to find a language that can speak the protocol used by
+O2 so the processes can talk to each others and exchange data.
+
+An interesting R&D activity is to explore how a language like Go, which has
+nicer (than C++) concurrency programming building blocks would fare in such
+an environment.
+That is what "fer" is investigating.
+
+see:
+- https://talks.godoc.org/github.com/sbinet/talks/2017/20170331-alice-fer/talk.slide
+- https://talks.godoc.org/github.com/sbinet/talks/2017/20170619-alice-update/talk.slide
+- https://talks.godoc.org/github.com/sbinet/talks/2017/20170620-alice-mrrtf-update/talk.slide
+
+Since last time, fer didn't see much activity in its own repo, but a fair amount
+of activity happened in others, related, repos:
+
+- go-hep/rootio updates: more compatibility (reading) with ROOT files/TTrees/TBranches
+  - almost complete reading compatibility
+  - most glaring missing features:
+    - reading back trees with TClonesArrays
+	- reading back trees with std::container<std::container<...> > (e.g. deeply nested C++ STL containers. one-level C++ STL containers are OK.)
+	- writing ROOT files: this will be the focus for now
+
+O2 can use multiple libraries for the transport of data from one process to the other.
+The default transport method (the protocol from earlier) is ZeroMQ (a.k.a 0MQ).
+Up to now, "fer" had only the support for NanoMsg, support for ZeroMQ required to have the C++ library installed somewhere.
+That's about to change:
+
+- development of a C/C++-free library for ZeroMQ
+  - not everything is there yet
+  - no performance numbers yet
+  - but easy installation step (singular! `go get zeromq`)
+  - this was done in the context of neugram, a Go interpreter -- not done on my ALICE time, though :)
+
+- nice secondary benefits:
+  - Go can be run in Jupyter
+  - go-fer can be run in Jupyter (not tested!)
+  - go-hep/rootio can be run in Jupyter
+
+- demo:
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F01-display-data.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F02-gonum-stat.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F03-go-hep-hplot.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F04-go-hep-rootio.ipynb
+ - https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F05-astrogo-fitsio.ipynb
+
+Go+ROOT+HEP in Jupyter can be tested over there:
+ - https://mybinder.org/v2/gh/go-hep/binder/master
+
+AOB:
+ - CHEP-2018 paper about O2, Go and "fer" has been accepted by ALICE, submitted to CHEP
+ - https://indico.cern.ch/event/587955/abstracts/84221/
+ - "Exploring polyglot software frameworks in ALICE with FairMQ and fer" (L. Aphecetche, S.Binet)
+
