@@ -56,8 +56,11 @@ That's about to change:
 Go+ROOT+HEP in Jupyter can be tested over there:
  - https://mybinder.org/v2/gh/go-hep/binder/master
 
-AOB:
+AOB-1:
  - CHEP-2018 paper about O2, Go and "fer" has been accepted by ALICE, submitted to CHEP
  - https://indico.cern.ch/event/587955/abstracts/84221/
  - "Exploring polyglot software frameworks in ALICE with FairMQ and fer" (L. Aphecetche, S.Binet)
+
+AOB-2:
+ - recent (late 2017) effort by DAQ team to migrate the control software to Go. (stay tuned!)
 
