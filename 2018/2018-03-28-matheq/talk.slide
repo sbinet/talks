@@ -1,0 +1,39 @@
+Present with style and Math
+LPC, 2018-03-28
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Present & Equations
+
+
+* An equation
+
+$$x_i = i^\prime$$
+
+$$\mathcal{L} = - \frac{1}{4} F_{\mu \nu} F^{\mu \nu} + \ldots$$
+
+When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are
+  $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
+
+* Standard Model
+
+The Standard Model Lagrangian \(\mathcal{L}\) is defined as:
+
+   $$\mathcal{L} = - \tfrac{1}{4} F_{\mu \nu} F^{\mu \nu} \\
+   + i \bar{\psi} D \psi + h.c. \\
+   + \bar{\psi}_i y_{ij} \psi_j \phi + h.c. \\
+   + |D_\mu \phi|^2 - V(\phi)$$
+
+that is:
+
+$$\mathcal{L} = - \tfrac{1}{4} F_{\mu \nu} F^{\mu \nu} \\
+ + i \bar{\psi} D \psi + h.c. \\
+ + \bar{\psi}_i y_{ij} \psi_j \phi + h.c. \\
+ + |D_\mu \phi|^2 - V(\phi)$$
+
+.html math.html
+
