@@ -1,0 +1,144 @@
+SoLiD monitoring on RPis
+SoLiD @LPC, 2018-05-23
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* SoLiD monitoring on RPis
+
+`solid-mon-rpi` is:
+
+- a completely statically built [[https://golang.org][Go]] binary
+- running on RaspBerry Pi 3 boxes
+- monitoring environment data (H,P,T,V)
+- serving the monitoring data as `JSON`
+- displaying monitoring data on port `:80`
+
+* A bit of history:
+
+- it started as `github.com/sbinet-solid/tcp-srv`:
+
+  commit b6e55c61402a6f4e1bf85f89056a67c7959defd5
+  Author: Sebastien Binet <binet@cern.ch>
+  Date:   Thu Jan 12 19:11:50 2017 +0100
+  
+      all: first import
+
+
+Initially it was just a proof of concept to show `hchanal`:
+
+- `Go` was running OK on a RPi
+- it could do what Python could (with less memory, less CPU)
+
+At that time, as the name implied, it was just sending `JSON` data over `TCP`.
+No web display whatsoever.
+
+Then version `v0.1` came along and introduced a web server and an integrated display.
+
+* solid-mon-rpi
+
+Latest version `v0.6.2`, in production:
+
+  $> solid-mon-rpi -h
+  Usage of solid-mon-rpi:
+    -addr string
+      	[ip]:port for TCP server (default ":8080")
+    -bus-addr int
+      	SMBus address to read/write (default 112)
+    -bus-id int
+      	SMBus ID number (/dev/i2c-[ID]) (default 1)
+    -cfg string
+      	path to an XML configuration file for sensors
+    -freq duration
+      	data polling interval (default 2s)
+
+* Current status
+
+Web server exposes 3 end-points:
+
+- `/`: displays monitoring plots
+- `/data`: a WebSocket bi-directional pipe to transfer data b/w the server and the client
+- `/echo`: an HTTP end-point that writes the current monitoring data as `JSON` for all the sensors
+
+Pointing your favorite program at `:80/echo` would display something along the lines of:
+
+  $> curl clrmedaq02:80/echo
+  {"timestamp":"2017-01-12T19:33:00.99704373Z",
+   "tsl":{"lux":7.017600000000001,"full":5,"ir":2},
+   "sht31":{"temp":19.266803997863732,"hum":23.471427481498434},
+   "si7021":[{"temp":19.023549804687498,"hum":23.552459716796875},
+             {"temp":19.002099609375,"hum":22.644561767578125}],
+   "bme280":{"temp":20.001953125,"hum":34.72083367101912,"pres":977.0775195381289}}
+
+##* Plots
+
+Plots are generated server-side as `SVG` via the [[https://godoc.org/gonum.org/v1/plot][gonum/plot]] package and pushed to the client via the `/data` websocket.
+
+* Configuration + deployment
+
+Each RPi `env[1-3]` has a different set of sensors connected.
+
+Configuration passed to `solid-mon-rpi` as an `XML` file:
+
+ $> solid-mon-rpi -addr=:80 -cfg=/home/pi/config.xml
+
+Example:
+
+  <?xml version="1.0"?>
+  <data>
+  	<sensor name="Temperature sensor 1" channel="3" type="AT30TSE" i2c-addr="0x4c"/>
+  	<sensor name="Humidity sensor 1"    channel="1" type="HTS221"/>
+  	<sensor name="Onboard sensors"      channel="7" type="Onboard"/>
+  </data>
+
+Cross-compilation from a Linux/64b box to the RPi-3 (`ARM-32b`):
+
+ $> GOARCH=arm GOARM=7 go build -o solid-mon-rpi-linux-arm32.exe
+
+* 
+
+Everything is packaged up as a `systemd` unit:
+
+  [Unit]
+  Description=SoLid TCP sensors server
+  Requires=network-online.target
+  
+  [Service]
+  WorkingDirectory=/home/pi
+  ExecStart=/home/pi/bin/solid-mon-rpi -addr=:80 -cfg=/home/pi/config.xml
+  Restart=always
+  
+  [Install]
+  WantedBy=multi-user.target
+
+* Sensors
+
+- [[https://godoc.org/github.com/go-daq/smbus/sensor/adc101x][github.com/go-daq/smbus/sensor/adc101x]]
+- [[https://godoc.org/github.com/go-daq/smbus/sensor/at30tse75x][github.com/go-daq/smbus/sensor/at30tse75x]]
+- [[https://godoc.org/github.com/go-daq/smbus/sensor/bme280][github.com/go-daq/smbus/sensor/bme280]]
+- [[https://godoc.org/github.com/go-daq/smbus/sensor/hts221][github.com/go-daq/smbus/sensor/hts221]]
+- [[https://godoc.org/github.com/go-daq/smbus/sensor/tsl2591][github.com/go-daq/smbus/sensor/tsl2591]]
+
+* Prospects
+
+* (Possible) Prospects
+
+Right now, each RPi runs its own web server.
+
+Probably a bit wasteful.
+Perhaps a leaner approach would be to:
+
+- drop the web server part
+- just push data as `JSON` over `TCP`
+- have 1 web server that can aggregate+display all the RPis monitoring data
+
+Additionally, *streamline*:
+
+- install+deployment of new `solid-mon-rpi` versions ([[https://coreos.com/etcd/][etcd]]? [[https://www.consul.io/][consul]]?)
+- handle pushing different configurations to different RPis ([[https://coreos.com/etcd/][etcd]]? [[https://www.consul.io/][consul]]?)
+- handle update of read-only RPi filesystem
+
+*BUT* right now, everything's working...
