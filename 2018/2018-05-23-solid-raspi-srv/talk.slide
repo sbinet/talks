@@ -17,6 +17,10 @@ sebastien.binet@clermont.in2p3.fr
 - serving the monitoring data as `JSON`
 - displaying monitoring data on port `:80`
 
+Hosted on GitHub:
+
+.link https://github.com/sbinet-solid/solid-mon-rpi
+
 * A bit of history:
 
 - it started as `github.com/sbinet-solid/tcp-srv`:
