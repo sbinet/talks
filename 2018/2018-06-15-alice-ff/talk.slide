@@ -1,0 +1,257 @@
+Fer and Go based devices
+ALICE Framework and friends, 2018-06-15
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* FairMQ
+
+FairMQ is a distributed processing toolkit, written in `C++`, with pluggable transports (`ZeroMQ`, `nanomsg`).
+
+.image _figs/fairmq-example-topology.png 200 _
+
+* FairMQ
+
+FairMQ has a concept of `Devices` which are executed and connected together to form various topologies:
+
+ class FairMQDevice : <...> {
+ public:
+  int
+  Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  int
+  Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  // + new callback-based API
+
+ protected:
+   virtual void Init();    virtual void InitTask();
+   virtual void Run();
+   virtual bool ConditionalRun();
+   virtual void Pause();
+   virtual void Reset();   virtual void ResetTask();
+ };
+
+Users are supposed to *at* *least* override `FairMQDevice::Run()` (with the old API.)
+
+* FairMQ
+
+Topologies are created and described via `JSON` files:
+
+.code _code/fair-config.json.txt
+
+* fer
+
+* fer
+
+As FairMQ is distributed with each device talking over `ZeroMQ` or `nanomsg`, one can write each device in any language (which has support for `nanomsg` or `ZeroMQ`).
+
+`$OTHER_LANGUAGE` could be:
+
+- `Perl`
+- `Python`
+- `Java`
+- ... 
+
+or even just `bash` + `netcat` :)
+
+
+Let's do that in [[https://golang.org][Go]].
+
+* Interlude: Go
+
+* What is Go ?
+
+.play _code/hello.go
+
+ $ go run hello.go
+ Hello from Go
+
+A nice language with a nice mascot.
+
+.image _figs/golang-logo.png 200 400
+
+* Elements of Go
+
+- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+
+- Concurrent, garbage-collected
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `386`, `s390x`, `mips64`, ...)
+
+* fer
+
+Ok, let's write a `FairMQ` compatible, inter-operable, toolkit in [[https://golang.org][Go]]:
+
+.link https://github.com/sbinet-alice/fer
+
+- create `fer.Device`
+- create topologies using the same `JSON` files
+- connect devices via `ZeroMQ` (pure-Go, now)
+- connect devices via `nanomsg` (pure-Go)
+
+All topologies supported by `FairMQ` should be supported by `fer` too.
+One can mix and match `C++` and `Go` devices, see:
+
+.link https://github.com/FairRootGroup/FairRoot/tree/dev/examples/advanced/GoTutorial
+
+* fer - device
+
+.code _code/fer-device.go /START RUN/,/STOP RUN/
+
+Users need to implement this interface.
+
+Optionally, they may also implement:
+
+.code _code/fer-device.go /START CFG/,/STOP CFG/
+
+* fer - controler
+
+.code _code/fer-controler.go /START CTL/,/STOP CTL/
+
+`Controler` is used to give access to input/output channels to the user device.
+The `Done()` channel is used to signal user devices that processing should be somehow interrupted or paused.
+
+Messages and commands are defined as:
+
+.code _code/fer-controler.go /START MSG/,/STOP MSG/
+
+* fer tutorial
+
+* fer - processor
+
+.code _code/fer-processor.go /START CFG/,/STOP CFG/
+
+* fer - processor
+
+.code _code/fer-processor.go /START RUN/,/STOP RUN/
+
+* fer - processor
+
+.code _code/fer-processor.go /START MAIN/,/STOP MAIN/
+
+Build and run like so:
+
+ $> go install ./my-device
+ $> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
+
+Of course, `fer` is compatible with `JSON` files from `FairMQ`...
+
+More docs:
+
+.link https://godoc.org/github.com/sbinet-alice/fer
+
+* fer features
+
+- `ZeroMQ` (push/pull, pub/sub, ...), pure-Go [[https://github.com/go-zeromq/zmq4][go-zeromq/zmq4]]
+- `nanomsg` (push/pull, pub/sub, ...), pure-Go [[https://github.com/go-mangos/mangos][go-mangos/mangos]]
+- shared-memory: not there yet
+- devices' executables statically compiled, easily cross-compilable
+- `tcp` and `ipc` supported
+- with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
+- `FairMQ`-compatible program options (but probably not all of them)
+
+* fer non-features
+
+- plugins for DDS
+- state machine more limited than FairMQ's
+- ROOT I/O (except via [[https://github.com/go-hep/croot][go-hep/croot]] -- reading of (some) `TTree`, `TH1x`, `TH2x` possible via [[https://go-hep.org/x/hep/rootio][go-hep.org/x/hep/rootio]])
+
+- DPL.
+
+* DPL-compatible & O2-compatible messages
+
+Start of an implementation of O2-compatible messages:
+
+- [[https://github.com/AliceO2Group/AliceO2/blob/dev/DataFormats/Headers/include/Headers/DataHeader.h][AliceO2/DataFormats/Headers/DataHeader]] (`C++`)
+- [[https://github.com/sbinet-alice/oxy/blob/master/o2dh/dataheader.go][sbinet-alice/oxy/o2dh/dataheader]] (`Go`)
+
+  // BaseHeader is the common part for every header.
+  type BaseHeader struct {
+  	magic [sizeMagicString]byte // magic string used to identify an O2 header in a raw stream of bytes
+  	hdrsz uint32                // size of the header that starts with this sequence (base + derived header)
+  	flags uint32                // flags for sub headers. first bit indicates that a sub header follows.
+  	hvers uint32                // version of the entire header.
+  	descr HeaderType            // header type description
+  	serzm SerializationMethod   // header serialization method
+  }
+
+(idea: be able to run a little PoC digitizer chain in Go for `MUON/MCH` simulation: [[https://github.com/aphecetche/pigiron/tree/master/cmd/fer-mch-digotizer][aphecetche/pigiron/cmd/fer-mch-digotizer]])
+
+* O2 messages (Simulation)
+
+  // MCTrack holds MonteCarlo tracks processed by the Stack.
+  //
+  // An MCTrack can be a primary track put into the simulation or
+  // a secondary one produced by the transport through decay or interaction.
+  type MCTrack struct {
+  	StartVtxMomX float32 // px-component at start vertex [GeV]
+  	StartVtxMomY float32 // py-component at start vertex [GeV]
+  	StartVtxMomZ float32 // pz-component at start vertex [GeV]
+  
+  	StartVtxX float32 // x-coordinate of start vertex [cm, ns]
+  	StartVtxY float32 // y-coordinate of start vertex [cm, ns]
+  	StartVtxZ float32 // z-coordinate of start vertex [cm, ns]
+  	StartVtxT float32 // t-coordinate of start vertex [cm, ns]
+  
+  	PDGID int32 // PDG particle code
+  
+  	MotherTrkID int // index of mother track. -1 for primary particles.
+  
+  	Prop propEncoding // hitmask. if bit i is set, it means this track left a trace in detector i.
+  }
+
+* O2 messages
+
+Wasn't too hard to translate this into `Go`.
+
+But a bit tedious.
+
+*If* we want to really leverage the MQ aspect of O2 not *just* for distributed computing but also to be able to use/program O2 from other languages, we should _perhaps_ consider using a language agnostic tool to describe some/all of our PODs:
+
+- [[https://github.com/HEP-FCC/podio][PODIO]] ? (too much `C++`-y IMHO)
+- [[https://developers.google.com/protocol-buffers/][ProtoBuf]] ?
+- [[https://google.github.io/flatbuffers/md__schemas.html][Flat Buffers]] ?
+
+_e.g._ this could allow [[https://github.com/AliceO2Group/Control][AliceO2/Control]] to be completely written in [[https://golang.org][Go]] w/o any `C++` parts :)
+
+* Example (ProtoBuf)
+
+  message Person {
+    required string name = 1;
+    required int32 id = 2;
+    optional string email = 3;
+  }
+  
+  message BaseHeader {
+   required string              magic = 1; // fixed-size arrays...
+   required uint32              hdrsz = 2;
+   required uint32              flags = 3;
+   required HeaderType          descr = 4;
+   required SerializationMethod serzm = 5;
+  }
+
+* Extra
+
+* 
+
+.image _figs/fer-czmq.png 640 _
+
+* 
+
+.image _figs/fer-zeromq.png 640 _
+* 
+
+.image _figs/fer-nanomsg.png 640 _
+
