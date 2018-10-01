@@ -1,0 +1,390 @@
+Exploring polyglot software frameworks in ALICE with FairMQ and fer
+JI-2018, 2018-10-03
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+Laurent Aphecetche
+CNRS/IN2P3/Subatech
+https://github.com/aphecetche
+laurent.aphecetche@cern.ch
+
+* AliceO2
+
+ALICE is working on a new software framework for the O2 project:
+
+- a new framework to tackle the challenges of Run-3 data taking
+- a new framework that brings together Online and Offline
+- a new framework that builds upon [[https://github.com/FairRootGroup/FairRoot][FairRoot]] and [[https://github.com/FairRootGroup/FairMQ][FairMQ]]
+
+  The FairRoot framework is an object oriented simulation, reconstruction and
+  data analysis framework.
+  It includes core services for detector simulation and offline analysis of particle physics data.
+  FairRoot is the standard simulation, reconstruction and data analysis framework for
+  the FAIR experiments at GSI Darmstadt.
+
+* FairMQ
+
+FairMQ ([[https://indico.cern.ch/event/587955/timetable/?view=standard#454-alfa-alice-fair-new-messag][#454]]) is a distributed processing toolkit, written in `C++`, with pluggable transports (`ZeroMQ`, `nanomsg`).
+
+.image _figs/fairmq-example-topology.png 200 _
+
+Each box can be a different process, possibly on a different remote machine.
+This architecture enables a much smoother *horizontal* *scaling* when data taking or data processing demands it.
+
+Each box may be connected to another via various protocols: `tcp`, `udp`, `ipc`, `inproc`, shared-memory.
+
+* FairMQ
+
+FairMQ has a concept of `Devices` which are executed and connected together to form various topologies:
+
+ class FairMQDevice : <...> {
+ public:
+  int
+  Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+  int
+  Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+
+ protected:
+   virtual void Init();    virtual void InitTask();
+   virtual void Run();
+   virtual bool ConditionalRun();
+   virtual void Pause();
+   virtual void Reset();   virtual void ResetTask();
+ };
+
+Users are supposed to *at* *least* override `FairMQDevice::Run()`.
+
+* FairMQ
+
+Topologies can be created and described via `JSON` files (or XML, or via DDS (see [[https://indico.cern.ch/event/587955/timetable/?view=standard#407-dds-the-dynamic-deployment][#407]])):
+
+.code _code/fair-config.json.txt
+
+* fer
+
+* fer
+
+As FairMQ is distributed with each device talking over `ZeroMQ` or `nanomsg`, one can write each device in any language (which has support for `nanomsg` or `ZeroMQ`).
+
+`$OTHER_LANGUAGE` could be:
+
+- `Java`
+- `Perl`
+- `Python`
+- `Rust`
+- ... 
+
+or even just `bash` + `netcat` :)
+
+
+Let's do that in [[https://golang.org][Go]].
+
+* Interlude: Go
+
+## * What is Go ?
+## 
+## .play _code/hello.go
+## 
+##  $ go run hello.go
+##  Hello from Go
+## 
+## A nice language with a nice mascot.
+## 
+## .image _figs/golang-logo.png 200 400
+
+## * History
+## 
+## - Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+## - Open source release in November 2009
+## - More than 1000 contributors have joined the project
+## - Version 1.0 release in March 2012
+## - Version 1.1 release in May 2013
+## - Version 1.2 release in December 2013
+## - _[...]_
+## - Version 1.7 release in August 2016
+## - Version 1.8 release in February 2017
+## - Version 1.9 release in August 2017
+## - Version 1.10 release in February 2018
+## 
+## .link https://golang.org
+
+* Elements of Go
+
+- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+
+- *Concurrent*, *garbage-collected*
+- An Open-source general progamming language (BSD-3)
+- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+- safety of a *static* *type* *system*
+- compiled down to machine language (so it is fast, goal is within ~10% of C)
+- *object-oriented* but w/o classes, *builtin* *reflection*
+- first-class functions with *closures*
+- implicitly satisfied *interfaces*
+
+Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `386`, `s390x`, `mips64`, ...)
+
+* Concurrency
+
+.image _figs/busy.jpg
+
+Go's concurrency primitives - *goroutines* and *channels* - derive from Hoare's Communicating Sequential Processes (CSP.)
+
+Goroutines are like threads: they share memory.
+
+But cheaper:
+
+- Smaller, segmented stacks.
+- Many goroutines per operating system thread
+
+## * Goroutines
+## 
+## - The _go_ statement launches a function call as a goroutine
+## 	go f()
+## 	go f(x, y, ...)
+## 
+## - A goroutine runs concurrently (but not necessarily in parallel)
+## - A goroutine has its own (growable/shrinkable) stack
+## 
+## * A simple example
+## 
+## .code _code/concurrency1.go /f START/,/f END/
+## 
+## Function f is launched as 3 different goroutines, all running concurrently:
+## 
+## .play _code/concurrency1.go /main START/,/main END/
+
+
+* fer
+
+Ok, let's write a `FairMQ` compatible, inter-operable, toolkit in [[https://golang.org][Go]]:
+
+.link https://github.com/sbinet-alice/fer
+
+- create `fer.Device`
+- create topologies using the same `JSON` files
+- connect devices via `ZeroMQ`
+- connect devices via `nanomsg`
+
+All topologies supported by `FairMQ` should be supported by `fer` too.
+One can mix and match `C++` and `Go` devices, see:
+
+.link https://github.com/FairRootGroup/FairRoot/tree/dev/examples/advanced/GoTutorial
+
+* fer - device
+
+.code _code/fer-device.go /START RUN/,/STOP RUN/
+
+Users need to implement this interface.
+
+Optionally, they may also implement:
+
+.code _code/fer-device.go /START CFG/,/STOP CFG/
+
+* fer - controler
+
+.code _code/fer-controler.go /START CTL/,/STOP CTL/
+
+`Controler` is used to give access to input/output channels to the user device.
+The `Done()` channel is used to signal user devices that processing should be somehow interrupted or paused.
+
+Messages and commands are defined as:
+
+.code _code/fer-controler.go /START MSG/,/STOP MSG/
+
+* fer tutorial
+
+* fer - processor
+
+.code _code/fer-processor.go /START CFG/,/STOP CFG/
+
+* fer - processor
+
+.code _code/fer-processor.go /START RUN/,/STOP RUN/
+
+* fer - processor
+
+.code _code/fer-processor.go /START MAIN/,/STOP MAIN/
+
+Build and run like so:
+
+ $> go install ./my-device
+ $> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
+
+Of course, `fer` is compatible with `JSON` files from `FairMQ`...
+
+More docs:
+
+.link https://godoc.org/github.com/sbinet-alice/fer
+
+## * fer example
+## 
+## Let's write a little `fer` demo that exercizes:
+## 
+## - static compilation, "duck-typing" *interfaces*, easy cross-compilation
+## - easy concurrency (*goroutines*, *channels*), garbage collector
+## - fast development, fast runtime, easy deployment
+## - network programming
+## 
+## Created a little web browser based driver for the standard `sampler/processor/sink` example:
+## 
+## .link https://github.com/sbinet-alice/fer/blob/master/_example/cmd/fer-ex-web-ctl/main.go
+## 
+## * fer example
+## 
+## Install and run:
+## 
+##  $> go get github.com/sbinet-alice/fer/_example/cmd/fer-ex-web-ctl
+##  $> fer-ex-web-ctl &
+##  $> open localhost:8080
+## 
+## or, cross-compile and deploy:
+## 
+##  $> go get -d github.com/sbinet-alice/fer/_example/cmd/fer-ex-web-ctl
+##  $> cd $GOPATH/github.com/sbinet-alice/fer/_example/cmd/fer-ex-web-ctl
+##  
+##  $> GOOS=windows GOARCH=amd64 \
+##     go build -o fer-ex-web-ctl-windows-amd64.exe
+##  $> scp ./fer-ex-web-ctl-windows-amd64.exe azure.windows.com:.
+## 
+##  $> GOOS=darwin GOARCH=amd64 \
+##     go build -o fer-ex-web-ctl-darwin-amd64.exe
+##  $> scp ./fer-ex-web-ctl-darwin-amd64.exe cloud.apple.com:.
+## 
+## * fer: (web) demo time
+## 
+## You can try it now, w/o any [[https://golang.org][Go]] toolchain.
+## 
+## Download it (for your OS/arch) from [[https://cern.ch/binet/alice/fer]]
+## 
+##  $> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
+##  $> ./fer-ex-web-ctl-linux-amd64.exe
+## 
+## Buzz words compliant:
+## 
+## - WebSockets
+## - JSON & binary serialization via (runtime type) reflection
+## - concurrency (via goroutines+channels)
+## - cloud friendly
+## 
+## * fer: (web) demo time
+## 
+## .image _figs/fer-zeromq.png 555 _
+## 
+## * figure of merit
+## 
+## exchanging the following token of data between the 3 processes:
+## 
+##  type token struct {
+##     msg []byte    // initially "HELLO"
+##     beg time.Time // uint64
+##     end time.Time // uint64
+##  }
+## 
+## Memory usage of the whole web-server + 3 devices:
+## 
+##  $> top -p `pidof fer-ex-web-ctl`
+##     PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+##    6029 binet     20   0  492736  12172   9628 S   0.0   0.2   0:00.01 fer-ex-web-ctl
+##    6029 binet     20   0 1089780  18472  11464 S   0.0   0.2   1:09.35 fer-ex-web-ctl          
+## 
+## The same, w/o the web server...
+## 
+##  $> time ./fer-ex-raw-ctl
+##  real=20.03 user=22.55 sys=20.33 CPU=214%
+##  MaxRSS=18848
+##  I/O=0/72
+## 
+
+* fer features
+
+- `ZeroMQ` (push/pull, pub/sub, ...), pure-Go [[https://github.com/go-zeromq/zmq4][go-zeromq/zmq4]]
+- `nanomsg` (push/pull, pub/sub, ...), pure-Go [[https://github.com/go-mangos/mangos][go-mangos/mangos]]
+- devices' executables statically compiled, easily cross-compilable
+- `tcp` and `ipc` supported
+- with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
+- `FairMQ`-compatible program options
+
+* Conclusions
+
+
+[[https://github.com/sbinet-alice/fer][fer]] is a `FairMQ`-compatible toolkit, written in [[https://golang.org][Go]].
+
+Straightforward installation:
+
+- install [[https://golang.org/doc/install][Go]] for your platform (macOS, linux, windows, ...)
+- install [[https://github.com/sbinet-alice/fer][fer]]:
+
+  $> go get github.com/sbinet-alice/fer
+
+and voila!
+
+It provides interoperability with `FairMQ` in a language that is safe, concurrent-friendly, easy to deploy, and ready for the cloud.
+
+With `FairMQ` and the microservice-like architecture it enables, one can migrate each device from `$LANG1` to `$LANG2`, adiabatically.
+
+[[https://golang.org][Go]] (and eventually _fer_) is being used by ALICE for the control system: [[https://github.com/AliceO2Group/Control][AliceO2Group/Control]].
+
+* Thank you
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+[[https://github.com/sbinet]]
+[[https://twitter.com/0xb1ns][@0xbins]]
+[[mailto:sebastien.binet@clermont.in2p3.fr]]
+
+Laurent Aphecetche
+CNRS/IN2P3/Subatech
+[[https://github.com/aphecetche]]
+[[mailto:laurent.aphecetche@cern.ch]]
+
+* Extra
+
+* fer non-features
+
+- shared-memory "transport": not there yet
+- plugins for the _Dynamic_ _Deployment_ _System_ ([[http://dds.gsi.de/][DDS]])
+- state machine more limited than FairMQ's
+- no support yet for AliceO2's _Data_ _Processing_ _Layer_ ([[https://github.com/AliceO2Group/AliceO2/tree/dev/Framework/Core][DPL]], see [[https://indico.cern.ch/event/587955/timetable/?view=standard#328-evolution-of-the-alice-sof][#328]])
+
+* 
+
+.image _figs/fer-czmq.png 640 _
+
+* 
+
+.image _figs/fer-nanomsg.png 640 _
+
+
+* 
+
+.image _figs/tof-nanomsg-ipc.png 
+
+  $> ./fer-ex-raw-ctl -timeout=20s -transport=nanomsg -protocol=ipc
+  real=20.06 user=23.77 sys=17.52 CPU=205% MaxRSS=18808 I/O=0/176
+
+* 
+
+.image _figs/tof-nanomsg-tcp.png
+
+  $> ./fer-ex-raw-ctl -timeout=20s -transport=nanomsg -protocol=tcp
+  real=20.05 user=17.98 sys=24.40 CPU=211% MaxRSS=19548 I/O=0/80
+
+* 
+
+.image _figs/tof-zeromq-ipc.png
+
+  $> ./fer-ex-raw-ctl -timeout=20s -transport=zeromq -protocol=ipc
+  real=20.06 user=27.62 sys=15.63 CPU=215% MaxRSS=19312 I/O=0/80
+
+* 
+
+.image _figs/tof-zeromq-tcp.png
+
+  $> ./fer-ex-raw-ctl -timeout=20s -transport=zeromq -protocol=tcp
+  real=20.06 user=21.28 sys=22.28 CPU=217% MaxRSS=19976 I/O=0/80
+ 
