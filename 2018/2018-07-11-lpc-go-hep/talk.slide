@@ -1,0 +1,31 @@
+Go-HEP
+LPC-Prospectives, 2018-07-11
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Go-HEP
+
+"Software is complicated."
+
+- Compilation/D\'eveloppement/D\'eploiement de code C++/Python: compliqu\'e
+- C++/ROOT: rapide \`a l'execution, lent \`a d\'evelopper (programmation multi-thread\'ee pas ais\'ee)
+- Python: d\'eveloppement rapide, intuitif; lent \`a l'execution, peu maintenable
+
+[[https://go-hep.org][Go-HEP]]: une biblioth\`eque \'ecrite en [[https://golang.org][Go]] pour \'ecrire des analyses de donn\'ees.
+
+- `Go` est compil\'e, facilement d\'eployable, compilable rapidement
+- d\'ependances install\'ees automatiquement (Linux/macOS/Windows)
+- support pour la programmation parall\`ele
+
+`Go-HEP`:
+
+- lecture de fichiers ROOT (\'ecriture: *bient\^ot*)
+- histogrammes, scatter, plots, n-tuples, 4-vector
+- LCIO, LHEF, HepMC, HEPEVT, HepPDT, CSV, SLHA, 
+- xrootd
+- fits
+
