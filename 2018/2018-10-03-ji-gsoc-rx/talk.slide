@@ -1,0 +1,132 @@
+GSoC-HSF: RX
+JI-2018, 2018-10-03
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+Antoine Pérus
+CNRS/IN2P3/LAL
+perus@lal.in2p3.fr
+
+* Google Summer of Code (GSoC)
+
+- international annual program financed by Google since 2005
+- program focused on bringing more student developers into open source software development
+
+- in 2005: 40 projects and 400 students
+- in 2018: >200 organisations and >12500 students from ~150 countries
+
+* CERN-HSF umbrella
+
+- CERN participated since 2011 and expanded to a wider HEP software ecosystem as Umbrella Organisation last year.
+
+in 2018:
+
+- 64 organisations/projects with 80 mentors
+- 107 proposals and 29 students selected and allocated by Google
+- 3 IN2P3 laboratories (LAL, LPC, LLR) with 4 proposals (CPU Race, Spark3D, HAhRD, Pure-Go XRootD)
+
+
+* How it works
+
+Students:
+
+- Choose an Open Source community
+- Propose a project
+- Spend summer coding
+
+* GSoC
+
+[[https://summerofcode.withgoogle.com][Google Summer of Code]]:
+
+- Google pays students to work on open source projects
+- 3 months (during the summer)
+
+Since 2017, [[https://hepsoftwarefoundation.org/][CERN-HSF]] is a participating organization.
+
+[[https://github.com/sbinet][@sbinet]] (through LPC & CERN-HSF) mentored a couple of students.
+
+2017:
+
+- [[https://github.com/HSF/hsf.github.io/blob/master/_gsocproposals/2017/proposal_GoHEPFADS.md][Jet clustering optimizations in Go]]
+- [[https://github.com/HSF/hsf.github.io/blob/master/_gsocproposals/2017/proposal_GoInterpreterWagon.md][Launching Wagon, a WebAssembly interpreter in Go]]
+- [[https://github.com/HSF/hsf.github.io/blob/master/_gsocproposals/2017/proposal_GoPythonGoPy.md][Updating gopy to support Python3 and PyPy]]
+
+2018:
+
+- [[https://github.com/HSF/hsf.github.io/blob/master/_gsocproposals/2018/proposal_GoHEPxrootd.md][Go-HEP/xrootd: creating a pure-Go client for XRootD]]
+
+* Project proposal
+
+- send a PR against the HSF's github repository with your proposal (in Markdown)
+- need 2 co-mentors (for overlap during summer holidays)
+- prepare a couple of exercizes to assess level of candidates
+- receive, read CVs of all candidates
+
+Finally: select a student.
+
+* Project timeline
+
+- Organization Applications Open: January 4, 2018
+- Organization Application Deadline: January 23, 2018
+- Organizations Announced: February 12, 2018
+- Student Application Period: March 12 - 27, 2018
+- Application Review Period: March 27, 2018 - April 23, 2018
+- Student Projects Announced: April 23, 2018
+- Community Bonding: April 23, 2018 - May 14, 2018
+- Coding: May 14, 2018 - August 6, 2018
+
+* Project timeline
+
+Evaluations:
+
+- June 11 - 15, 2018
+- July 9 - 13, 2018
+
+Finally:
+
+- Mentors Submit Final Evaluations: August 14 - 21, 2018
+- Results Announced: August 22, 2018
+
+
+* My timeline
+
+Few hours per day to:
+
+- review PRs
+- interact with student (email, chat, skype, ...)
+
+Based on the grand total of my 2 years of stats:
+
+- 3-4h per day at the beginning of the internship
+- less so in the middle (student becomes a bit more autonomous, less handholding required): 1-2h or just 1/2h
+- workload picks up a bit at the end (report to write and proof read, polishing stuff and all)
+
+* RX
+
+Candidates are required to write their own proposal, based off the one submitted by the organizations.
+
+=> a bit strange at first, but indeed a good way for the students to grok the internship.
+
+During the internship:
+
+- insist on small, iterative PRs
+- insist on writing *documented* code
+- insist on writing *tested* code
+- insist on having regular communication (I prefer emails + discussions PRs)
+
+* RX - conclusions
+
+- borderline burn-out for the 2017 session
+- reduced # of proposals for 2018: better, more reusable, result
+- choose well your co-mentor, so you can take holidays during the summer
+
+Overall, good experience, with usable code.
+Lot's of work, but "free" for IN2P3.
+
+Idea: 
+
+- What about a "Summer of Code @IN2P3" (or "Spring of code", or "Winter of code" ?)
