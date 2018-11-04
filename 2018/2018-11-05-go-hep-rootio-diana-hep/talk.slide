@@ -1,0 +1,478 @@
+GoHEP/rootio: Updates
+Diana-HEP, 2018-11-05
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* GoHEP
+
+* GoHEP
+
+[[https://go-hep.org][GoHEP]] is a set of packages, written in [[https://golang.org][Go]], to ease the day-to-day life of physicists.
+
+.link https://go-hep.org
+.link https://golang.org
+
+Our motto:
+
+  GoHEP is a set of libraries and applications allowing High Energy Physicists
+  to simply write concurrent & efficient code in the Go programming language.
+
+
+.link https://doi.org/10.5281/zenodo.597940 DOI:10.5281 (Zenodo:597940)
+.link http://joss.theoj.org/papers/0b007c81073186f7c61f95ea26ad7971 JOSS Paper
+
+* What can Go bring to science and HEP?
+
+- a *simple* language anybody can learn in days, proficient in a couple of months
+- *standard* tool to handle *dependencies* (across OSes, architectures)
+- *fast* edit-compile-run development cycle
+- *simple* deployment (on clusters, laptops, ...), *easiest* *cross-compilation* system to date
+- fast at runtime, builtin tools for profiling (CPU, mem, flamegraph, tracing)
+- support for *concurrency* programming and multi-core machines
+- no magic, no voodoo, *reduce* disconnect b/w HEP sw experts and HEP users
+- *easy* code sharing: between packages, between experiments, between scientists
+- easier *reproducibility* and cross-check tests
+- *refactoring* tools & linters, builtin/standard testing tools
+
+.link https://sbinet.github.io/posts/2018-07-31-go-hep-manifesto
+
+* Go for HEP: challenges
+
+`$EXPERIMENT` is taking data:
+
+- one can't really migrate (monolithic) MLoC software stacks while taking data, neither during a long shutdown
+
+*Convincing* physicists:
+
+- need to prove `Go` is useful, pleasant to use and viable
+- need to prove one can carry an analysis in `Go`, faster than by other means
+- provide 1 or 2 "poster child" applications
+
+*Need* to implement:
+
+- histograms, PDFs, plotting, fits, BLAS/LAPACK, I/O
+- (some level of) inter-operability with `C++/ROOT`
+
+=> [[https://go-hep.org][go-hep.org]] is the beginning of such an endeavour
+
+* 
+
+.image _figs/go-hep-home.png 550 _
+
+* 
+
+Available and tested (TravisCI, AppVeyor) on Windows, Linux, Darwin, ... AMD64, 386, ARM, ARM64, ...
+
+- [[https://go-hep.org/x/hep/brio][go-hep.org/x/hep/brio]]: a toolkit to generate serialization code
+- [[https://go-hep.org/x/hep/fads][go-hep.org/x/hep/fads]]: a fast detector simulation toolkit
+- [[https://go-hep.org/x/hep/fastjet][go-hep.org/x/hep/fastjet]]: a jet clustering algorithms package (WIP)
+- [[https://go-hep.org/x/hep/fit][go-hep.org/x/hep/fit]]: a fitting function toolkit (WIP)
+- [[https://go-hep.org/x/hep/fmom][go-hep.org/x/hep/fmom]]: a 4-vectors library
+- [[https://go-hep.org/x/hep/fwk][go-hep.org/x/hep/fwk]]: a concurrency-enabled framework
+- [[https://go-hep.org/x/hep/hbook][go-hep.org/x/hep/hbook]]: histograms and n-tuples (WIP)
+- [[https://go-hep.org/x/hep/hplot][go-hep.org/x/hep/hplot]]: interactive plotting (WIP)
+- _[...]_
+- [[https://go-hep.org/x/hep/rootio][go-hep.org/x/hep/rootio]]: a pure [[https://golang.org][Go]] package to for [[https://root.cern.ch][ROOT]] I/O (WIP) 
+- [[https://go-hep.org/x/hep/xrootd][go-hep.org/x/hep/xrootd]]: [[http://xrootd.org][XRootD]] client in pure [[https://golang.org][Go]]
+
+
+* XRootD
+
+Thanks to GSoC-2018, GoHEP has now a client for [[http://xrootd.org][XRootD]] in pure-Go:
+
+- login, auth (`unix`, `krb5`, `pwd`)
+- mkdir, ls, cp, ...
+- FUSE client (in pure-Go as well)
+
+and the beginnings of a pure-Go server too.
+
+All of this available on Linux, Darwin, Windows, ...
+
+Thanks to:
+
+.link https://github.com/EgorMatirov Mikhail Ivchenko (a.k.a @EgorMatirov)
+
+Go-XRootD has sparked interest from 2 development teams [[https://home.cern][@CERN]]:
+
+- [[https://cernbox.web.cern.ch/][CERNBox]]: migrating from PHP to Go
+- [[http://information-technology.web.cern.ch/][CERN IT (stockage)]]: interest in integrating with a Go backup tool ([[https://rclone.org/][rclone]]).
+
+
+* ROOT I/O
+
+[[https://go-hep.org][GoHEP]] provides some amount of interoperability with `ROOT-{5,6}` via [[https://go-hep.org/x/hep/rootio]], a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [[https://golang.org][Go]]) that:
+
+- decodes and understands the structure of `TFiles`, `TKeys`, `TDirectory` and `TStreamerInfos`,
+- decodes, deserializes `TH1x`, `TH2x`, `TLeaf`, `TBranch` and `TTrees` (w/ support of user classes)
+
+The last version of GoHEP (`v0.15.0`) has support for also *writing* `TH1x`, `TH2x`. (support for `TTrees` slated for end of 2018/beginning of 2019.) Still in pure-Go.
+
+- `cmd/root-ls`, `cmd/root-cp`
+- `cmd/root-dump`, `cmd/root-diff`, `cmd/root-print`, `cmd/root-gen-datareader`
+- `cmd/root2csv`, `cmd/root2npy`, `cmd/root2yoda`
+- `cmd/root-srv`, `cmd/root-fuse`
+
+* root-srv (served by AppEngine)
+
+.image _figs/root-srv-screenshot.jpg 550 _
+
+* go-hep/rootio - Installation
+
+- step 1:
+
+  $> go get go-hep.org/x/hep/rootio/...
+
+Yes, with the ellipsis at the end, to also install sub-packages.
+
+- `go` `get` will recursively download and install all the packages that [[https://go-hep.org/x/hep/rootio][hep/rootio]] depends on
+- then actually build and install [[https://go-hep.org/x/hep/rootio][hep/rootio]]
+- no `Makefile`, no `CMakeList.txt` involved in the process
+
+There's no step 2.
+
+* Reproducibility
+
+Go (with Go >= 1.11) has support for:
+
+- completely reproducible builds
+- across time and space, produces (by default) a *static* binary
+
+Developpers specify which version of their deps they use, through the `go.mod` file:
+
+.code _code/go.mod
+
+* Reproducibility - security
+
+Go will also generate a `go.sum` file that holds hashes of the deps:
+
+.code _code/go.sum
+
+* GoHEP/rootio: read API
+
+* ROOT I/O -- scanning data trees
+
+ f, err := rootio.Open("my-file.root")
+ obj, err := f.Get("my-tree")
+ tree := obj.(rootio.Tree)
+ 
+ type Data struct {
+ 	I64    int64       `rootio:"Int64"`
+ 	F64    float64     `rootio:"Float64"`
+ 	Str    string      `rootio:"Str"`
+ 	ArrF64 [10]float64 `rootio:"ArrayFloat64"`
+ 	N      int32       `rootio:"N"`
+ 	SliF64 []float64   `rootio:"SliceFloat64"`
+ }
+ 
+ var data Data
+ sc, err := rootio.NewScanner(tree, &data)
+ 
+ for sc.Next() {
+ 	err := sc.Scan()
+ 	if err != nil {
+ 		log.Fatal(err)
+ 	}
+ 	fmt.Printf("entry[%d]: %+v\n", sc.Entry(), data)
+ }
+
+ 
+* ROOT I/O features
+
+- read flat TTrees with C/C++ builtins, static/dynamic arrays of C/C++ builtins
+- read "event" TTrees with user defined classes containing: `std::vector<T>` (where `T` is a C/C++ builtin or a `std::string`/`TString`), another user defined class, `std::string` or `TString`, static/dynamic arrays of C/C++ builtins and, of course C/C++ builtins
+
+ struct P3 { int32_t Px; double  Py; int32_t Pz; };
+ 
+ struct Event {
+   int16_t  I16;  int32_t  I32; int64_t  I64; uint32_t U32;
+   float    F32;  double   F64;
+   TString  TStr; std::string StdStr;
+   P3       P3;
+   int16_t  ArrayI16[ARRAYSZ]; int32_t  ArrayI32[ARRAYSZ];
+   double   ArrayF64[ARRAYSZ];
+   int32_t  N;
+   int16_t  *SliceI16;  //[N]
+   int32_t  *SliceI32;  //[N]
+   double   *SliceF64;  //[N]
+   std::vector<int64_t> StlVecI64; std::vector<std::string> StlVecStr;
+ };
+
+* ROOT I/O performances
+
+- Input files:
+
+ $> ll *root
+ -rw-r--r-- 1 binet binet 686M Aug 16 11:00 f64s-default-compress.root
+ -rw-r--r-- 1 binet binet 764M Aug 16 15:39 f64s-no-compress.root
+ 
+ $> root-ls -t f64s-no-compress.root
+ === [f64s-no-compress.root] ===
+ version: 61002
+ TTree       tree          tree    (entries=1000000)
+   Scalar_0  "Scalar_0/D"  TBranch
+   Scalar_1  "Scalar_1/D"  TBranch
+   Scalar_2  "Scalar_2/D"  TBranch
+   [...]
+   Scalar_98 "Scalar_98/D" TBranch
+   Scalar_99 "Scalar_99/D" TBranch
+
+* ROOT - C++
+
+	auto f = TFile::Open(argv[1], "read");
+	auto t = (TTree*)f->Get("tree");
+
+	const Long_t BRANCHES= 100;
+
+	Double_t v[BRANCHES] = {0};
+
+	for (int i = 0; i < BRANCHES; i++) {
+		auto n = TString::Format("Scalar_%d", i);
+		t->SetBranchAddress(n, &v[i]);
+	}
+
+	Long_t entries = t->GetEntries();
+	Double_t sum = 0;
+	for ( Long_t i = 0; i < entries; i++ ) {
+		t->GetEntry(i);
+		sum += v[0];
+	}
+
+	std::cout << "sum= " << sum << "\n";
+
+* GoHEP/rootio
+
+	f, err := rootio.Open(flag.Arg(0))
+	obj, err := f.Get("tree")
+	t := obj.(rootio.Tree)
+
+	var vs [100]float64
+	var svars []rootio.ScanVar
+	for i := range vs {
+		svars = append(svars, rootio.ScanVar{
+			Name:  fmt.Sprintf("Scalar_%d", i),
+			Value: &vs[i],
+		})
+	}
+
+	sum := 0.0
+	scan, err := rootio.NewScannerVars(t, svars...)
+	for scan.Next() {
+		err = scan.Scan()
+		if err != nil {
+			log.Fatal(err)
+		}
+		sum += vs[0]
+	}
+
+	fmt.Printf("sum= %v\n", sum)
+
+* Results -- No Compression
+
+ $> time ./cxx-read-data
+ $> time ./go-read-data
+
+ === ROOT === (VMem=517Mb)
+ real=6.70 user=6.18 sys=0.51 CPU= 99% MaxRSS=258296
+ real=6.84 user=6.32 sys=0.51 CPU= 99% MaxRSS=257748
+ real=6.82 user=6.29 sys=0.52 CPU= 99% MaxRSS=258348
+ real=6.66 user=6.13 sys=0.53 CPU=100% MaxRSS=258440
+ 
+ === go-hep/rootio === (VMem=43Mb)
+ real=12.94 user=12.39 sys=0.56 CPU=100% MaxRSS=42028
+ real=12.93 user=12.37 sys=0.56 CPU=100% MaxRSS=42072
+ real=12.96 user=12.38 sys=0.58 CPU=100% MaxRSS=41984
+ real=12.94 user=12.36 sys=0.57 CPU=100% MaxRSS=42048
+
+* Results -- with default compression
+
+ === ROOT === (VMem=529Mb)
+ real=20.61 user=11.86 sys=0.63 CPU=60% MaxRSS=292640
+ real=12.56 user=11.54 sys=0.51 CPU=96% MaxRSS=290124
+ real=12.04 user=11.50 sys=0.52 CPU=99% MaxRSS=290444
+ real=12.05 user=11.54 sys=0.50 CPU=99% MaxRSS=290324
+ 
+ === go-hep/rootio === (VMem=83Mb)
+ real=36.43 user=35.20 sys=0.69 CPU= 98% MaxRSS=81196
+ real=35.75 user=35.15 sys=0.63 CPU=100% MaxRSS=81644
+ real=35.76 user=35.10 sys=0.69 CPU=100% MaxRSS=81856
+ real=35.70 user=35.18 sys=0.54 CPU=100% MaxRSS=81944
+
+*Only* ~2 times slower, w/o any optimization wrt baskets buffering, TTreeCache, ...
+No concurrency (yet.)
+
+Of course, `go-hep/rootio` provides less features than ROOT, isn't as battle-tested and is probably full of bugs.
+But it's in the same order of magnitude, performance-wise.
+
+* GoHEP/rootio: write API
+
+* GoHEP/rootio: write
+
+For the moment (`v0.15.0`, 2018/11), GoHEP can only write the following ROOT data types:
+
+- `TObject`, `TObjString`, `TNamed`,
+- `TDirectory`, `TDirectoryFile`, `TKey`,
+- `TList`, `THashList`, `TObjArray`,
+- `TStreamerInfo`, `TStreamerElement`, `TStreamerXXX`
+- `TH1x`, `TH2x`
+- `TGraph`, `TGraphErrors`, `TGraphAsymErrors`
+
+This enabled to write this new program:
+
+- `cmd/yoda2root`: creates `ROOT` files with histos and graphs from [[https://yoda.hepforge.org/][YODA]] files.
+
+* GoHEP/rootio: write
+
+GoHEP `v0.15.0`, released for the ROOT workshop (Sept. 2018), was the first version to support writing out ROOT files: there are a few (hopefully temporary) limitations.
+
+- Objects can only be written out at the top-level,
+- GoHEP/rootio has no mechanism (yet) to generate a valid `TStreamerInfo` for a class (ROOT based or user defined) so a special package holding the definition of a few ROOT streamers, generated with ROOT itself, is created,
+- bugs.
+
+These limitations will be lifted at some point.
+
+* GoHEP/rootio: storing histos
+
+	f, err := rootio.Create(fname)
+
+	h := hbook.NewH1D(20, -4, +4)
+	for i := 0; i < 1000; i++ {
+		v := dist.Rand()
+		h.Fill(v, 1)
+	}
+	h.Fill(-10, 1) // fill underflow
+	h.Fill(-20, 2)
+	h.Fill(+10, 3) // fill overflow
+
+	hroot := rootio.NewH1DFrom(h)
+
+	err = f.Put("h1", hroot)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = f.Close()
+	if err != nil {
+		log.Fatalf("error closing ROOT file: %v", err)
+	}
+
+* GoHEP: the shape of things to come
+
+* GoHEP v0.16.0
+
+Next version will get a new package: `groot`.
+
+.image _figs/groot.jpg 350 _
+
+Package `rootio` will be frozen and deprecated (but kept around for a couple of releases.)
+
+`rootio` is dead, long live `groot`!
+
+* go-hep.org/x/hep/groot
+
+`groot` will ship with better organized "sub" packages:
+
+- `groot`: `Open`, `Create` functions, interfaces
+- `groot/rbase`: `TObject`, `TNamed`, `TObjString`
+- `groot/rbytes`: r/w buffers to (de)serialize objects
+- `groot/rcont`: `TList`, `TObjArray`, `THashList`
+- `groot/rdict`: streamers
+- `groot/rhist`: histograms, graphs
+- `groot/riofs`: `TFile`, `TDirectory`, `TKey`
+- `groot/rtree`: `TTree`, `TChain`, `TBranch`, `TLeaf`
+
+See Pull Request:
+
+.link https://github.com/go-hep/hep/pull/387
+
+* GoHEP + Apache Arrow
+
+GoHEP contributed a bunch of code to the [[https://golang.org][Go]]-based [[https://arrow.apache.org][Apache Arrow]] package:
+
+- primitive arrays, list arrays, struct arrays,
+- records, tables
+- tensors
+- csv records reader
+
+.link https://godoc.org/github.com/apache/arrow/go/arrow
+
+This will be part of Arrow-0.12 but you can already play with it:
+
+  $> go get github.com/apache/arrow/go/arrow/...
+
+Next-to-next version of `groot` will leverage this work and expose an Arrow-based interface to read (and write?) `TTrees`.
+
+Perhaps also a Bulk-I/O like API?
+
+* Conclusions
+
+Go is great at writing small and large (concurrent) programs.
+Also true for *science-y* programs, even if the amount of libraries can still be improved.
+
+.image _figs/funfast.svg 320 _
+
+Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]? and [[https://go-hep.org][GoHEP]] or [[https://github.com/astrogo][astrogo]], or [[https://github.com/biogo][Biogo]], or [[https://gonum.org][Gonum]], or ...
+
+* Conclusions
+
+Go is great at writing small and large (concurrent) programs.
+Also true for *science-y* programs, even if the amount of libraries can still be improved.
+
+.image _figs/funfast.svg 320 _
+
+  Software engineering is what happens to programming
+  when you add time and other programmers.
+  (Russ Cox)
+
+* Thank you
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+[[https://github.com/sbinet]]
+[[https://twitter.com/0xb1ns][@0xbins]]
+[[mailto:sebastien.binet@clermont.in2p3.fr]]
+
+* Extra
+
+* Rivet & fads
+
+* Rivet
+
+The [[http://rivet.hepforge.org/][Rivet]] toolkit (Robust Independent Validation of Experiment and Theory) is a system for validation of Monte Carlo event generators. It provides a large (and ever growing) set of experimental analyses useful for MC generator development, validation, and tuning, as well as a convenient infrastructure for adding your own analyses.
+
+ $> repeat 10 'time rivet --analysis=MC_GENERIC -q  ./Z-hadronic-LEP.hepmc > /dev/null'
+ real=13.32 user=12.97 sys=0.33 CPU=99% MaxRSS=26292
+ real=13.31 user=12.93 sys=0.37 CPU=99% MaxRSS=26356
+ real=13.29 user=12.93 sys=0.35 CPU=99% MaxRSS=26440
+ real=13.31 user=12.95 sys=0.35 CPU=99% MaxRSS=26356
+ real=13.29 user=13.01 sys=0.27 CPU=99% MaxRSS=26280
+ real=13.31 user=12.97 sys=0.32 CPU=99% MaxRSS=26328
+ real=13.35 user=12.93 sys=0.41 CPU=99% MaxRSS=26276
+ real=13.30 user=12.96 sys=0.33 CPU=99% MaxRSS=26624
+ real=13.30 user=12.93 sys=0.36 CPU=99% MaxRSS=26440
+ real=13.35 user=12.98 sys=0.36 CPU=99% MaxRSS=26484
+
+* fads-rivet-mc-generic
+
+Reimplementation on top of [[https://godoc.org/go-hep.org/x/hep/fwk][go-hep/fwk+fads]] of the `MC_GENERIC` analysis.
+
+Bit-to-bit identical results.
+
+ $> go get go-hep.org/x/hep/fads/cmd/fads-rivet-mc-generic
+ 
+ $> repeat 10 'time fads-rivet-mc-generic -nprocs=1 ./Z-hadronic-LEP.hepmc > /dev/null'
+ real=6.04 user=5.66 sys=0.12 CPU= 95% MaxRSS=23384
+ real=5.70 user=5.62 sys=0.09 CPU=100% MaxRSS=21128
+ real=5.71 user=5.58 sys=0.11 CPU= 99% MaxRSS=22208
+ real=5.68 user=5.60 sys=0.08 CPU=100% MaxRSS=23156
+ real=5.71 user=5.63 sys=0.08 CPU=100% MaxRSS=20672
+ real=5.78 user=5.62 sys=0.09 CPU= 98% MaxRSS=22328
+ real=5.67 user=5.62 sys=0.05 CPU=100% MaxRSS=20968
+ real=5.68 user=5.57 sys=0.07 CPU= 99% MaxRSS=23748
+ real=5.70 user=5.60 sys=0.10 CPU=100% MaxRSS=21360
+ real=5.72 user=5.65 sys=0.07 CPU=100% MaxRSS=22764
+
+
