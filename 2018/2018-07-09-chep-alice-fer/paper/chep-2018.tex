@@ -11,10 +11,16 @@
 %% \usepackage[english]{babel}
 
 % for code colouring
-\usepackage[finalizecache=true]{minted}
-\setminted{fontsize=\footnotesize,frame=lines}
+%\usepackage[finalizecache=true,newfloat=true]{minted}
+\usepackage[newfloat=true]{minted}
+\setminted{fontsize=\footnotesize,frame=lines}%%,framesep=1pt}
 %% \definecolor{bg}{rgb}{0.95,0.95,0.95}
 %% \setminted{bgcolor=bg}
+
+\usepackage{caption}
+\captionsetup[listing]{skip=-5pt}
+%%\usepackage[font=small,skip=0pt]{caption}
+%%\usepackage[skip=2pt]{caption}
 
 %
 % Put here some packages required or/and some personnal commands
@@ -22,6 +28,7 @@
 %
 \begin{document}
 %%\linenumbers
+
 %
 \title{Exploring polyglot software frameworks in ALICE with \texttt{FairMQ} and \texttt{fer}}
 %
@@ -31,7 +38,7 @@
 
 \author{
 	%%\firstname{Laurent} \lastname{Aphecetche}\inst{1}\fnsep\thanks{\email{laurent.aphecetche@subatech.in2p3.fr}} \and
-        \firstname{S\'ebastien} \lastname{Binet}\inst{1}\fnsep\thanks{\email{binet@cern.ch}} 
+        \firstname{S\'ebastien} \lastname{Binet}\inst{1}\fnsep\thanks{\email{binet@cern.ch}}
 		on behalf of the ALICE collaboration
         % etc.
 }
@@ -43,8 +50,8 @@
           }
 
 \abstract{%
-In order to meet the challenges of the Run 3 data rates and volumes, the ALICE collaboration is merging the online and offline infrastructures into a common framework: ALICE-$O^2$.
-$O^2$ is based on FairRoot and FairMQ, a message-based, multi-threaded and multi-process control framework.
+In order to meet the challenges of the Run 3 data rates and volumes, the ALICE collaboration is merging the online and offline infrastructures into a common framework: ALICE-O\textsuperscript{2}.
+O\textsuperscript{2} is based on FairRoot and FairMQ, a message-based, multi-threaded and multi-process control framework.
 In FairMQ, processes (possibly on different machines) exchange data via message queues either through 0MQ or nanomsg.
 In turn, this enables developers to write their reconstruction or analysis process in whatever language they choose or deem appropriate for the task at hand, as long as that programming language can send and receive data through these message queues.
 This paper introduces \texttt{fer}, a Go-based toolkit that interoperates with the C++ toolkit FairMQ, to explore the realm of polyglot distributed frameworks.
@@ -55,9 +62,9 @@ This paper introduces \texttt{fer}, a Go-based toolkit that interoperates with t
 \section{Introduction}
 \label{intro}
 
-The ALICE collaboration is merging the online and offline infrastructures into a common framework: ALICE-$O^2$~\cite{ref-aliceo2}.
+The ALICE collaboration is merging the online and offline infrastructures into a common framework: ALICE-O\textsuperscript{2}~\cite{ref-aliceo2}.
 This work is needed to meet the challenges of the Run 3 data rates and volumes.
-$O^2$ is a message-based, multi-threaded and multi-process control framework based on two libraries: FairRoot~\cite{ref-fairroot} and FairMQ~\cite{ref-fairmq}.
+O\textsuperscript{2} is a message-based, multi-threaded and multi-process control framework based on two libraries: FairRoot~\cite{ref-fairroot} and FairMQ~\cite{ref-fairmq}.
 Sophisticated processing pipelines can be modeled with FairMQ: router/dealer, request/reply, publish/subscribe, client/server, etc.
 The nodes of these pipelines are processes (possibly on different machines) exchanging data via message queues either through \texttt{ZeroMQ}~\cite{ref-zeromq} or \texttt{nanomsg}~\cite{ref-nanomsg}.
 
@@ -65,7 +72,7 @@ From the standpoint of the FairMQ toolkit, the programming language used to impl
 This enables developers to write their reconstruction or analysis process in whatever language they choose or deem appropriate for the task at hand.
 
 This paper presents \texttt{fer}, a Go-based~\cite{ref-golang} library compatible and interoperable with FairMQ.
-This paper starts with a brief introduction of the builtin features that make Go a solid choice when dealing with I/O and concurrency.
+It starts with a brief introduction of the builtin features that make Go a solid choice when dealing with I/O and concurrency.
 The principal components of \texttt{fer} and how they interact with C++ FairMQ will then be described.
 Finally, Sec.~\ref{sec-fer} will report on the performance (CPU, VMem) of \texttt{fer} and conclude with the main figures of merit of \texttt{fer}, in the context of deployment in a distributed computing setup.
 
@@ -76,19 +83,19 @@ FairMQ is a distributed processing toolkit, written in \texttt{C++}, with plugga
 In FairMQ, the bulk of the processing is performed by devices: UNIX processes that are connected with other devices through message queues.
 Devices can be connected in various ways, through a wide variety of topologies: router/dealer, request/reply, publish/subscribe, client/server, etc.
 The medium used for the connection between devices can be chosen among the following options: \texttt{tcp}, \texttt{udp}, \texttt{ipc}, \texttt{inproc}, shared-memory.
-Figure~\ref{fig-topology} shows a typical FairMQ processing pipeline, fanning out data read off a source (\texttt{sampler}) to a pair of processors and then fanning in the data to a single output sink.
+Fig.~\ref{fig-topology} shows a typical FairMQ processing pipeline, fanning out data read off a source (\texttt{sampler}) to a pair of processors and then fanning in the data to a single output sink.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.75\textwidth,clip]{figs/fairmq-example-topology}
+\includegraphics[width=1\textwidth,clip]{figs/fairmq-example-topology}
 \caption{Example of a processing pipeline topology, implemented with FairMQ. Each box is a UNIX process, possibly on different machines, connected with other UNIX processes. Data "flows" from left to right.}
 \label{fig-topology}
 \end{figure}
 
 FairMQ applications are currently configured via a \texttt{JSON} configuration file, declaring the devices, the ports they are listening on or sending data to, the type and topology of the message queues, etc.
-An example of such a configuration file is shown in Fig.~\ref{fig-cfg-json}.
+An example of such a configuration file is shown in listing~\ref{code-cfg-json}.
 
-\begin{figure}[h]
+\begin{listing}[h]
 \centering
 \begin{minted}{json}
 {
@@ -114,17 +121,18 @@ An example of such a configuration file is shown in Fig.~\ref{fig-cfg-json}.
 [...]
 }
 \end{minted}
-
 \caption{Example of a JSON configuration file for a FairMQ processing pipeline.}
-\label{fig-cfg-json}       % Give a unique label
-\end{figure}
+\label{code-cfg-json}       % Give a unique label
+\end{listing}
 
-Topologies in FairMQ can be described in JSON, like in Fig.~\ref{fig-cfg-json}, but other formats and mechanisms are available: XML or via the Dynamic Deployment System (DDS)~\cite{ref-dds}.
+Topologies in FairMQ can be described in JSON, like in listing~\ref{code-cfg-json}, but other formats and mechanisms are available: XML or via the Dynamic Deployment System (DDS)~\cite{ref-dds}.
 Devices are completely agnostic with regard to the technology used to modify, deploy, and push the final configuration.
-Once the user has written the correct configuration, declaring inputs and outputs of the whole pipeline, the \texttt{C++} device is launched, is given that configuration and essentially runs an infinite \texttt{for} loop, waiting for data to be received, sending refined data down the pipeline, or waiting for external commands to control the finite state machine of a FairMQ application.
-An abridged declaration of the \texttt{C++} base class for devices is shown in Fig.~\ref{fig-fairmq-cxx-device}.
+Once the user has written the correct configuration, declaring inputs and outputs of the whole pipeline, the \texttt{C++} device is launched and provided with a configuration.
+It essentially runs an infinite \texttt{for} loop, waiting for data to be received, sending refined data down the pipeline.
+Devices are also listening for external commands that control and modify the finite state machine of a FairMQ application.
+An abridged declaration of the \texttt{C++} base class for devices is shown in listing~\ref{code-fairmq-cxx-device}.
 
-\begin{figure}[h]
+\begin{listing}[h]
 \centering
 \begin{minted}{c++}
 class FairMQDevice : <...> {
@@ -146,14 +154,14 @@ protected:
 };
 \end{minted}
 \caption{Excerpt of the \texttt{FairMQDevice} class, the main API for implementing a device.}
-\label{fig-fairmq-cxx-device}
-\end{figure}
+\label{code-fairmq-cxx-device}
+\end{listing}
 
 Users are supposed to at least override the \texttt{FairMQDevice::Run()} method in their derived classes.
 This method is where data is sent to the downstream devices (using the \texttt{FairMQDevice::Send(\ldots)} method) or received from upstream devices (using the \texttt{FairMQDevice::Receive(\ldots)} method).
 As a device is usually instantiated within its own UNIX process, users are usually free to leverage any kind of library or programming paradigm inside the boundaries of their own memory address space.
 
-With FairMQ's microservice-like architecture, processing pipelines can horizontally scale much more easily when data taking or data processing demand it.
+With FairMQ's microservice-like architecture, processing pipelines can horizontally scale much more easily when data taking or data processing demands it.
 Indeed, it is just a matter of adding more processing resources to the pool and connect them via message queues to accomodate a change in the processing load.
 Abstracting away the minute details of how devices are connected and distributed (all in the same address space, on different machines, etc.) allows users to very easily isolate a faulty device and mitigate its impact on others, \emph{e.g.} preventing it from corrupting memory of other devices.
 This also allows to use processes' boundaries to segregate components that are multithread friendly from others that are not.
@@ -183,8 +191,7 @@ The Go toolchain can very easily cross-compile from one OS/Arch pair to any othe
 The Go toolchain generates completely statically compiled binaries.
 This enables a very efficient deployment model where binaries produced on a developer laptop can be quickly provisioned on a bare metal production cluster.
 Finally, compiling Go code is not only fast thanks to its package and import system, it is also regular and automatically handles dependencies, recursively discovering and installing them.
-Indeed, installing Go packages is usually just a matter of entering in the shell:
-
+Indeed, installing Go packages is usually just a matter of entering the following command at the prompt:
 \begin{minted}{bash}
 	%> go get -v github.com/sbinet-alice/fer
 	github.com/sbinet-alice/fer/mq
@@ -197,8 +204,7 @@ Indeed, installing Go packages is usually just a matter of entering in the shell
 	github.com/sbinet-alice/fer/mq/nanomsg
 	github.com/sbinet-alice/fer/mq/zeromq
 \end{minted}
-
-A single command that works on all platforms and operating systems supported by the Go toolchain.
+This single command works on all platforms and operating systems supported by the Go toolchain.
 
 \section{Design and components of \texttt{fer}}
 \label{sec-fer}
@@ -206,9 +212,9 @@ A single command that works on all platforms and operating systems supported by 
 As introduced in Sec.~\ref{sec-fairmq-concepts}, implementing a toolkit compatible with FairMQ requires to be able to configure FairMQ-like devices, using \emph{e.g.} the JSON configuration file format; to create topologies of devices according to the configuration and connected via a transport library (\emph{e.g.} \texttt{ZeroMQ} or \texttt{nanomsg}); and finally to execute the main routines of the devices.
 
 The requirements above are met by \texttt{fer}~\cite{ref-fer}, a toolkit implemented in Go.
-Similar to its \texttt{C++} sibling, \texttt{fer} exposes the concept of a device by way of the \texttt{Device} interface, as shown in Fig.~\ref{fig-fer-device}.
+Similar to its \texttt{C++} sibling, \texttt{fer} exposes the concept of a device by way of the \texttt{Device} interface, as shown in listing~\ref{code-fer-device}.
 
-\begin{figure}[h]
+\begin{listing}[h]
 \centering
 \begin{minted}{go}
 package fer
@@ -217,29 +223,29 @@ import "github.com/sbinet-alice/fer/config"
 
 // Device is a handle to what users get to run via the Fer toolkit.
 type Device interface {
-	Run(ctl Controler) error
+	Run(ctl Controller) error
 }
 
 type DevConfigurer interface { Configure(cfg config.Device) error }
-type DevIniter     interface { Init(ctl Controler) error }
-type DevPauser     interface { Pause(ctl Controler) error }
-type DevReseter    interface { Reset(ctl Controler) error }
+type DevIniter     interface { Init(ctl Controller) error }
+type DevPauser     interface { Pause(ctl Controller) error }
+type DevReseter    interface { Reset(ctl Controller) error }
 \end{minted}
 	\caption{Excerpt of the \texttt{fer} package, with the main interfaces it exposes. Users are only required to implement the \texttt{Device} interface, other interfaces are optional.}
-\label{fig-fer-device}
-\end{figure}
+\label{code-fer-device}
+\end{listing}
 
-A type implements the \texttt{Device} interface as soon as it has a method named \texttt{Run()} that takes a \texttt{Controler} interface and returns an \texttt{error}.
-The \texttt{Controler} interface is shown in Fig.~\ref{fig-fer-controler}.
+A type implements the \texttt{Device} interface as soon as it has a method named \texttt{Run()} that takes a \texttt{Controller} interface and returns an \texttt{error}.
+The \texttt{Controller} interface is shown in listing~\ref{code-fer-controller}.
 It is used to retrieve named channels bound to incoming or outgoing data, through the \texttt{Chan()} method.
 An additional \texttt{Done()} method exposes transitions in the \texttt{fer} final state machine (\texttt{RUN}, \texttt{PAUSE}, \texttt{STOP}, etc.)
 
-\begin{figure}[h]
+\begin{listing}[h]
 	\centering
 	\begin{minted}{go}
-// Controler controls devices execution and gives a device access to input and
+// Controller controls devices execution and gives a device access to input and
 // output data channels.
-type Controler interface {
+type Controller interface {
 	Logger
 	Chan(name string, i int) (chan Msg, error)
 	Done() chan Cmd
@@ -254,24 +260,24 @@ type Msg struct {
 // Cmd describes commands to be sent to a device, via a channel.
 type Cmd byte
 	\end{minted}
-	\caption{Declaration of the \texttt{Logger} and \texttt{Controler} interfaces in the \texttt{fer} package.
-	\texttt{Controler}s expose communication channels that can exchange data messages, \texttt{Msg}, that embed the actual payload or an error if any.
+	\caption{Declaration of the \texttt{Logger} and \texttt{Controller} interfaces in the \texttt{fer} package.
+	\texttt{Controller}s expose communication channels that can exchange data messages, \texttt{Msg}, that embed the actual payload or an error if any.
 }
-	\label{fig-fer-controler}
-\end{figure}
+	\label{code-fer-controller}
+\end{listing}
 
 The input configuration is parsed by the \texttt{fer/config} package and passed to the devices via the \texttt{DevConfigurer} interface, if that device implements it.
 
 \subsection{Implementing a \texttt{fer} device}
 This section shows how implementing a \texttt{fer} device and integrating it inside a \texttt{C++} pipeline can be done.
-Figure~\ref{fig-fer-processor} shows how one can implement the \texttt{processor} from Fig.~\ref{fig-topology}.
+Listing~\ref{code-fer-processor} shows how one can implement the \texttt{processor} from Fig.~\ref{fig-topology}.
 The \texttt{processor} retrieves two channels, the \texttt{"data1"} input channel and the \texttt{"data2"} output channel.
 The \texttt{Run()} method contains an infinite \texttt{for} loop.
 At each iteration, the device waits for data coming in from either the \texttt{idatac} or the \texttt{Done()} channel.
 When the input channel is ready -- a message has been delivered to the device -- the associated payload is modified by the device (just appending some data) and then sent downstream through the output channel \texttt{odatac}.
 Concurrently, if any command is sent on the \texttt{Done()} channel, the \texttt{for} loop exits and the Go runtime can reclaim resources used by the associated goroutine.
 
-\begin{figure}[h]
+\begin{listing}[h]
 	\centering
 \begin{minted}{go}
 package mydevice
@@ -292,7 +298,7 @@ func (dev *processor) Configure(cfg config.Device) error {
 	return nil
 }
 
-func (dev *processor) Init(ctl fer.Controler) error {
+func (dev *processor) Init(ctl fer.Controller) error {
 	idatac, err := ctl.Chan("data1", 0) // handle err
 	odatac, err := ctl.Chan("data2", 0) // handle err
 	dev.idatac = idatac
@@ -300,7 +306,7 @@ func (dev *processor) Init(ctl fer.Controler) error {
 	return nil
 }
 
-func (dev *processor) Run(ctl fer.Controler) error {
+func (dev *processor) Run(ctl fer.Controller) error {
 	str := " (modified by "+dev.cfg.Name()+")"
 	for {
 		select {
@@ -315,13 +321,13 @@ func (dev *processor) Run(ctl fer.Controler) error {
 }
 \end{minted}
 \caption{Implementation of the \texttt{DevConfigurer}, \texttt{DevIniter} and \texttt{Device} interfaces.}
-\label{fig-fer-processor}
-\end{figure}
+\label{code-fer-processor}
+\end{listing}
 
 Once a type implements the \texttt{fer.Device} interface, a value of that type can be created and passed to the \texttt{fer.Main} function that takes care of the minute details of scheduling devices, establishing socket connections and forwarding external commands.
-This simplifies the creation of the main entry point for the whole program, as shown in Fig.~\ref{fig-fer-main}.
+This simplifies the creation of the main entry point for the whole program, as shown in listing~\ref{code-fer-main}.
 
-\begin{figure}[h]
+\begin{listing}[h]
 	\centering
 \begin{minted}{go}
 package main
@@ -334,8 +340,8 @@ func main() {
 }
 \end{minted}
 	\caption{Main program for the \texttt{processor} example device. For brevity, imports are omitted.}
-	\label{fig-fer-main}
-\end{figure}
+	\label{code-fer-main}
+\end{listing}
 
 Compiling and running this processor is done via:
 \begin{minted}{bash}
@@ -366,7 +372,7 @@ The maximum resident set size (\texttt{MaxRSS} from \texttt{/proc/self/statm}) f
 \section{Conclusions}
 \label{sec-conclusions}
 
-The ALICE-$O^2$ framework based on the message passing infrastructure from FairMQ enables one to build applications that resemble microservices architectures.
+The ALICE-O\textsuperscript{2} framework based on the message passing infrastructure from FairMQ enables one to build applications that resemble microservices architectures.
 These types of architectures allow systems to scale horizontally quite easily, by just adding new processor devices and fanning out data to these new processors, in \emph{e.g.} a round-robin fashion.
 FairMQ, and microservices in general, is language agnostic: developers can thus implement their device in whatever language they deem adequate for the task at hand.
 This paper introduced \texttt{fer}, a Go-based toolkit that interoperates with the C++ toolkit FairMQ, to explore the realm of polyglot distributed frameworks.
@@ -382,8 +388,8 @@ As such it can be a great testbed environment to explore new avenues.
 \bibitem{ref-fairmq} \texttt{https://github.com/FairRootGroup/FairMQ}, visited: August 2018
 \bibitem{ref-zeromq} \texttt{http://zeromq.org/} (\texttt{v4.2.5}, visited: August 2018)
 \bibitem{ref-nanomsg} \texttt{https://nanomsg.org/} (\texttt{v1.1.5}, visited: August 2018)
-\bibitem{ref-dds} A. Manafov and A. Lebedev, DDS: The Dynamic Deployment System, GSI Report 2015-1, p 371 (2015) \texttt{doi:10.15120/GR-2015-1-INFRASTRUCTURE-IT-04}
 \bibitem{ref-golang} The \texttt{Go} programming language, \texttt{https://golang.org} (\texttt{v1.11}, visited: August 2018)
+\bibitem{ref-dds} A. Manafov and A. Lebedev, DDS: The Dynamic Deployment System, GSI Report 2015-1, p 371 (2015) \texttt{doi:10.15120/GR-2015-1-INFRASTRUCTURE-IT-04}
 \bibitem{ref-csp} C. A. R. Hoare, Communications of the ACM \textbf{Volume 21} Issue 8, pp 666-677 (1978)
 \bibitem{ref-fer} \texttt{https://github.com/sbinet-alice/fer}, \texttt{doi:10.5281/zenodo.1470586}
 \bibitem{ref-go-zmq} \texttt{https://github.com/go-zeromq/zmq4}, \texttt{doi:10.5281/zenodo.1470580}
