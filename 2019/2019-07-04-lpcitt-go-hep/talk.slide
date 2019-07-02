@@ -50,9 +50,9 @@ Splitted `rootio` into:
 - `groot/rtree`: `TBranch`, `TBasket`, `TTree`, `TChain`
 - `groot/rsrv`: basic toolkit for exposing ROOT objects via `http(s)`
 
-* ROOT I/O: groot
+* groot
 
-[[https://go-hep.org][Go-HEP]] provides some amount of interoperability with `ROOT-{5,6}` via [[https://go-hep.org/x/hep/rootio]], a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [[https://golang.org][Go]]) that:
+[[https://go-hep.org][Go-HEP]] provides some amount of interoperability with `ROOT-{5,6}` via [[https://go-hep.org/x/hep/groot]], a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [[https://golang.org][Go]]) that:
 
 - decodes and understands the structure of `TFiles`, `TKeys`, `TDirectory` and `TStreamerInfos`,
 - decodes, deserializes `TH1x`, `TH2x`, `TLeaf`, `TBranch` and `TTrees` (w/ support of user classes)
@@ -150,11 +150,3 @@ Go-XRootD has sparked interest from 2 development teams [[https://home.cern][@CE
 - continue work on [[https://github.com/go-hep/examples/tree/master/groot/bench-opendata][HSF OpenData benchmarks]] (A list of example analysis challenges and solved implementations of them in various languages)
 - no GSoC student this year (despite 2 proposals: [[https://hepsoftwarefoundation.org/gsoc/2019/proposal_GoHEPhifact.html][hifact]] and [[https://hepsoftwarefoundation.org/gsoc/2019/proposal_GoHEPgroot.html][dframe]]): not as many candidates as last years, not as good as last years
 - no local student on `Go-HEP` either (no candidate)
-
-* Thank you
-
-Sebastien Binet
-CNRS/IN2P3/LPC-Clermont
-[[https://github.com/sbinet]]
-[[https://twitter.com/0xb1ns][@0xbins]]
-[[mailto:sebastien.binet@clermont.in2p3.fr]]
