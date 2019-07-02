@@ -1,0 +1,160 @@
+Go-HEP: Updates
+LPC-ITT, 2019-07-04
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Go-HEP
+
+* What can Go bring to science and HEP?
+
+- a *simple* language anybody can learn in days, proficient in a couple of months
+- *standard* tool to handle *dependencies* (across OSes, architectures)
+- *fast* edit-compile-run development cycle
+- *simple* deployment (on clusters, laptops, ...), *easiest* *cross-compilation* system to date
+- fast at runtime, builtin tools for profiling (CPU, mem, flamegraph, tracing)
+- support for *concurrency* programming and multi-core machines
+- no magic, no voodoo, *reduce* disconnect b/w HEP sw experts and HEP users
+- *easy* code sharing: between packages, between experiments, between scientists
+- easier *reproducibility* and cross-check tests
+- *refactoring* tools & linters, builtin/standard testing tools
+
+.link https://sbinet.github.io/posts/2018-07-31-go-hep-manifesto
+
+* Go-HEP: new releases
+
+- `v0.15.0`: September 2018, [[https://go-hep.org/news/release-0.15.0/][release notes]]
+- `v0.16.0`: December 2018, [[https://go-hep.org/news/release-0.16.0/][release notes]]
+- `v0.17.1`: January 2019, [[https://go-hep.org/news/release-0.17.1/][release notes]]
+- `v0.18.0`: May 2019, [[https://go-hep.org/news/release-0.18.0/][release notes]]
+- `v0.19.0`: June 2019, [[https://go-hep.org/news/release-0.19.0/][release notes]]
+
+* 
+
+`v0.16.0` introduced a new revamped package to better handle ROOT from Go...
+
+.image _figs/groot.jpg 450 _
+
+[[https://go-hep.org/x/hep/groot][go-hep.org/x/hep/groot]]
+
+* groot:
+
+Splitted `rootio` into:
+
+- `groot/rbase`: ROOT base objects (`TObject`, `TObjString`, `TName`, ...)
+- `groot/rcont`: ROOT container objects (`TList`, `TObjArray`, ...)
+- `groot/rhist`: `TH{1,2}x`, `TGraph{Errors}`
+- `groot/rtree`: `TBranch`, `TBasket`, `TTree`, `TChain`
+- `groot/rsrv`: basic toolkit for exposing ROOT objects via `http(s)`
+
+* ROOT I/O: groot
+
+[[https://go-hep.org][Go-HEP]] provides some amount of interoperability with `ROOT-{5,6}` via [[https://go-hep.org/x/hep/rootio]], a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [[https://golang.org][Go]]) that:
+
+- decodes and understands the structure of `TFiles`, `TKeys`, `TDirectory` and `TStreamerInfos`,
+- decodes, deserializes `TH1x`, `TH2x`, `TLeaf`, `TBranch` and `TTrees` (w/ support of user classes)
+
+Go-HEP (`>=v0.15.0`) has support for also *writing* `TH1x`, `TH2x`. Still in pure-Go.
+
+- `cmd/root-ls`, `root-cp`
+- `cmd/root-dump`, `cmd/root-diff`, `cmd/root-print`, `cmd/root-gen-datareader`
+- `cmd/root2csv`, `cmd/root2npy`, `cmd/root2yoda`, `cmd/yoda2root`
+- `cmd/root-srv`
+
+* root-srv (served by AppEngine)
+
+.image _figs/root-srv-screenshot.jpg 550 _
+
+* root-srv
+
+- added a REST API to `root-srv` (via `go-hep.org/x/hep/groot/rsrv`)
+- easier to implement your own `root-srv` like binary and integrate
+- might be used eventually by CMS
+
+* groot
+
+- `cmd/root-gen-streamer`: generates streamers given a ROOT or user type
+- `cmd/root-gen-type`: generates Go code from a given ROOT streamer
+- `cmd/root2arrow`: converts the content of a ROOT TTree to an ARROW file
+
+Support (reading) for `TMap`, `TArrayC`, `TArrayS`, `TArrayL`, `Float16_t`, `Double32_t`.
+
+* groot/rsql
+
+Added a new package `groot/rsql/rsqldrv` that exposes ROOT files+trees as an SQL database:
+
+- ability to use the `database/sql` [[https://godoc.org/database/sql][package]] from Go's stdlib
+- send queries
+
+  SELECT (nEles, jetPt) FROM mytree WHERE nJets > 2
+
+`groot/rsql` is a layer atop to easily create histograms or plow through data (a-la `TTree::Draw` and `TTree::Scan`)
+
+  h, err := rsql.ScanH1D(tree, "SELECT jetPt FROM tree", nil)
+  h, err := rsql.ScanH1D(tree, "SELECT jetPt FROM tree", hbook.NewH1D(100, 0, 500))
+
+* groot/rarrow
+
+Leverages (my) work on the [[https://arrow.apache.org][Apache Arrow]] project that provides a Go implementation of the Arrow data format (and data exchange protocol) to expose a ROOT TTree as an Arrow Table or Arrow Record.
+
+*Goal:* expose ROOT TTrees as Arrow data so DataScience/BigData/ML toolkits can be leveraged, in a multi-language environment.
+
+See:
+
+.link https://blog.gopheracademy.com/advent-2018/go-arrow/
+
+* Arrow: A cross-language development platform for in-memory data
+
+.image _figs/simd.png 550 _
+
+* Arrow
+
+.image _figs/copy.png 450 _
+
+* Arrow
+
+.image _figs/shared.png 450 _
+
+* XRootD
+
+Thanks to GSoC-2018, Go-HEP has a client for [[http://xrootd.org][XRootD]] in pure-Go:
+
+- login, auth (`unix`, `krb5`, `pwd`)
+- mkdir, ls, cp, ...
+- FUSE client (in pure-Go as well)
+
+and the beginnings of a pure-Go server too.
+
+All of this available on Linux, Darwin, Windows, ...
+
+Thanks to:
+
+.link https://github.com/EgorMatirov Mikhail Ivchenko (a.k.a @EgorMatirov)
+
+Go-XRootD has sparked interest from 2 development teams [[https://home.cern][@CERN]]:
+
+- [[https://cernbox.web.cern.ch/][CERNBox]]: migrating from PHP to Go
+- [[http://information-technology.web.cern.ch/][CERN IT (stockage)]]: interest in integrating with a Go backup tool ([[https://rclone.org/][rclone]]).
+
+* xrootd
+
+- more client requests implemented (`kXR_query`, `kXR_prepare`, `kXR_endsess`, `kXR_locate`, `kXR_decrypt`, `kXR_admin`)
+- new server requests implemented (`ping`, `mkdir`, `rm`, and `rmdir`)
+
+* Perspectives
+
+- work on writing TTrees has started in `groot/rtree`
+- continue work on [[https://github.com/go-hep/examples/tree/master/groot/bench-opendata][HSF OpenData benchmarks]] (A list of example analysis challenges and solved implementations of them in various languages)
+- no GSoC student this year (despite 2 proposals: [[https://hepsoftwarefoundation.org/gsoc/2019/proposal_GoHEPhifact.html][hifact]] and [[https://hepsoftwarefoundation.org/gsoc/2019/proposal_GoHEPgroot.html][dframe]]): not as many candidates as last years, not as good as last years
+- no local student on `Go-HEP` either (no candidate)
+
+* Thank you
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+[[https://github.com/sbinet]]
+[[https://twitter.com/0xb1ns][@0xbins]]
+[[mailto:sebastien.binet@clermont.in2p3.fr]]
