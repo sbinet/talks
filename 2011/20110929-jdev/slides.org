@@ -1,0 +1,139 @@
+#+TITLE:     D\'eveloppeur \`a l'IN2P3
+#+AUTHOR:    S\'ebastien Binet
+#+EMAIL:     sebastien.binet@cern.ch
+#+INSTITUTE: LAL/IN2P3
+#+DATE:      2011-09-29
+#+DESCRIPTION: jdev
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+startup: beamer
+#+startup: showall
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+LaTeX_HEADER: \usetheme[titlepagelogo=lal-logo]{Binet}
+#+latex_header: \usepackage{minted}
+#+latex_header: \usemintedstyle{emacs}
+#+latex_header: \pgfdeclareimage[height=1.5cm]{lal-logo}{lal-logo-eps-converted-to}
+#+latex_HEADER: \logo{\pgfuseimage{lal-logo}}
+#+latex_HEADER: \hypersetup{colorlinks,linkcolor=blue,urlcolor=blue}
+
+# #+BEAMER_HEADER_EXTRA: \logo{\includegraphics{lal-logo.eps}}
+#+BEAMER_HEADER_EXTRA: \institute[LAL]{\insertlogo\hskip0.1cm}
+
+#+BEAMER_FRAME_LEVEL: 2
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+
+* jdev
+
+** Qui suis-je ?
+
+- @2008-...:@ Post-doc au LAL (Orsay)
+    - d\'eveloppeur sur le cadriciel ~ATHENA~ d'ATLAS
+    - d\'eveloppeur d'outils logiciels pour les analyses de physique
+    - /R\&D/ multi-c\oe urs
+
+- @2005-2008:@ Post-doc \`a LBL (Berkeley)
+    - d\'eveloppeur sur le cadriciel ~ATHENA~ d'ATLAS
+    - d\'eveloppeur d'outils pour les analyses de physique
+    - d\'eveloppement d'outils logiciels pour le suivi des performances
+    - /R\&D/ multi-c\oe urs
+
+- @2002-2005:@ Doctorant au LPC (Clermont-Fd)
+    - analyse de physique aupr\`es du d\'etecteur ATLAS
+    - d\'eveloppement d'outils logiciels pour la physique
+
+** Structure d'accueil
+
+Laboratoire de l'Acc\'el\'erateur Lin\'eaire.
+
+- Unit\'e Mixte de Recherche IN2P3/CNRS - Paris-Sud (UMR 8607)
+- Centr\'e sur la Physique des Particules
+- + forte composante en Cosmologie et Astrophysique
+
+- Mission de transmission des connaissances
+  - /via/ l'enseignement
+  - /via/ la communication
+
+- Services techniques et administratifs
+- Services de conception et r\'ealisation en m\'ecanique et
+  \'electronique
+- Services technologies de l'information
+
+- Programme de /R\&D/ dans le domaine des acc\'el\'erateurs
+
+** LAL
+
+- 352 agents (2011/01/01)
+
+  - 126 chercheurs
+
+    - 49 CNRS
+    - 11 enseignants
+    - 12 \'em\'erites
+    - 20 post-docs \& CDDs
+    - 32 doctorants
+    - 2 \'etudiants master
+
+  - 226 Ing\'enieurs Techniciens
+    - 29 CDDs
+    - 4 ITARFs
+
+** Activit\'e - Contexte
+
+- d\'eveloppement de logiciel pour la collaboration ATLAS
+
+- contexte exp\'erimental
+
+  - ATLAS - trigger
+
+- outils
+
+  - savannah
+  - LXR (Linux Cross Referencer)
+  - NICOS (NIghtly COntrol System)
+  - ATN (Atlas Testing Nightly)
+  - RTT (RunTime Tester)
+  - FCT (Full Chain Test)
+  - CMT (Configuration Management Tool)
+  - WLCG (Worldwide LHC Computing Grid)
+  - pacman (package manager)
+  - RPM
+
+  - SVN, CVS (->2009)
+
+  - Tag Collector
+
+** Illustration
+
+[[file:figs/global_evolution_files30.png]]
+
+
+# Titre: Portrait de développeur de l'ESR
+#              Francois Rincon, chercheur dans le laboratoire IRAP
+#              Fonction exercee: "recherche dans le domaine, 
+# responsabilite scientifique X, ..."
+
+# Plan:
+
+#      Description du labo (2')
+
+#      Description de sa fonction (3')
+
+#      Description de son activite sous l'angle des "processus metiers" du 
+# developpement et de la recherche. En quelque sorte: pourquoi et comment 
+# je developpe du logiciel et comment cela s'integre dans mon activite de 
+# recherche ou dans l'activite de recherche que je soutiens. (9')
+
+#      Illustration par un  projet (1')
+
+
+## ref.
+## http://bourricot.cern.ch/dq2/accounting/global_view/0/
