@@ -1,0 +1,602 @@
+#+TITLE:     Musings with 'Go' - addressing the multicore issues of today and the manycore problems of tomorrow ?
+#+AUTHOR:    S\'ebastien Binet
+#+EMAIL:     sebastien.binet@cern.ch
+#+INSTITUTE: LAL/IN2P3
+#+DATE:      2011-10-20
+#+DESCRIPTION: go in HEP
+#+KEYWORDS: golang multicore bindings
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+startup: showall
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger]
+#+LaTeX_HEADER: \usetheme[titlepagelogo=lal-logo]{Binet}
+#+latex_header: \usepackage{minted}
+#+latex_header: \usemintedstyle{emacs}
+#+latex_header: \pgfdeclareimage[height=1.5cm]{lal-logo}{lal-logo-eps-converted-to}
+#+latex_HEADER: \logo{\pgfuseimage{lal-logo}}
+#+latex_HEADER: \hypersetup{colorlinks,linkcolor=blue,urlcolor=blue}
+
+# #+BEAMER_HEADER_EXTRA: \logo{\includegraphics{lal-logo.eps}}
+#+BEAMER_HEADER_EXTRA: \institute[LAL]{\insertlogo\hskip0.1cm}
+
+#+BEAMER_FRAME_LEVEL: 2
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+
+* go in HEP
+
+** Introduction
+
+- Moore's law ceased to provide the traditional single-threaded
+  performance increases
+
+  - clock-frequency wall of 2003
+
+  - still deliver increases in @transistor density@
+
+- multicore systems become the norm
+
+- need to "go parallel" to get scalability
+
+** In a ~C++~ world...
+- parallel programming in ~C++~ is @doable@:
+  - ~C/C++~ "locking + threads" (~pthreads~, ~WinThreads~)
+    - excellent performance
+    - good generality
+    - relatively @low productivity@
+  - multi-threaded applications...
+    - hard to get right
+    - hard to @keep@ right
+    - hard to @keep@ efficient and optimized across releases
+  - multi-process applications...
+    - \`a la ~AthenaMP/GaudiMP~
+    - leverage ~fork+COW~ on ~GNU/Linux~
+    - event-level based parallelism
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+ \begin{center}
+ Parallel programming in ~C++~ is \alert{doable}, \\
+ but \alert{\emph{no panacea}}
+ \end{center}
+
+
+** In a ~C++~ world...
+- in ~C++03~, we have libraries to help with parallel programming
+  - ~boost::lambda~
+  - ~boost::MPL~
+  - ~boost::thread~
+  - Threading/Array Building Blocks (TBB/ArBB)
+  - Concurrent Collections (CnC)
+  - ~OpenMP~
+  - ...
+
+
+** In a ~C++11~ world...
+- in ~C++11~, we get:
+  - \lambda functions (and a new syntax to define them)
+  - ~std::thread~, 
+  - ~std::future~, 
+  - ~std::promise~
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+ \begin{center}
+ Helps taming the beast \\
+ ... at the price of sprinkling templates everywhere... \\
+ ... and complicating further a not so simple language...
+ \end{center}
+
+
+** In a ~C++11~ world...
+
+*** \quad                                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+yay! for ~C++11~, but old problems are @still there...@
+
+
+*** \quad                                                          :B_normal:
+    :PROPERTIES:
+    :BEAMER_env: normal
+    :END:
+
+- @build scalability@
+  - templates 
+  - headers system
+  - still no module system (WG21 - N2073)
+    - maybe in the next Technical Report ?
+
+\vspace
+
+- @code distribution@
+  - no ~CPAN~ like readily available infrastructure (and cross-platform) for ~C++~
+  - remember ~ROOT/BOOT~ ? (CHEP-06)
+ 
+** Time for a new language ?
+
+*** \quad                                                       :B_quotation:
+    :PROPERTIES:
+    :BEAMER_env: quotation
+    :END:
+ "Successful new languages build on existing languages and where possible, support legacy software. C++ grew our of C. java grew out of C++. To the programmer, they are all one continuous family of C languages."
+ (T. Mattson)
+
+
+*** \quad                                                          :B_normal:
+    :PROPERTIES:
+    :BEAMER_env: normal
+    :END:
+
+- notable exception (which confirms the rule): @python@
+
+
+*** \quad                                                      :B_alertblock:
+    :PROPERTIES:
+    :BEAMER_env: alertblock
+    :END:
+    Can we have a language:
+    - as easy as @python@,
+    - as fast (or nearly as fast) as ~C/C++/FORTRAN~,
+    - with none of the deficiencies of ~C++~,
+    - and is multicore/manycore friendly ?
+
+** \quad
+
+#+begin_latex
+\begin{center}
+Why not {\texttt Go} ?\\
+\href{http://golang.org}{{\color{blue}golang.org}}
+\end{center}
+#+end_latex
+
+** Elements of ~go~
+
+- obligatory ~hello world~ example...
+
+#+begin_src go
+package main
+import "fmt"
+func main() {
+    fmt.Println("Hello, World")
+}
+#+end_src
+
+file:figs/golang-logo.pdf
+
+** Elements of ~go~ - II
+
+- founding fathers:
+
+  - Russ Cox, Robert Griesemer, Ian Lance Taylor
+
+  - Rob Pike, Ken Thompson
+
+- concurrent, compiled
+
+- @garbage collected@
+
+- an open-source general programming language
+
+- best of both 'worlds':
+
+  - feel of a @dynamic language@
+
+    - limited verbosity thanks to *type inference system*, map, slices
+
+  - safety of a @static type system@
+
+  - compiled down to machine language (so it is fast)
+
+    - goal is within 10% of @C@
+
+- @object-oriented@ (but w/o classes), @builtin reflection@
+
+- first-class functions with @closures@
+
+- @duck-typing@ \`a la ~python~
+
+** ~Go~ concurrent
+
+*** goroutines                                                      :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+
+  - a function executing concurrently as other goroutines @in the same address space@
+
+  - starting a goroutine is done with the ~go~ keyword
+
+    - ~go myfct(arg1, arg2)~
+
+  - growable stack 
+
+    - @lightweight threads@ 
+
+    - starts with a few kB, grows (and shrinks) as needed
+
+      - now, also available in ~GCC~ 4.6 (thanks to the ~GCC-Go~ front-end)
+
+    - no stack overflow
+
+** ~Go~ concurrent - II
+
+*** channels                                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
+
+  - provide (type safe) communication and synchronization
+
+#+begin_src go
+ // create a channel of mytype
+ my_chan := make(chan mytype)
+ my_chan <- some_data    // sending data
+ some_data = <- my_chan  // receiving data
+#+end_src
+
+  - ~send~ and ~receive~ are atomic
+
+*** \quad                                                      :B_alertblock:
+    :PROPERTIES:
+    :BEAMER_env: alertblock
+    :END:
+ \begin{center}
+ \emph{
+ "Do not communicate by sharing memory; instead, \\
+  share memory by communicating"
+ }
+ \end{center}
+
+
+** Go concurrent - III
+
+file:figs/evtproc-mp-next-evt-0-go.pdf
+
+
+** Go concurrent - IV
+
+file:figs/evtproc-mp-next-evt-1-go.pdf
+
+** Go concurrent - V
+
+file:figs/evtproc-mp-next-evt-2-go.pdf
+
+** Go concurrent - VI
+
+file:figs/evtproc-mp-next-evt-3-go.pdf
+
+
+** Go concurrent - VII
+
+file:figs/evtproc-diagram.pdf
+
+
+** Go concurrent with ~ng-go-gaudi~
+
+- very minimal implementation of ~Gaudi~ in ~Go~:
+
+  - ~appmgr~
+
+  - ~evtproc~
+
+  - ~datastoresvc~
+
+  - ~algorithm~, ~messages~, ~tools~, ~services~, ~properties~
+
+  - simple ~JSON~ output stream
+
+  - simple ~go~ bytestream (~gob~) output stream
+
+  - simple test algorithms (~adder, counter, ...~)
+
+** A simple ~jobo.py~ example
+
+- create 500 ~adder~ algorithms,  500 ~dumper~ algorithms
+
+- process 10000 events, spawn off 5000 concurrent workers
+
+file:figs/big-jobo.pdf
+
+
+** Non-elements of ~Go~
+
+- @no@ dynamic libraries (frown upon)
+
+- @no@ dynamic loading (yet)
+
+  - but can either rely on separate processes
+
+    - ~IPC~ is made easy /via/ the ~netchan~ package
+
+  - or rebuild executables on the fly
+
+    - @compilation@ of ~Go~ code is @fast@ 
+
+    - even faster than ~FORTRAN~ and/or ~C~
+
+- @no@ templates/generics
+
+  - still open issue
+
+  - looking for the proper ~Go~ -friendly design
+
+- @no@ operator overloading
+
+
+** Go from anywhere to everywhere
+
+- code compilation and distribution are (/de facto/) standardized
+
+- put your code on some repository
+
+  - ~bitbucket~, ~launchpad~, ~googlecode~, ~github~, ...
+
+- check out, compile and install in one go with @goinstall@:
+
+  - ~goinstall bitbucket.org/binet/igo~
+
+  - no ~root~ access required
+
+  - automatically handle @dependencies@
+
+\vspace
+
+- ~goinstall~ -able packages are listed on the dashboard:
+
+  - [[http://godashboard.appspot.com][godashboard.appspot.com]]
+#  - \href{godashboard.appspot.com}{{\color{blue}godashboard.appspot.com}}
+
+
+** Go and C/C++
+
+Interfacing with ~C~:
+
+- done with the ~CGo~ foreign function interface
+
+- ~#include~ the header file to the ~C~ library to be wrapped
+
+- access the ~C~ types and functions under the artificial "C" package
+
+#+begin_src go
+package myclib
+// #include <stdio.h>
+// #include <stdlib.h>
+import "C"
+import "unsafe"
+
+func foo(s string) {
+  c_str := C.CString(s)  // create a C string from a Go one
+  C.fputs(c_str, C.stdout)
+  C.free(unsafe.Pointer(c_str))
+}
+#+end_src
+
+** Go and C/C++
+
+Interfacing with ~C++~:
+
+- a bit more involved
+- uses ~SWIG~ 
+
+  - you write the ~SWIG~ interface file for the library to be wrapped
+  - ~SWIG~ will generate the ~C~ stub functions 
+  - which can then be called using the ~CGo~ machinery
+  - the ~Go~ files doing so are automatically generated as well
+
+- handles overloading, multiple inheritance
+- allows to provide a ~Go~ implementation for a ~C++~ abstract class
+
+*** Problem                                                    :B_alertblock:
+    :PROPERTIES:
+    :BEAMER_env: alertblock
+    :END:
+    ~SWIG~ doesn't understand all of ~C++03~
+    - /e.g./ can't parse ~TObject.h~
+
+** Go and FORTRAN
+
+Two cases:
+
+- lucky enough to wrap "legacy" ~Fortran 03~ code with the ~ISO C~
+  interface:
+
+  - just use ~CGo~
+
+- wrapping legacy ~F77~ code:
+
+  - write the ~C~ interface code
+
+  - use ~CGo~ to call this interface code
+
+- examples:
+
+  - [[http://bitbucket.org/binet/go-hepevt]]
+
+  - [[http://bitbucket.org/binet/go-herwig]]
+
+
+- no automatic press-button solution
+
+  - although there is no technical blocker to write such a thing
+
+  - this has been done for ~python~ (/e.g.:/ ~fwrap~)
+
+
+
+** Go and ROOT
+
+- step 1 of evil plan for (~HENP~) world domination: 
+
+  - \alert{~Go~ bindings to ~ROOT~}
+
+- [[http://bitbucket.org/binet/go-croot]]
+
+  - hand written ~CGo~ bindings to a hand written library exposing a
+    ~C~ interface to (a subset of) ~ROOT~ 
+
+    - ~TFile~, ~TTree/TChain~
+    - ~Reflex~, ~Cint~
+    - ~TRandom~
+
+  - handles automatic conversion of ~Go~ structs into their ~C~
+    counter-part
+
+  - and /vice versa/
+
+    - two-way conversion is done by connecting the ~C++~ introspection
+      library (~Reflex~) with its ~Go~ counter-part (the ~reflect~
+      package)
+
+** Go and ROOT
+
+- running the ~ROOT~ ~TTree~ example, in ~C++~, via the ~C API~ and
+  through ~go-croot~ over 10000000 events:
+
+\begin{verbatim}
+ 29.04s user  1.03s system 86% cpu 34.83 total (C++)
+ 29.12s user  1.09s system 85% cpu 35.48 total (CRoot)
+ 44.83s user  1.24s system 87% cpu 54.36 total (go-croot)
+
+$ uname -a
+Linux farnsworth 3.0-ARCH #1 SMP PREEMPT 
+x86_64 Intel(R) Core(TM)2 Duo 
+CPU T9400 @ 2.53GHz GenuineIntel GNU/Linux
+
+\end{verbatim}
+
+
+additional overhead /w.r.t./ ~CRoot~
+
+- different calling conventions (b/w ~C~ and ~Go~) need to be handled
+
+- /Note:/ for such loopy-code, using ~GCC-Go~ would be better
+
+
+** Conclusions
+
+Can ~Go~ address the (non-) multicore problems of yesterday ?
+
+- @yes:@
+
+  - productivity (dev cycle of a scripting language)
+
+  - build scalability (package system)
+
+  - deployment (goinstall)
+
+  - support for "legacy" ~C/C++/Fortran~ software (cgo+swig)
+
+\vspace
+
+Can ~Go~ address the multicore issues of tomorrow ?
+
+- @yes:@
+
+  - @easier@ to write concurrent code with the builtin abstractions
+    (goroutines, channels)
+
+  - @easier@ to have efficient concurrent code (stack management)
+
+  - still have to actually write efficient concurrent code, though...
+
+    - work partitioning, load balancing, ...
+
+- *but:* no such thing as a magic wand for multicores/manycores
+
+
+** Prospects - what's missing ?
+
+- better support for ~C++~ libraries
+
+  - building on ~ROOT~ ~C++~ dictionary infrastructure
+
+    - now using ~GCC-Xml~ + a modified version of ~genreflex~
+
+    - tomorrow using ~LLVM/CLang~
+
+  - automatically generate the ~Go~ bindings
+
+\vspace
+
+- bind more ~HEP~ libraries ?
+
+- provide a ~Go~ interpreter ?
+
+  - [[http://bitbucket.org/binet/igo][bitbucket.org/binet/igo]]
+
+
+** Resources
+
+- [[http://golang.org][golang.org]]
+- [[http://root.cern.ch][root.cern.ch]]
+- [[http://www.swig.org/][swig.org]]
+- [[http://godashboard.appspot.com][godashboard.appspot.com]]
+- [[http://bitbucket.org/binet/go-hepevt][bitbucket.org/binet/go-hepevt]]
+- [[http://bitbucket.org/binet/go-herwig][bitbucket.org/binet/go-herwig]]
+- [[http://bitbucket.org/binet/go-croot][bitbucket.org/binet/go-croot]]
+- [[http://bitbucket.org/binet/ng-go-gaudi][bitbucket.org/binet/ng-go-gaudi]]
+- [[http://fortrancython.wordpress.com/][fwrap]]
+- [[http://llvm.org/][LLVM]]
+- [[http://clang.llvm.org/][CLang]]
+
+
+# Can 'go' address the multicore issues of today and the manycore
+# problems of tomorrow ? 
+# ===============================================================
+
+# Sebastien Binet (LAL/IN2P3)
+
+
+# Current HENP libraries and frameworks were written before multicore
+# systems became widely deployed and used.
+# From this environment, a 'single-thread' processing model naturally
+# emerged but the implicit assumptions it encouraged are greatly
+# impairing our abilities to scale in a multicore/manycore world.
+
+# While parallel programming - still in an intensive phase of R&D
+# despite the 30+ years of literature on the subject - is an obvious
+# topic to consider, other issues (build scalability, code clarity, code
+# deployment and ease of coding) are worth investigating when preparing
+# for the manycore era.
+# Moreover, if one wants to use another language than C++, a language
+# better prepared and tailored for expressing concurrency, one also
+# needs to ensure a good and easy reuse of already field-proven
+# libraries.
+
+# We present the work resulting from such investigations applied to the
+# 'Go' programming language.
+# We first introduce the concurrent programming facilities 'Go' is
+# providing and how its module system addresses the build scalability and
+# dependency hell issues.
+# We then describe the process of leveraging the many (wo)man-years put into
+# scientific Fortran/C/C++ libraries and making them available to the Go
+# ecosystem.
+# The ROOT data analysis framework, the C-BLAS library and the Herwig-6
+# MonteCarlo generator will be taken as examples.
+# Finally, performances of a small analysis written in Go and using
+# Fortran and C++ libraries will be discussed.
+
+# references:
+# Go:       http://golang.org
+# ROOT:     http://root.cern.ch
+# C-BLAS:   http://www.netlib.org/clapack/cblas/
+# Herwig-6: http://hepwww.rl.ac.uk/theory/seymour/herwig/
+
+
+# Successful new languages build on existing languages and where possible, support legacy software. C++ grew our of C. java grew out of C++. To the programmer, they are all one continuous family of C languages. 
+

@@ -1,0 +1,41 @@
+Can 'go' address the multicore issues of today and the manycore
+problems of tomorrow ? 
+===============================================================
+
+Sebastien Binet (LAL/IN2P3)
+
+
+Current HENP libraries and frameworks were written before multicore
+systems became widely deployed and used.
+From this environment, a 'single-thread' processing model naturally
+emerged but the implicit assumptions it encouraged are greatly
+impairing our abilities to scale in a multicore/manycore world.
+
+While parallel programming - still in an intensive phase of R&D
+despite the 30+ years of literature on the subject - is an obvious
+topic to consider, other issues (build scalability, code clarity, code
+deployment and ease of coding) are worth investigating when preparing
+for the manycore era.
+Moreover, if one wants to use another language than C++, a language
+better prepared and tailored for expressing concurrency, one also
+needs to ensure a good and easy reuse of already field-proven
+libraries.
+
+We present the work resulting from such investigations applied to the
+'Go' programming language.
+We first introduce the concurrent programming facilities 'Go' is
+providing and how its module system addresses the build scalability and
+dependency hell issues.
+We then describe the process of leveraging the many (wo)man-years put into
+scientific Fortran/C/C++ libraries and making them available to the Go
+ecosystem.
+The ROOT data analysis framework, the C-BLAS library and the Herwig-6
+MonteCarlo generator will be taken as examples.
+Finally, performances of a small analysis written in Go and using
+Fortran and C++ libraries will be discussed.
+
+references:
+Go:       http://golang.org
+ROOT:     http://root.cern.ch
+C-BLAS:   http://www.netlib.org/clapack/cblas/
+Herwig-6: http://hepwww.rl.ac.uk/theory/seymour/herwig/
