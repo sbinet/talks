@@ -1,0 +1,12 @@
+digraph dataflow {
+	"t1-ints1"->"t2";
+	"t2"->"t1-ints1-massaged";
+	"t1"->"t1-ints1";
+	"t1"->"t2-ints2";
+	"t1" [ "node"="task", "shape"="component" ];
+	"t1-ints1" [ "node"="data", "type"="int64" ];
+	"t1-ints1-massaged" [ "node"="data", "type"="int64" ];
+	"t2" [ "node"="task", "shape"="component" ];
+	"t2-ints2" [ "node"="data", "type"="int64" ];
+
+}
