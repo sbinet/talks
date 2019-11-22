@@ -1,0 +1,204 @@
+Fer: Updates
+ALICE WP4, 2019-11-22
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* fer
+
+[[https://github.com/alice-go/fer][fer]] is a pure-[[https://golang.org][Go]] based implementation of the `FairMQ` distributed processing toolkit.
+
+  $> mkdir tmp && cd tmp
+  $> time go get github.com/alice-go/fer/...
+  real  0m9.229s
+  user  0m1.812s
+  sys   0m0.614s
+
+Everything is installed and compiled (including dependencies, recursively) in one go.
+
+
+See [[https://talks.godoc.org/github.com/sbinet/talks/2018/2018-06-15-alice-ff/talk.slide][presentation (2018-06-15)]] from last time for more detailed informations.
+But, in a nutshell, `fer` supports:
+
+- devices, topologies, FSM, `JSON` configuration
+- `0MQ` and `nanomsg` transport
+- `ipc`, `tcp`, `inproc`
+
+* fer & ROOT
+
+`fer` only deals with the `FairMQ` side of things: no ROOT support _per_ _se_.
+
+But [[https://go-hep.org/x/hep/groot][Go-HEP/groot]] provides some amount of ROOT support (also in pure-Go):
+
+- read/write of `TObject`, `TNamed`, `TObjString`, `T{Hash,}List`, `TObjArray`, `TMap`
+- read/write of `TH1x`, `TH2x`, `TGraph`, `TGraph{Asymm,}Errors`, `TArrayX`
+- read only support for `TTree`, `TBranch{,Element}`, `TLeafXXX`, `TChain`
+- write support for flat `TTree` (and `TBranch`, `TLeafXXX`) with `GoHEP@v0.20.0`
+
+Work on providing write support for `TTrees` has just begun (starting with only supporting flat-ntuples): [[https://godoc.org/go-hep.org/x/hep/groot/rtree#example-package--CreateFlatNtuple][see there]].
+
+
+`fer` can be used now as sink for (some) ROOT based messages, but not as a source for ROOT based messages (well, except for histograms.)
+
+* fer & Arrow
+
+Similarly, `fer` does not handle [[https://arrow.apache.org][Apache Arrow]] aspects.
+But [[https://go-hep.org][Go-HEP]] provided FTEs to implement a Go package for Arrow:
+
+.link https://godoc.org/github.com/apache/arrow/go/arrow
+.image _figs/simd.png 400 _
+
+* fer & Arrow
+
+All Arrow arrays have been implemented (`{Ui,I}ntX`, `FloatXX`, `Struct`, `List`, ...) *except* for `Dictionary`, `Union`, `Extension` and `Map`. (`Decimal` support is minimal.)
+
+.link https://godoc.org/github.com/apache/arrow/go/arrow/array
+
+Arrow IPC support is complete (`>=` `v0.14.0`) for all implemented arrays, and part of the official cross-languages (`C++`, `Java`, `JavaScript`, `Go`) integration tests.
+
+.link https://godoc.org/github.com/apache/arrow/go/arrow/ipc
+
+Building on `ipc`, two commands have been provided:
+
+.link https://godoc.org/github.com/apache/arrow/go/arrow/ipc/cmd/arrow-ls
+.link https://godoc.org/github.com/apache/arrow/go/arrow/ipc/cmd/arrow-cat
+
+* arrow-ls
+
+  $> arrow-ls -h
+  Command arrow-ls displays the listing of an Arrow file.
+  
+  Usage: arrow-ls [OPTIONS] [FILE1 [FILE2 [...]]]
+  
+  Examples:
+  
+   $> arrow-ls ./testdata/primitives.data
+   version: V4
+   schema:
+     fields: 11
+       - bools: type=bool, nullable
+       - int8s: type=int8, nullable
+       - int16s: type=int16, nullable
+       - int32s: type=int32, nullable
+       - int64s: type=int64, nullable
+       - uint8s: type=uint8, nullable
+       - uint16s: type=uint16, nullable
+       - uint32s: type=uint32, nullable
+       - uint64s: type=uint64, nullable
+       - float32s: type=float32, nullable
+       - float64s: type=float64, nullable
+   records: 3
+
+* arrow-cat
+
+  $> arrow-cat -h
+  Command arrow-cat displays the content of an Arrow stream or file.
+  
+  Usage: arrow-cat [OPTIONS] [FILE1 [FILE2 [...]]]
+  
+  Examples:
+  
+   $> arrow-cat ./testdata/primitives.data
+   version: V4
+   record 1/3...
+     col[0] "bools": [true (null) (null) false true]
+     col[1] "int8s": [-1 (null) (null) -4 -5]
+     col[2] "int16s": [-1 (null) (null) -4 -5]
+     col[3] "int32s": [-1 (null) (null) -4 -5]
+     col[4] "int64s": [-1 (null) (null) -4 -5]
+     col[5] "uint8s": [1 (null) (null) 4 5]
+     col[6] "uint16s": [1 (null) (null) 4 5]
+     col[7] "uint32s": [1 (null) (null) 4 5]
+     col[8] "uint64s": [1 (null) (null) 4 5]
+     col[9] "float32s": [1 (null) (null) 4 5]
+     col[10] "float64s": [1 (null) (null) 4 5]
+   record 2/3...
+     col[0] "bools": [true (null) (null) false true]
+   [...]
+
+* Testing with AliceO2Group/Run2ESDConverter
+
+.link https://github.com/AliceO2Group/Run2ESDConverter
+.link https://www.dropbox.com/s/2deyy0x2bwkfyqr/test.arrow?dl=1
+
+  $> go get github.com/apache/arrow/go/arrow/...
+  $> cat ./test.arrow | arrow-cat
+  record 1...
+    col[0] "fID4Tracks": [0 0 0 0 0 0 ...]
+    col[1] "fX": [0.024681108 -0.32146156 -0.2422095 -0.14354491 ...]
+    col[2] "fAlpha": [2.847351 -1.4050441 ...]
+    col[3] "fY": [-0.32964134 0.113896154 ...]
+    col[4] "fZ": [-6.9270973 -6.942675 ...]
+    col[5] "fSnp": [1.3946633e-10 -7.809399e-11 ...]
+    col[6] "fTgl": [0.683091 -0.7708971 ...]
+    col[7] "fSigned1Pt": [-1.9531516 1.3528225 -1.2555588  ...]
+  record 1...
+    col[0] "fCYY": [0.0002168037 0.00010494422 ...]
+    col[1] "fCZY": [5.4385127e-06 1.0856621e-06 ...]
+    [...]
+    col[14] "fC1Pt21Pt2": [0.00052152964 0.00013535273 ...]
+
+* 
+
+   $> arrow-ls ./test.arrow 
+   schema:
+     fields: 8
+       - fID4Tracks: type=int32, nullable
+       - fX: type=float32, nullable
+       - fAlpha: type=float32, nullable
+       - fY: type=float32, nullable
+       - fZ: type=float32, nullable
+       - fSnp: type=float32, nullable
+       - fTgl: type=float32, nullable
+       - fSigned1Pt: type=float32, nullable
+     metadata: ["description": "TRACKPAR"]
+   records: 1
+   schema:
+     fields: 15
+       - fCYY: type=float32, nullable
+       - fCZY: type=float32, nullable
+       - fCZZ: type=float32, nullable
+       - fCSnpY: type=float32, nullable
+       - fCSnpZ: type=float32, nullable
+       - fCSnpSnp: type=float32, nullable
+       - fCTglY: type=float32, nullable
+       - fCTglZ: type=float32, nullable
+       - fCTglSnp: type=float32, nullable
+       - fCTglTgl: type=float32, nullable
+       - fC1PtY: type=float32, nullable
+       - fC1PtZ: type=float32, nullable
+       - fC1PtSnp: type=float32, nullable
+       - fC1PtTgl: type=float32, nullable
+       - fC1Pt21Pt2: type=float32, nullable
+     metadata: ["description": "TRACKPARCOV"]
+   records: 1
+
+* fer & Arrow
+
+`fer` could use `go-arrow` to create devices that are sinks or sources of Arrow messages.
+
+- [[https://go-hep.org][Go-HEP/groot]] provides a `ROOT/TTree` `->` `Arrow/{Table,Record}` converter: [[https://godoc.org/go-hep.org/x/hep/groot/rarrow][groot/rarrow]]
+
+Any interest in having such a thing incorporated in some unit test(s)?
+(first test of [[https://godoc.org/github.com/apache/arrow/go/arrow/ipc/cmd/arrow-cat][go-arrow]] on the input test file from `Run2ESDConverter` uncovered an issue on the `C++` side.)
+
+* fer & O2
+
+More generally, any interest in:
+
+- incorporating `fer` as part of the unit test system (deps: [[https://golang.org][Go]], already provided for [[https://github.com/AliceO2Group/Control][AliceO2Group/Control]]) ?
+- build O2 compatibility on top of `fer` (DPL, O2 messages) ?
+- integrate this into official unit tests ?
+- provide more CPU/Mem/throughput tests ?
+
+* Usage of fer and/or Go in ALICE
+
+- [[https://github.com/AliceO2Group/Control][AliceO2Group/Control]]: O2 control system
+- [[https://github.com/sbinet-alice/oxy][sbinet-alice/oxy]]: pkg to provide AliceO2 message semantics on top of fer (WIP)
+- [[https://github.com/alice-go/aligo][alice-go/aligo]]: pkg to manipulate OCDB files (WIP)
+- [[https://github.com/mrrtf/pigiron][mrrtf/pigiron]]: testbed for MCH mapping (WIP)
+- [[https://github.com/aphecetche/galo][aphecetche/galo]]: Utilities to inspect/play with Run2/3 Alice Muon Intermediate Data Formats (WIP)
+
