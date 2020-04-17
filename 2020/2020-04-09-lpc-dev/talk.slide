@@ -1,4 +1,4 @@
-LPC-Dev Update
+# LPC-Dev Update
 LPC-Dev, 2020-04-09
 
 Sebastien Binet
@@ -7,150 +7,145 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Activities
+## Activities
 
-- ALICE: [[https://github.com/alice-go/fer][fer]] a [[https://golang.org][Go]]-based distributed control framework compatible and inter-operable w/ [[https://github.com/AliceO2Group][Alice O2]]
-- ITT: [[https://go-hep.org][Go-HEP]], a set of [[https://golang.org][Go]]-based libraries for High Energy Physics
-- LSST: slow control of the LSST testbench
-- SoLiD: "embedded" environmental data probes (Raspi-3)
-- Tomuvol/MIM: rewrite of the DAQ in Go: [[https://github.com/go-lpc/mim][go-lpc/mim]]
+  - ALICE: [fer](https://github.com/alice-go/fer) a [Go](https://golang.org)-based distributed control framework compatible and inter-operable w/ [Alice O2](https://github.com/AliceO2Group)
+  - ITT: [Go-HEP](https://go-hep.org), a set of [Go](https://golang.org)-based libraries for High Energy Physics
+  - LSST: slow control of the LSST testbench
+  - SoLiD: "embedded" environmental data probes (Raspi-3)
+  - Tomuvol/MIM: rewrite of the DAQ in Go: [go-lpc/mim](https://github.com/go-lpc/mim)
 
-* ALICE
+## ALICE
 
-- wrote a paper + talk ("on behalf of ALICE collaboration") for [[https://indico.cern.ch/event/587955/timetable/?view=standard#388-exploring-polyglot-softwar][CHEP-2018]]
-- `go-fer` could be used by the Alice Control (already written in Go)
-- implemented an automated conversion tool for `ROOT` <=> `Arrow` formats (like in Alice)
+  - wrote a paper + talk ("on behalf of ALICE collaboration") for [CHEP-2018](https://indico.cern.ch/event/587955/timetable/?view=standard#388-exploring-polyglot-softwar)
+  - `go-fer` could be used by the Alice Control (already written in Go)
+  - implemented an automated conversion tool for `ROOT` \<=> `Arrow` formats (like in Alice)
 
-  But since August 2019, I've tried to present `fer` updates to the dedicated Alice meetings...
-  ... to no avail.
-  Clear that it isn't something Alice is interested in (I removed/archived all my repos w/o
-  a reaction).
-  
-  It's time for my Go skills to be used somewhere else (ATLAS-LPC would be ok with that...)
+	But since August 2019, I've tried to present `fer` updates to the dedicated Alice meetings...
+	... to no avail.
+	Clear that it isn't something Alice is interested in (I removed/archived all my repos w/o
+	a reaction).
 
-* LSST
+	It's time for my Go skills to be used somewhere else (ATLAS-LPC would be ok with that...)
+
+## LSST
 
 Slow control of the LSST testbench (in Go, with an HTML5+Polymer web interface):
 
-- [[https://github.com/go-lsst/fcs-lpc-motor-ctl][github.com/go-lsst/fcs-lpc-motor-ctl]]
-
+  - [github.com/go-lsst/fcs-lpc-motor-ctl](https://github.com/go-lsst/fcs-lpc-motor-ctl)
 
 running well.
 
-- implemented a REST API to control the testbench
-- implemented a Go client for that REST API
-- implemented a Python client for it as well
+  - implemented a REST API to control the testbench
+  - implemented a Go client for that REST API
+  - implemented a Python client for it as well
 
 Nothing to report, at the moment.
 
-* LSST - FourAcc
+## LSST - FourAcc
 
-- implemented a little web-server to analyze acceleration data for the LSST testbench.
-- Louis-Pierre likes it (it's easier than doing analysis with Excel for some reason)
-- [[https://github.com/lsst-lpc/fouracc][lsst-lpc/fouracc]]
+  - implemented a little web-server to analyze acceleration data for the LSST testbench.
+  - Louis-Pierre likes it (it's easier than doing analysis with Excel for some reason)
+  - [lsst-lpc/fouracc](https://github.com/lsst-lpc/fouracc)
 
 There's a CLI and a server, of course:
 
-  $> go get github.com/lsst-lpc/fouracc/cmd/fouracc
-  $> fouracc ./testdata/msr-accel-2019-08-06.csv 
-  fouracc: chunk size: 256
-  fouracc: file:       ./testdata/msr-accel-2019-08-06.csv
-  fouracc: data: 16384
-  fouracc: coeffs: 64
-  fouracc: dims: (c=64, r=128)
+	$> go get github.com/lsst-lpc/fouracc/cmd/fouracc
+	$> fouracc ./testdata/msr-accel-2019-08-06.csv 
+	fouracc: chunk size: 256
+	fouracc: file:       ./testdata/msr-accel-2019-08-06.csv
+	fouracc: data: 16384
+	fouracc: coeffs: 64
+	fouracc: dims: (c=64, r=128)
 
-  $> go get github.com/lsst-lpc/fouracc/cmd/fouracc-srv
-  $> fouracc-srv
-  fouracc-srv: http server listening on :8080
-  fouracc-srv: fname: msr-accel-2019-08-06.csv
-  fouracc-srv: chunks: 256
-  fouracc-srv: xs: 16384, 16384
-  fouracc-srv: coeffs: 64
-  fouracc-srv: dims: (c=64, r=128)
+	$> go get github.com/lsst-lpc/fouracc/cmd/fouracc-srv
+	$> fouracc-srv
+	fouracc-srv: http server listening on :8080
+	fouracc-srv: fname: msr-accel-2019-08-06.csv
+	fouracc-srv: chunks: 256
+	fouracc-srv: xs: 16384, 16384
+	fouracc-srv: coeffs: 64
+	fouracc-srv: dims: (c=64, r=128)
 
-* 
+## 
 
 .image _figs/fouracc-srv.png 550 _
 
-
-* SoLiD
+## SoLiD
 
 Implemented a little "embedded" program that reads environmental data from a few probes (H,P,T, luminosity) and present it behind a `web` server + REST/JSON API
 
-- [[https://github.com/sbinet-solid/solid-mon-rpi][github.com/sbinet-solid/solid-mon-rpi]]
+  - [github.com/sbinet-solid/solid-mon-rpi](https://github.com/sbinet-solid/solid-mon-rpi)
 
 you may have seen a couple of its plots flowing around last year during the heat wave :)
 
-See this [[https://talks.godoc.org/github.com/sbinet/talks/2018/2018-05-23-solid-raspi-srv/talk.slide][2018-05-23 SoLiD collaboration meeting]] for more informations.
+See this [2018-05-23 SoLiD collaboration meeting](https://talks.godoc.org/github.com/sbinet/talks/2018/2018-05-23-solid-raspi-srv/talk.slide) for more informations.
 
-
-* Plots - I
+## Plots - I
 
 .image _figs/solid-mon-rpi-1.png 550 _
 
-* Plots - II
+## Plots - II
 
 .image _figs/solid-mon-rpi-2.png 580 _
 
-* Tomuvol/MIM
+## Tomuvol/MIM
 
 Re-engineering of MIM DAQ (C++ from ILC) into a Go-based solution (which could be reused for SoLiD as well).
 
 Current code:
 
-- [[https://github.com/go-lpc/mim][go-lpc/mim]]
+  - [go-lpc/mim](https://github.com/go-lpc/mim)
 
 Based on a `fer`-like codebase:
 
-- [[https://github.com/go-daq/tdaq][go-daq/tdaq]]
+  - [go-daq/tdaq](https://github.com/go-daq/tdaq)
 
-`tdaq` uses the [[http://nanomsg.org/][nanomsg]] library to orchestrate distributed processes and transfer data between those.
+`tdaq` uses the [nanomsg](http://nanomsg.org/) library to orchestrate distributed processes and transfer data between those.
 `nanomsg` is available from a bunch of programing languages (C, C++, Python, ... and Go).
 `nanomsg` can handle `tcp`, `ipc`, `inproc`, `websocket` as transport medium.
 `nanomsg` supports many topologies (`pub/sub`, `req/rep`, `pipeline`, ...)
 
 REPL+WebUI to control the gang of processes
 
-* 
+## 
 
 .image _figs/webui_golden.png _ 1600
 
-
-* Tomuvol/MIM
+## Tomuvol/MIM
 
 Current effort is on implementing various parts of the MIM read-out:
 
-- drivers for old/new hardware
-- data frame decoders/encoders
-- detector layout
+  - drivers for old/new hardware
+  - data frame decoders/encoders
+  - detector layout
 
 Next steps:
 
-- configuration from database (schema + r/w layer)
-- implementation of a "fake" detector for tests
+  - configuration from database (schema + r/w layer)
+  - implementation of a "fake" detector for tests
 
 More infos:
 
-- [[https://talks.godoc.org/github.com/sbinet/talks/2020/2020-01-28-mim-daq/talk.slide][2020-01-28-mim-daq]]
+  - [2020-01-28-mim-daq](https://talks.godoc.org/github.com/sbinet/talks/2020/2020-01-28-mim-daq/talk.slide)
 
-* Go-HEP
+## Go-HEP
 
-- improvements in r/w support for ROOT trees via [[https://godoc.org/go-hep.org/x/hep/groot][hep/groot]] (a pure-Go implementation of ROOT I/O)
-- added automated conversion between ROOT trees and [[https://arrow.apache.org][Apache Arrow]], via [[https://godoc.org/go-hep.org/x/hep/cmd/root2arrow][root2arrow]] and [[https://godoc.org/go-hep.org/x/hep/cmd/arrow2root][arrow2root]]
-- added an automated conversion tool between ROOT trees and FITS tables, via [[https://godoc.org/go-hep.org/x/hep/cmd/root2fits][root2fits]] and [[https://godoc.org/go-hep.org/x/hep/cmd/fits2root][fits2root]]
-- improvements in plotting capabilities and ROOT+LorentzVector handling, prompted by my new favorite user (Romain Madar)
+  - improvements in r/w support for ROOT trees via [hep/groot](https://godoc.org/go-hep.org/x/hep/groot) (a pure-Go implementation of ROOT I/O)
+  - added automated conversion between ROOT trees and [Apache Arrow](https://arrow.apache.org), via [root2arrow](https://godoc.org/go-hep.org/x/hep/cmd/root2arrow) and [arrow2root](https://godoc.org/go-hep.org/x/hep/cmd/arrow2root)
+  - added an automated conversion tool between ROOT trees and FITS tables, via [root2fits](https://godoc.org/go-hep.org/x/hep/cmd/root2fits) and [fits2root](https://godoc.org/go-hep.org/x/hep/cmd/fits2root)
+  - improvements in plotting capabilities and ROOT+LorentzVector handling, prompted by my new favorite user (Romain Madar)
 
-See: [[https://github.com/go-hep/hep/blob/master/hplot/README.md][hplot gallery]].
+See: [hplot gallery](https://github.com/go-hep/hep/blob/master/hplot/README.md).
 
 Ex: implemented a histo-stack + improved LaTeX handling.
 
-- started to look at the next evolution of ROOT I/O (supposed to be in ROOT-v7): [[https://root.cern.ch/doc/master/md_tree_ntuple_v7_doc_README.html][ROOT::Experimental::RNTuple]]
+  - started to look at the next evolution of ROOT I/O (supposed to be in ROOT-v7): [ROOT::Experimental::RNTuple](https://root.cern.ch/doc/master/md_tree_ntuple_v7_doc_README.html)
 
-* HStack
+## HStack
 
 .image _figs/hstack_golden.png 580 _
 
-* 
+## 
 
 .image _figs/aplas-dummy.png 600 _
-
