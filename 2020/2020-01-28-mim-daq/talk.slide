@@ -1,4 +1,4 @@
-go-daq/tdaq
+# go-daq/tdaq
 MIM, 2020-01-28
 
 Sebastien Binet
@@ -7,19 +7,19 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* tdaq
+## tdaq
 
-[[https://github.com/go-daq/tdaq][tdaq]] is a pure-[[https://golang.org][Go]] based implementation of a simple DAQ system.
+[tdaq](https://github.com/go-daq/tdaq) is a pure-[Go](https://golang.org) based implementation of a simple DAQ system.
 
-  $> mkdir tmp && cd tmp
-  $> time go get github.com/go-daq/tdaq/...
-  real  0m15.417s
-  user  0m18.188s
-  sys   0m2.467s
+	$> mkdir tmp && cd tmp
+	$> time go get github.com/go-daq/tdaq/...
+	real  0m15.417s
+	user  0m18.188s
+	sys   0m2.467s
 
 Everything is installed and compiled (including dependencies, recursively) in one go.
 
-License: [[https://github.com/go-daq/tdaq/license][BSD-3]].
+License: [BSD-3](https://github.com/go-daq/tdaq/license).
 
 Platforms: tested on Linux/{arm64,amd64,386}, Darwin/amd64.
 
@@ -27,49 +27,49 @@ Documentation:
 
 .link https://godoc.org/github.com/go-daq/tdaq
 
-* Concepts
+## Concepts
 
 A `tdaq` system is a set of processes that exchange (framed) messages over the wire.
 
-- [[https://godoc.org/github.com/go-daq/tdaq#RunControl][tdaq.RunControl]] is the master process, listening for new tdaq processes to join the system
-- [[https://godoc.org/github.com/go-daq/tdaq#Server][tdaq.Servers]] are such processes that connect to the `RunControl` and announce their expected inputs and outputs
+  - [tdaq.RunControl](https://godoc.org/github.com/go-daq/tdaq#RunControl) is the master process, listening for new tdaq processes to join the system
+  - [tdaq.Servers](https://godoc.org/github.com/go-daq/tdaq#Server) are such processes that connect to the `RunControl` and announce their expected inputs and outputs
 
 `RunControl` accepts commands from the user (_via_ a REPL or _via_ a web UI) and propagates them to all known `Servers`:
 
-- `/config`, `/init`, `/reset`
-- `/start`
-- `/stop`
-- `/quit`
-- `/status`
+  - `/config`, `/init`, `/reset`
+  - `/start`
+  - `/stop`
+  - `/quit`
+  - `/status`
 
-* RunControl
+## RunControl
 
 `RunControl` listens on 4 ports:
 
-- the control server: listen for new `tdaq` processes to join
-- the heartbeat server (default: 5s): probe `tdaq` processes
-- the log server: collect logs from all `tdaq` processes
-- the web server: collect commands from user
+  - the control server: listen for new `tdaq` processes to join
+  - the heartbeat server (default: 5s): probe `tdaq` processes
+  - the log server: collect logs from all `tdaq` processes
+  - the web server: collect commands from user
 
 When new `tdaq` processes join, `RunControl` collects their expected inputs and outputs (names, types, address+port).
 `RunControl` builds a dependency graph (a DAG) and makes sure all inputs are satisfied when `/init` is hit.
 
-* Servers
+## Servers
 
 `tdaq.Servers` expose 6 (optional) command handlers (but users may hook into those):
 
-- `/config`
-- `/init`
-- `/start`
-- `/stop`
-- `/reset` and
-- `/quit`.
+  - `/config`
+  - `/init`
+  - `/start`
+  - `/stop`
+  - `/reset` and
+  - `/quit`.
 
 `tdaq.Servers` also expose input and output (optional) handlers.
 
 `tdaq.Servers` expose (optional) `"run"` handlers (code that does not need input to be executed. _e.g.:_ number generator, counter, accumulate internal statistics, etc...).
 
-* Servers - II
+## Servers - II
 
 	var dev myDeviceType
 
@@ -92,134 +92,132 @@ When new `tdaq` processes join, `RunControl` collects their expected inputs and 
 		log.Panicf("error: %+v", err)
 	}
 
-* Servers - III
+## Servers - III
 
-  type myDeviceType { ... }
+	type myDeviceType { ... }
 
-  func (dev *myDeviceType)
-    OnConfig(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
+	func (dev *myDeviceType)
+	  OnConfig(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
 
-  func (dev *myDeviceType)
-    OnInit(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
+	func (dev *myDeviceType)
+	  OnInit(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
 
-  func (dev *myDeviceType) Input(ctx tdaq.Context, src tdaq.Frame) error { ... }
-  func (dev *myDeviceType) Output(ctx tdaq.Context, dst *tdaq.Frame) error { ... } 
-  func (dev *myDeviceType) Loop(ctx tdaq.Context) error { ... }
+	func (dev *myDeviceType) Input(ctx tdaq.Context, src tdaq.Frame) error { ... }
+	func (dev *myDeviceType) Output(ctx tdaq.Context, dst *tdaq.Frame) error { ... } 
+	func (dev *myDeviceType) Loop(ctx tdaq.Context) error { ... }
 
-* Servers - IV
+## Servers - IV
 
 .image _figs/tdaq-pipeline.png
 
-* Example
+## Example
 
-* RunControl
+## RunControl
 
-  $> go get github.com/go-daq/tdaq/cmd/tdaq-runctl
-  $> tdaq-runctl -h
-  Usage of tdaq-runctl:
-    -hbeat duration
-      	frequency for the heartbeat server (default 5s)
-    -i	enable interactive run-ctl shell
-    -id string
-      	name of the tdaq process
-    -log-file string
-      	path to log file for run-ctl log server
-    -lvl string
-      	msgstream level (default "INFO")
-    -rc-addr string
-      	[addr]:port of run-ctl cmd server (default ":44000")
-    -web string
-      	[addr]:port of run-ctl web server
+	$> go get github.com/go-daq/tdaq/cmd/tdaq-runctl
+	$> tdaq-runctl -h
+	Usage of tdaq-runctl:
+	  -hbeat duration
+	    	frequency for the heartbeat server (default 5s)
+	  -i	enable interactive run-ctl shell
+	  -id string
+	    	name of the tdaq process
+	  -log-file string
+	    	path to log file for run-ctl log server
+	  -lvl string
+	    	msgstream level (default "INFO")
+	  -rc-addr string
+	    	[addr]:port of run-ctl cmd server (default ":44000")
+	  -web string
+	    	[addr]:port of run-ctl web server
 
-* 
+## 
 
-  $> tdaq-runctl -i
-  tdaq-runctl          INFO listening on ":44000"...
-  
-  ::::::::::::::::::::::::::
-  :::  RunControl shell  :::
-  ::::::::::::::::::::::::::
-  
-  - /config -> configure tdaq processes
-  - /init   -> initialize tdaq processes
-  - /run    -> start a new run
-  - /stop   -> stop current run
-  - /reset  -> reset tdaq processes
-  - /status -> display status of all tdaq processes
-  - /quit   -> terminate tdaq processes (and quit)
-  
-  tdaq-runctl          INFO waiting for commands...
-  tdaq-runctl>> 
+	$> tdaq-runctl -i
+	tdaq-runctl          INFO listening on ":44000"...
 
-* Servers
+	::::::::::::::::::::::::::
+	:::  RunControl shell  :::
+	::::::::::::::::::::::::::
 
- $> tdaq-datasrc -h
- Usage of tdaq-datasrc:
-   -id string
-     	name of the tdaq process
-   -lvl string
-     	msgstream level (default "INFO")
-   -rc-addr string
-     	[addr]:port of run-control process (default ":44000")
- 
- $> tdaq-datasink -h
- Usage of tdaq-datasink:
-   -id string
-     	name of the tdaq process
-   -lvl string
-     	msgstream level (default "INFO")
-   -rc-addr string
-     	[addr]:port of run-control process (default ":44000")
+	- /config -> configure tdaq processes
+	- /init   -> initialize tdaq processes
+	- /run    -> start a new run
+	- /stop   -> stop current run
+	- /reset  -> reset tdaq processes
+	- /status -> display status of all tdaq processes
+	- /quit   -> terminate tdaq processes (and quit)
 
+	tdaq-runctl          INFO waiting for commands...
+	tdaq-runctl>> 
+
+## Servers
+
+	$> tdaq-datasrc -h
+	Usage of tdaq-datasrc:
+	  -id string
+	    	name of the tdaq process
+	  -lvl string
+	    	msgstream level (default "INFO")
+	  -rc-addr string
+	    	[addr]:port of run-control process (default ":44000")
+
+	$> tdaq-datasink -h
+	Usage of tdaq-datasink:
+	  -id string
+	    	name of the tdaq process
+	  -lvl string
+	    	msgstream level (default "INFO")
+	  -rc-addr string
+	    	[addr]:port of run-control process (default ":44000")
 
 Launch in 2 separate terminals:
 
- $> tdaq-datasink -lvl dbg
- $> tdaq-datasrc  -lvl dbg
+	$> tdaq-datasink -lvl dbg
+	$> tdaq-datasrc  -lvl dbg
 
-* Web-UI
+## Web-UI
 
 Very rough.
 Very basic.
 
-- Collects logs/messages from `tdaq` processes _via_ a `WebSocket` connection (internally funneled from `RunControl`).
-- Collects statuses of `tdaq` processes _via_ a `WebSocket` connection (internally funneled from `RunControl`).
-- Sends `/config`, `/init`, ... commands to `RunControl` _via_ `POST` requests.
+  - Collects logs/messages from `tdaq` processes _via_ a `WebSocket` connection (internally funneled from `RunControl`).
+  - Collects statuses of `tdaq` processes _via_ a `WebSocket` connection (internally funneled from `RunControl`).
+  - Sends `/config`, `/init`, ... commands to `RunControl` _via_ `POST` requests.
 
-* 
+## 
 
 .image _figs/webui_golden.png _ 1600
 
-* Tools
+## Tools
 
-A few `tdaq` devices have been packaged up at [[https://godoc.org/github.com/go-daq/tdaq/xdaq][github.com/go-daq/tdaq/xdaq]]:
+A few `tdaq` devices have been packaged up at [github.com/go-daq/tdaq/xdaq](https://godoc.org/github.com/go-daq/tdaq/xdaq):
 
-- [[https://godoc.org/github.com/go-daq/tdaq/xdaq#Scaler][xdaq.Scaler]]: consumes data from an input end-point and publishes it on an output end-point if it is accepted by the `Accept` function. 
+  - [xdaq.Scaler](https://godoc.org/github.com/go-daq/tdaq/xdaq#Scaler): consumes data from an input end-point and publishes it on an output end-point if it is accepted by the `Accept` function. 
 
-  type Scaler struct {
-      Accept func() bool // decides whether to accept or reject the input data.
-      // contains filtered or unexported fields
-  }
+	type Scaler struct {
+	    Accept func() bool // decides whether to accept or reject the input data.
+	    // contains filtered or unexported fields
+	}
 
-- [[https://godoc.org/github.com/go-daq/tdaq/xdaq#Splitter][xdaq.Splitter]]: consumes data from an input end-point and publishes it on either the `"left"` or `"right"` output end-point, whether the `Fct` function returns (resp.) -1 or +1.
+  - [xdaq.Splitter](https://godoc.org/github.com/go-daq/tdaq/xdaq#Splitter): consumes data from an input end-point and publishes it on either the `"left"` or `"right"` output end-point, whether the `Fct` function returns (resp.) -1 or +1.
 
-  type Splitter struct {
-      Fct func() int // decides whether to forward the input data on the "left" or the "right".
-      // contains filtered or unexported fields
-  }
+	type Splitter struct {
+	    Fct func() int // decides whether to forward the input data on the "left" or the "right".
+	    // contains filtered or unexported fields
+	}
 
-* Tools - II
+## Tools - II
 
-- [[https://https://godoc.org/github.com/go-daq/tdaq/xdaq][xdaq.I64{Adder,Dumper,Gen,Processor}]]: devices that (resp.) add 2 `int64`, dump on screen an `int64`, generate an `int64` and consume+produce an `int64`.
+  - [xdaq.I64{Adder,Dumper,Gen,Processor}](https://https://godoc.org/github.com/go-daq/tdaq/xdaq): devices that (resp.) add 2 `int64`, dump on screen an `int64`, generate an `int64` and consume+produce an `int64`.
 
 Used for tests and examples.
 
-* Next steps
+## Next steps
 
-* Next steps
+## Next steps
 
-- create MIM-oriented devices
-- create binary data encoder/decoder for new EDA format (_started_)
-- start parasitic DAQ
-- start adiabatic transition
-
+  - create MIM-oriented devices
+  - create binary data encoder/decoder for new EDA format (_started_)
+  - start parasitic DAQ
+  - start adiabatic transition

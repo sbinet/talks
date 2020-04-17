@@ -1,4 +1,4 @@
-SoLiD DAQ - Update
+# SoLiD DAQ - Update
 LPC-SoLiD, 2017-12-08
 
 Sebastien Binet
@@ -7,7 +7,7 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* SoLiD DAQ
+## SoLiD DAQ
 
 All the code lives under:
 
@@ -17,186 +17,185 @@ The main branch being used currently for data taking is `spi_fix`.
 
 Not `master` (for some reason.)
 
-* Quick tour of spi_fix
+## Quick tour of spi\_fix
 
-  * 10b86c5 (HEAD -> spi_fix, origin/spi_fix) updates
-  *   357c21e resolve merge
-  |\  
-  | * e72dc75 updates for clock
-  | * e73e5fb prep for debugging with Python
-  | * 00d535b debugging at Bristol
-  | * 05e89be voltage scans working
-  * | ac229d2 merging
-  |/  
-  * 15b8f13 added firmware files
-  * 72a2dd0 update to firmware scripts
-  * d029a90 firmware loading scripts
-  * 3f1cf08 typo
-  * bd05984 update firmware load script
-  * 5306bef added load firmware script
-  * 8ac260e remove temp files
-  *   d339393 Merge branch 'spi_fix' of bitbucket.org:solidexperiment/readout-software into spi_fix
-  |\  
-  * | 7fa4e3d added clock firmware file
+	* 10b86c5 (HEAD -> spi_fix, origin/spi_fix) updates
+	*   357c21e resolve merge
+	|\  
+	| * e72dc75 updates for clock
+	| * e73e5fb prep for debugging with Python
+	| * 00d535b debugging at Bristol
+	| * 05e89be voltage scans working
+	* | ac229d2 merging
+	|/  
+	* 15b8f13 added firmware files
+	* 72a2dd0 update to firmware scripts
+	* d029a90 firmware loading scripts
+	* 3f1cf08 typo
+	* bd05984 update firmware load script
+	* 5306bef added load firmware script
+	* 8ac260e remove temp files
+	*   d339393 Merge branch 'spi_fix' of bitbucket.org:solidexperiment/readout-software into spi_fix
+	|\  
+	* | 7fa4e3d added clock firmware file
 
-* Layout
+## Layout
 
-  $> ls -F
-  clockscripts/     firmware/           run64chdigi/          t8chTestPattern/
-  cmd/              frontend/           run64chtrig/          tests/
-  commstest64chan/  log/                run8chtrig/           teststand8chan/
-  database/         out/                rundetector/          trigger/
-  doc.go            qa64chan/           scripts/              triggeredreadout/
-  environment/      randomtriggerdump/  solidreadoutlogo.png  vendor/
-  event/            Readme.md           solidreadoutlogo.svg
-  filetodrop/       robot/              t64chSetClock/
-  filetofile/       run/                t8chSetClock/
+	$> ls -F
+	clockscripts/     firmware/           run64chdigi/          t8chTestPattern/
+	cmd/              frontend/           run64chtrig/          tests/
+	commstest64chan/  log/                run8chtrig/           teststand8chan/
+	database/         out/                rundetector/          trigger/
+	doc.go            qa64chan/           scripts/              triggeredreadout/
+	environment/      randomtriggerdump/  solidreadoutlogo.png  vendor/
+	event/            Readme.md           solidreadoutlogo.svg
+	filetodrop/       robot/              t64chSetClock/
+	filetofile/       run/                t8chSetClock/
 
-* Quick description
+## Quick description
 
-- `frontend`: IPC w/ FPGA (bulk of the code), ICS (chips and boards)
-- `event`: build event (d'oh!)
-- `out`: create output data (on `/dev/null`, on file, on network)
-- `database`: calibration
-- `environment`: communicate with env. sensors
-- `robot`: control calibration robot
-- `run8chtrig`, `run64chtrig`: main program (eventually)
-- `rundetector`: main program for current data acquisition
-- `trigger`: describes the various trigger configs
+  - `frontend`: IPC w/ FPGA (bulk of the code), ICS (chips and boards)
+  - `event`: build event (d'oh!)
+  - `out`: create output data (on `/dev/null`, on file, on network)
+  - `database`: calibration
+  - `environment`: communicate with env. sensors
+  - `robot`: control calibration robot
+  - `run8chtrig`, `run64chtrig`: main program (eventually)
+  - `rundetector`: main program for current data acquisition
+  - `trigger`: describes the various trigger configs
 
 Initial plan (NickR) was to turn `runXXchtrig` into a server/daemon to start/stop/configure runs.
 
-* rundetector
+## rundetector
 
-  $> ls -F rundetector/
-  addr_table64v15a@  addr_tableClocksV1a@  rundetector.go                      
-  addr_table64v18/   quickVscan.py         Si5344-RevD-SCLKMA02-Registers.txt  
-  Si5345-RevB-SOL64CSA-Registers.txt@      Si5345-RevD-SOL64CZW-SOL64CHW-Registers.txt
-  solidfpga.xml@
-  
-  $> wc -l ./rundetector/rundetector.go 
-  368 ./rundetector/rundetector.go
+	$> ls -F rundetector/
+	addr_table64v15a@  addr_tableClocksV1a@  rundetector.go                      
+	addr_table64v18/   quickVscan.py         Si5344-RevD-SCLKMA02-Registers.txt  
+	Si5345-RevB-SOL64CSA-Registers.txt@      Si5345-RevD-SOL64CZW-SOL64CHW-Registers.txt
+	solidfpga.xml@
+
+	$> wc -l ./rundetector/rundetector.go 
+	368 ./rundetector/rundetector.go
 
 Build:
 
-  $> go get -v ./rundetector
-  bitbucket.org/solidexperiment/readout-software/trigger
-  github.com/go-sql-driver/mysql
-  bitbucket.org/solidexperiment/readout-software/vendor/bitbucket.org/NickRyder/goipbus/ipbus
-  bitbucket.org/solidexperiment/readout-software/event
-  bitbucket.org/solidexperiment/readout-software/frontend/comms
-  bitbucket.org/solidexperiment/readout-software/frontend/ics
-  bitbucket.org/solidexperiment/readout-software/database
-  bitbucket.org/solidexperiment/readout-software/out
-  bitbucket.org/solidexperiment/readout-software/frontend
-  bitbucket.org/solidexperiment/readout-software/rundetector
+	$> go get -v ./rundetector
+	bitbucket.org/solidexperiment/readout-software/trigger
+	github.com/go-sql-driver/mysql
+	bitbucket.org/solidexperiment/readout-software/vendor/bitbucket.org/NickRyder/goipbus/ipbus
+	bitbucket.org/solidexperiment/readout-software/event
+	bitbucket.org/solidexperiment/readout-software/frontend/comms
+	bitbucket.org/solidexperiment/readout-software/frontend/ics
+	bitbucket.org/solidexperiment/readout-software/database
+	bitbucket.org/solidexperiment/readout-software/out
+	bitbucket.org/solidexperiment/readout-software/frontend
+	bitbucket.org/solidexperiment/readout-software/rundetector
 
-* rundetector/rundetector.go
+## rundetector/rundetector.go
 
-  func main() {
-     notifyDQM("[DAQ]: DAQ Started")
-     // ...
-     cfg := frontend.Configuration{}
-     det, err := frontend.NewDetector(cfg, *flagUseInternalDigiClocks)
-     threshtrig := trigger.NewThreshold(trigger.ThreshTrigDisabled, 0, 0, 0)
-     randtrig := trigger.NewRandom(trigger.RandTrigForcedOnly, 0.0, randoffset, randblocks)
-     neutrontrig := trigger.NewNeutron(trigger.NeutronTrigDisabled, 0.0, 0, 256, noffset, nblocks)
-     menu, err := trigger.NewMenu(neutrontrig, threshtrig, randtrig, float32(*op_zsthreshold))
-     err = det.ConfigureTrigger(menu, uint32(*op_zs_blks))
-     // ...
-     outp, err := out.NewBinary(*op_outDir + "/" + outfn)
-     go outp.Output(events, stopout)                   // start the output file
-     go builder.Build(menu, chunks, events, stopbuild) // start the builder
-     err = det.PrepareRun(chunks)
-     err = det.StartSyncRun()                          // or det.StartNonSyncRun()
-     time.Sleep(runduration)
-     err = det.StopRun()
-     notifyDQM("[DAQ]: DAQ Stopped")
-  }
+	func main() {
+	   notifyDQM("[DAQ]: DAQ Started")
+	   // ...
+	   cfg := frontend.Configuration{}
+	   det, err := frontend.NewDetector(cfg, *flagUseInternalDigiClocks)
+	   threshtrig := trigger.NewThreshold(trigger.ThreshTrigDisabled, 0, 0, 0)
+	   randtrig := trigger.NewRandom(trigger.RandTrigForcedOnly, 0.0, randoffset, randblocks)
+	   neutrontrig := trigger.NewNeutron(trigger.NeutronTrigDisabled, 0.0, 0, 256, noffset, nblocks)
+	   menu, err := trigger.NewMenu(neutrontrig, threshtrig, randtrig, float32(*op_zsthreshold))
+	   err = det.ConfigureTrigger(menu, uint32(*op_zs_blks))
+	   // ...
+	   outp, err := out.NewBinary(*op_outDir + "/" + outfn)
+	   go outp.Output(events, stopout)                   // start the output file
+	   go builder.Build(menu, chunks, events, stopbuild) // start the builder
+	   err = det.PrepareRun(chunks)
+	   err = det.StartSyncRun()                          // or det.StartNonSyncRun()
+	   time.Sleep(runduration)
+	   err = det.StopRun()
+	   notifyDQM("[DAQ]: DAQ Stopped")
+	}
 
-
-* Branch issue-46: http server
+## Branch issue-46: http server
 
 Implemented a HTTP server that tickles empty boxes.
 
-  $> ls -F ./cmd/solid-srv
-  deploy-lpc*  favicon.go  main.go  runctl.go  solid-runctl-srv.service
+	$> ls -F ./cmd/solid-srv
+	deploy-lpc*  favicon.go  main.go  runctl.go  solid-runctl-srv.service
 
-  $> cat ./cmd/solid-srv/runctl.go
-  // ...
-  
-  // RunControler is the interface that models the Run Control.
-  type RunControler interface {
-      start(ctx context.Context) error
-      stop(ctx context.Context) error
-      configure(ctx context.Context) error
-      status(ctx context.Context) error
-  }
+	$> cat ./cmd/solid-srv/runctl.go
+	// ...
 
-* http-server
+	// RunControler is the interface that models the Run Control.
+	type RunControler interface {
+	    start(ctx context.Context) error
+	    stop(ctx context.Context) error
+	    configure(ctx context.Context) error
+	    status(ctx context.Context) error
+	}
+
+## http-server
 
 .code _code/solid-srv-main.go /func main/,/^}/
 
-* http-server
+## http-server
 
 .code _code/solid-srv-main.go /func newServer/,/^}/
 
-* http-server
+## http-server
 
 .code _code/solid-srv-main.go /func \(srv \*server\) run/,/^}/
 
 `handleCmd` will eventually tell the `RunControler` what to do (`START`, `STOP`, ...) depending on the `cmd.Cmd` value.
 
-* http-server /start
+## http-server /start
 
 .code _code/solid-srv-main.go /func \(srv \*server\) handleStart/,/^}/
 .code _code/solid-srv-main.go /START CMD/,/END CMD/
 
-* Test instance:
+## Test instance:
 
 .link http://clrbinetsrv.in2p3.fr:8080/
 
-* 
+## 
 
 .image _figs/01-solid-daq.png 512 _
 
-* /status
+## /status
 
 .image _figs/02-solid-daq-status.png
 
-* /configure
+## /configure
 
 .image _figs/03-solid-daq-configure.png
 
-* /start
+## /start
 
 .image _figs/04-solid-daq-start.png
 
-* /stop
+## /stop
 
 .image _figs/05-solid-daq-stop.png
 
-* Py-GUI
+## Py-GUI
 
-* PyGUI
+## PyGUI
 
 The current `python` GUI lives at:
 
 .link https://bitbucket.org/solidexperiment/sdqm2
 .link https://bitbucket.org/solidexperiment/sdqm2/wiki/Home
 
-* 
+## 
 
 .image _figs/py-gui-sdqm2.png _ 900
 
-* SDQM2 end-points
+## SDQM2 end-points
 
-- `/stop_current`
-- `/start_run`
-- `/start_run_scan/<scan_type>` (VScan, CalipsoEdge, TwoDPositionScan, ...)
-- `/update_baselines`
-- `/notify`, `/notify/<msg>`
-- `/subscribe` (to get notifications)
-- `/update_log_entry`
+  - `/stop_current`
+  - `/start_run`
+  - `/start_run_scan/<scan_type>` (VScan, CalipsoEdge, TwoDPositionScan, ...)
+  - `/update_baselines`
+  - `/notify`, `/notify/<msg>`
+  - `/subscribe` (to get notifications)
+  - `/update_log_entry`
 
 Spawns a sub-process `"DAQ_symlink/rundetector"`

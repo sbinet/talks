@@ -1,4 +1,4 @@
-Go-HEP: Providing robust concurrent software for HEP
+# Go-HEP: Providing robust concurrent software for HEP
 LPC-SI, 2017-01-23
 
 Sebastien Binet
@@ -7,276 +7,268 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Software in HEP
+## Software in HEP
 
-- *50's-90's*: `FORTRAN77`
-- *90's-...*: `C++`
-- *00's-...*: `Python`
+  - **50's-90's**: `FORTRAN77`
+  - **90's-...**: `C++`
+  - **00's-...**: `Python`
 
 Software in HEP is mostly `C++/Python` (with pockets of `Java` and `Fortran`.)
 
 .image _figs/data-flux-summary-all.png 300 _
 
-* Software in HEP is painful
+## Software in HEP is painful
 
-*Painful* to develop:
+**Painful** to develop:
 
-- deep and complex software stacks
-- huge dependencies issues (install, support)
-- compilation time
-- complex deployment of multi-GB stacks (shared libraries, configuration, databases, ...)
-- `C++` is a complex language to learn, read, write and maintain
-- unpleasant run-edit-compile development cycle
+  - deep and complex software stacks
+  - huge dependencies issues (install, support)
+  - compilation time
+  - complex deployment of multi-GB stacks (shared libraries, configuration, databases, ...)
+  - `C++` is a complex language to learn, read, write and maintain
+  - unpleasant run-edit-compile development cycle
 
-* Software in HEP is painful
+## Software in HEP is painful
 
-*Painful* to use:
+**Painful** to use:
 
-- overly complicated Object Oriented systems
-- overly complicated inheritance hierarchies
-- overly complicated meta-template programming
-- installation of dependencies
-- granularity of dependencies
-- no simple, nor standard, way to handle dependencies across OSes, experiments, groups, ...
-- documentation
+  - overly complicated Object Oriented systems
+  - overly complicated inheritance hierarchies
+  - overly complicated meta-template programming
+  - installation of dependencies
+  - granularity of dependencies
+  - no simple, nor standard, way to handle dependencies across OSes, experiments, groups, ...
+  - documentation
 
 End-users tend to prefer `Python` because of its nicer development cycle, despite its runtime performances (or lack thereof.)
 
-* Software in HEP: optimization and performances
+## Software in HEP: optimization and performances
 
 Software is painful and does not perform well:
 
-- most of our stack is not optimized (OO anti-patterns, code-bloat from `C++` templates)
-- memory leaks, slow to initialize (loading `.so/.dll`), slow to run
-- resources hungry to run and develop (`CPU`, `VMem`, people)
-- most of our stack has to be re-written: support of multi-cores machine, parallelism/concurrency
+  - most of our stack is not optimized (OO anti-patterns, code-bloat from `C++` templates)
+  - memory leaks, slow to initialize (loading `.so/.dll`), slow to run
+  - resources hungry to run and develop (`CPU`, `VMem`, people)
+  - most of our stack has to be re-written: support of multi-cores machine, parallelism/concurrency
 
-*Parallelism* and *concurrency* need to be exposed and leveraged, but the language (`C++14`, `C++17`, ...) is *ill* *equiped* for these tasks.
+**Parallelism** and **concurrency** need to be exposed and leveraged, but the language (`C++14`, `C++17`, ...) is **ill** **equiped** for these tasks.
 
 And `C++` is not well adapted for large, distributed development teams (of varying programming skills.)
 
 Time for something new?
 
-* Are those our only options ?
+## Are those our only options ?
 
 .image _figs/funfast-nogo.svg 500 _
 
-* Enter... Go
+## Enter... Go
 
-* What is Go ?
+## What is Go ?
 
 .play _code/hello.go
 
- $ go run hello.go
- Hello from Go
+	$ go run hello.go
+	Hello from Go
 
 A nice language with a nice mascot.
 
 .image _figs/golang-logo.png 200 400
 
+## History
 
-* History
-
-- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
-- Open source release in November 2009
-- More than 700 contributors have joined the project
-- Version 1.0 release in March 2012
-- Version 1.1 release in May 2013
-- Version 1.2 release in December 2013
-- Version 1.3 release in June 2014
-- Version 1.4 release in December 2014
-- Version 1.5 release in August 2015
-- Version 1.6 release in February 2016
-- Version 1.7 release in August 2016
+  - Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+  - Open source release in November 2009
+  - More than 700 contributors have joined the project
+  - Version 1.0 release in March 2012
+  - Version 1.1 release in May 2013
+  - Version 1.2 release in December 2013
+  - Version 1.3 release in June 2014
+  - Version 1.4 release in December 2014
+  - Version 1.5 release in August 2015
+  - Version 1.6 release in February 2016
+  - Version 1.7 release in August 2016
 
 .link https://golang.org
 
-* Elements of Go
+## Elements of Go
 
-- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+  - Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
 
-
-- Concurrent, garbage-collected
-- An Open-source general progamming language (BSD-3)
-- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
-- safety of a *static* *type* *system*
-- compiled down to machine language (so it is fast, goal is ~10% of C)
-- *object-oriented* but w/o classes, *builtin* *reflection*
-- first-class functions with *closures*
-- implicitly satisfied *interfaces*
+  - Concurrent, garbage-collected
+  - An Open-source general progamming language (BSD-3)
+  - feel of a **dynamic** **language**: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+  - safety of a **static** **type** **system**
+  - compiled down to machine language (so it is fast, goal is ~10% of C)
+  - **object-oriented** but w/o classes, **builtin** **reflection**
+  - first-class functions with **closures**
+  - implicitly satisfied **interfaces**
 
 Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
 
-* Go for HEP
+## Go for HEP
 
-What can [[https://golang.org][Go]] bring to science and HEP?
+What can [Go](https://golang.org) bring to science and HEP?
 
-- a *simple* language anybody can learn (and be productive) in days, be an expert in months
-- *standard* tool to handle *dependencies* (across OSes, architectures)
-- *fast* edit-compile-run development cycle
-- *simple* deployment (on clusters, laptops, ...), *easiest* *cross-compilation* system to date
-- fast at runtime
-- support for *concurrency* programming and multi-core machines
-- no magic, no voodoo, *reduce* disconnect b/w HEP sw experts and HEP users
-- *easy* code sharing: between packages, between experiments, between scientists
-- easier *reproducibility* and cross-check tests
+  - a **simple** language anybody can learn (and be productive) in days, be an expert in months
+  - **standard** tool to handle **dependencies** (across OSes, architectures)
+  - **fast** edit-compile-run development cycle
+  - **simple** deployment (on clusters, laptops, ...), **easiest** **cross-compilation** system to date
+  - fast at runtime
+  - support for **concurrency** programming and multi-core machines
+  - no magic, no voodoo, **reduce** disconnect b/w HEP sw experts and HEP users
+  - **easy** code sharing: between packages, between experiments, between scientists
+  - easier **reproducibility** and cross-check tests
 
-* Go for HEP: challenges
+## Go for HEP: challenges
 
 LHC is taking data:
 
-- one can't really migrate (monolithic) MLoC software stacks during a LS phase
+  - one can't really migrate (monolithic) MLoC software stacks during a LS phase
 
-*Convincing* physicists:
+**Convincing** physicists:
 
-- need to prove `Go` is useful, pleasant to use and viable
-- need to prove one can carry an analysis in `Go`, faster than by other means
-- provide 1 or 2 "poster child" applications
+  - need to prove `Go` is useful, pleasant to use and viable
+  - need to prove one can carry an analysis in `Go`, faster than by other means
+  - provide 1 or 2 "poster child" applications
 
-*Need* to implement:
+**Need** to implement:
 
-- histograms, PDFs, plotting, fits, BLAS/LAPACK, I/O
-- (some level of) inter-operability with `C++/ROOT`
+  - histograms, PDFs, plotting, fits, BLAS/LAPACK, I/O
+  - (some level of) inter-operability with `C++/ROOT`
 
-=> [[https://github.com/go-hep][go-hep]] is the beginning of such an endeavour
+=> [go-hep](https://github.com/go-hep) is the beginning of such an endeavour
 
-* Go-HEP
+## Go-HEP
 
 2 work areas to demonstrate `Go`'s applicability for HEP use cases have been identified:
 
-- `DAQ`, monitoring, control command
-- detector fast simulation toolkit (a la [[https://cp3.irmp.ucl.ac.be/projects/delphes][Delphes]])
+  - `DAQ`, monitoring, control command
+  - detector fast simulation toolkit (a la [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes))
 
-* Go-DAQ
+## Go-DAQ
 
 `DAQ`, monitoring and control command need `I/O`, network libraries and performances.
 
 These have been already tested at LPC and is gaining traction outside:
 
-- LSST@LPC: control command + monitoring of the LPC testbench for LSST
-- AVIRM@LPC: DAQ + monitoring for a medical application
-- SoLid@Oxford: DAQ
-- SoLid@LPC: sensor monitoring application for RaspBerry-3
+  - LSST@LPC: control command + monitoring of the LPC testbench for LSST
+  - AVIRM@LPC: DAQ + monitoring for a medical application
+  - SoLid@Oxford: DAQ
+  - SoLid@LPC: sensor monitoring application for RaspBerry-3
 
-* Go-DAQ (LSST)
+## Go-DAQ (LSST)
 
 .image _figs/fcs-lsst.png 550 _
 
-* Go-DAQ (AVIRM)
+## Go-DAQ (AVIRM)
 
 .image _figs/avirm-dpga-1.png 500 _
 
-* Go-HEP - fast-simulation
+## Go-HEP - fast-simulation
 
-`fads`: [[https://github.com/go-hep/fads][a Fast Detector Simulation toolkit]].
+`fads`: [a Fast Detector Simulation toolkit](https://github.com/go-hep/fads).
 
 .image _figs/linux-cpu.png 500 _
 
-* Go-HEP - fads
+## Go-HEP - fads
 
 .image _figs/linux-rss.png
 
-* Go-HEP: next steps
+## Go-HEP: next steps
 
 Code:
 
-- consolidation of `DAQ` components for easier re-use (web display)
-- expose more drivers for new sensors and protocols (`SMBus`, `IPbus`, `OPC-UA`, ...)
-- improvements in `go-fastjet`
-- better, more performant `ROOT` file format inter-operability (w/o requiring to install `ROOT`)
-- (better) integration with [[http://jupyter.org/][Jupyter/IPython]] notebooks
-- better minimization algorithms
+  - consolidation of `DAQ` components for easier re-use (web display)
+  - expose more drivers for new sensors and protocols (`SMBus`, `IPbus`, `OPC-UA`, ...)
+  - improvements in `go-fastjet`
+  - better, more performant `ROOT` file format inter-operability (w/o requiring to install `ROOT`)
+  - (better) integration with [Jupyter/IPython](http://jupyter.org/) notebooks
+  - better minimization algorithms
 
 Non-code:
 
-- send 1 or 2 papers to the new "Computing and Software for Big Science" journal
-- reach out to IN2P3's "Nouveaux langages", "DAQ" and "HPC/HTC" working groups
+  - send 1 or 2 papers to the new "Computing and Software for Big Science" journal
+  - reach out to IN2P3's "Nouveaux langages", "DAQ" and "HPC/HTC" working groups
 
-* Go-HEP: end game
+## Go-HEP: end game
 
-- Provide reusable building blocks for robust, reliable, comprehensible and concurrent software for HEP
-- Provide software to produce better science, faster
-- Provide the Go scientific community, [[https://github.com/gonum][Gonum]], with input and use cases from HEP
-- Improve cross-pollination among scientific communities (via [[http://www.numfocus.org/][NumFOCUS]]? [[http://diana-hep.org/][DIANA-HEP]]?)
+  - Provide reusable building blocks for robust, reliable, comprehensible and concurrent software for HEP
+  - Provide software to produce better science, faster
+  - Provide the Go scientific community, [Gonum](https://github.com/gonum), with input and use cases from HEP
+  - Improve cross-pollination among scientific communities (via [NumFOCUS](http://www.numfocus.org/)? [DIANA-HEP](http://diana-hep.org/)?)
 
+## Extra
 
-* Extra
+## Real-world application?
 
-* Real-world application?
+OK, [Go](https://golang.org) is great.
 
-OK, [[https://golang.org][Go]] is great.
-
-And it's being used by [[https://github.com/golang/go/wiki/GoUsers][many companies]] (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
+And it's being used by [many companies](https://github.com/golang/go/wiki/GoUsers) (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
 (Basically: every single bit of tooling for the Cloud is written in Go)
 
 But what about science?
 
-* Go in science
+## Go in science
 
-* Science-y packages
+## Science-y packages
 
-Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [[https://github.com/gonum][gonum]] community:
+Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [gonum](https://github.com/gonum) community:
 
-- [[https://github.com/gonum/blas][gonum/blas]], a `go` based implementation of Basic Linear Algebra Subprograms
-- [[https://github.com/gonum/lapack][gonum/lapack]], a lapack implementation for `go`
-- [[https://github.com/gonum/matrix][gonum/matrix]], to work with matrices
-- [[https://github.com/gonum/graph][gonum/graph]], to work with graphs
-- [[https://github.com/gonum/optimize][gonum/optimize]], for finding the optimum value of functions
-- [[https://github.com/gonum/integrate][gonum/integrate]], provides routines for numerical integration
-- [[https://github.com/gonum/diff][gonum/diff]], for computing derivatives of a function
-- [[https://github.com/gonum/stat][gonum/stat]], for statistics and distributions
-- ...
+  - [gonum/blas](https://github.com/gonum/blas), a `go` based implementation of Basic Linear Algebra Subprograms
+  - [gonum/lapack](https://github.com/gonum/lapack), a lapack implementation for `go`
+  - [gonum/matrix](https://github.com/gonum/matrix), to work with matrices
+  - [gonum/graph](https://github.com/gonum/graph), to work with graphs
+  - [gonum/optimize](https://github.com/gonum/optimize), for finding the optimum value of functions
+  - [gonum/integrate](https://github.com/gonum/integrate), provides routines for numerical integration
+  - [gonum/diff](https://github.com/gonum/diff), for computing derivatives of a function
+  - [gonum/stat](https://github.com/gonum/stat), for statistics and distributions
+  - ...
 
+## Plots
 
-* Plots
-
-Plotting data is also rather easy: [[http://github.com/gonum/plot][gonum/plot]]
+Plotting data is also rather easy: [gonum/plot](http://github.com/gonum/plot)
 
 .image _figs/plots.png 400 _
 
-* I/O
+## I/O
 
 I/O support for some formats:
 
-- [[https://github.com/ready-steady/mat][ready-steady/mat]]: r/w support for [[http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf][MATLAB files]]
-- [[https://github.com/sbinet/npyio][sbinet/npyio]]: read/write support for [[http://docs.scipy.org/doc/numpy/neps/npy-format.html][NumPy data files]]
-- [[https://github.com/sbinet/matfio][sbinet/matfio]]: r/w support for [[http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf][MATLAB files]]
-- [[https://github.com/sbinet/go-hdf5][sbinet/go-hdf5]]: access to [[https://www.hdfgroup.org/HDF5][HDF5]]
+  - [ready-steady/mat](https://github.com/ready-steady/mat): r/w support for [MATLAB files](http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf)
+  - [sbinet/npyio](https://github.com/sbinet/npyio): read/write support for [NumPy data files](http://docs.scipy.org/doc/numpy/neps/npy-format.html)
+  - [sbinet/matfio](https://github.com/sbinet/matfio): r/w support for [MATLAB files](http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf)
+  - [sbinet/go-hdf5](https://github.com/sbinet/go-hdf5): access to [HDF5](https://www.hdfgroup.org/HDF5)
 
-* Go for Data Science
+## Go for Data Science
 
-A data science community is gathering around [[https://github.com/gopherds][github.com/gopherds]].
+A data science community is gathering around [github.com/gopherds](https://github.com/gopherds).
 
-- [[https://github.com/gopherds/gophernotes][gopherds/gophernotes]], a [[http://jupyter.org][Jupyter]] kernel for [[https://golang.org][Go]]
-- [[https://github.com/gopherds/mybinder-go][gopherds/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
-- [[https://github.com/gopherds/resources/tree/master/tooling][gopherds/resources]]: many resources for machine learning, classifiers, neural networks, ...
-- [[https://www.tensorflow.org/][TensorFlow]] available from Go (deep learning)
+  - [gopherds/gophernotes](https://github.com/gopherds/gophernotes), a [Jupyter](http://jupyter.org) kernel for [Go](https://golang.org)
+  - [gopherds/mybinder-go](https://github.com/gopherds/mybinder-go), a web-based Jupyter kernel for [Go](https://golang.org)
+  - [gopherds/resources](https://github.com/gopherds/resources/tree/master/tooling): many resources for machine learning, classifiers, neural networks, ...
+  - [TensorFlow](https://www.tensorflow.org/) available from Go (deep learning)
 
-* Go for data acquisition (DAQ) & monitoring
+## Go for data acquisition (DAQ) & monitoring
 
 Community is just starting to gather:
 
-- [[https://github.com/go-daq/canbus][go-daq/canbus]]: CAN bus via `SocketCAN`
-- [[https://gitlab.in2p3.fr/avirm/analysis-go][avirm/analysis-go]]: DAQ+monitoring s/w for a medical application (LPC AVIRM)
-- [[https://github.com/go-lsst/fcs-lpc-motor-ctl][go-lsst/fcs-lpc-motor-ctl]]: a slow control application for LSST (LPC testbench)
-- [[https://github.com/sbinet-solid/tcp-srv][sbinet-solid/tcp-srv]]: a sensor monitoring application for RaspBerry-3 (LPC SoLid)
-- [[https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf][SoLiD DAQ (PDF) by Oxford]]
+  - [go-daq/canbus](https://github.com/go-daq/canbus): CAN bus via `SocketCAN`
+  - [avirm/analysis-go](https://gitlab.in2p3.fr/avirm/analysis-go): DAQ+monitoring s/w for a medical application (LPC AVIRM)
+  - [go-lsst/fcs-lpc-motor-ctl](https://github.com/go-lsst/fcs-lpc-motor-ctl): a slow control application for LSST (LPC testbench)
+  - [sbinet-solid/tcp-srv](https://github.com/sbinet-solid/tcp-srv): a sensor monitoring application for RaspBerry-3 (LPC SoLid)
+  - [SoLiD DAQ (PDF) by Oxford](https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf)
 
+## Go in HEP & Astro
 
-* Go in HEP & Astro
+[go-hep.github.io](https://go-hep.github.io) gathers a few HEP-oriented packages, [astrogo](https://github.com/astrogo) for Astro/Cosmo:
 
-[[https://go-hep.github.io][go-hep.github.io]] gathers a few HEP-oriented packages, [[https://github.com/astrogo][astrogo]] for Astro/Cosmo:
-
-
-- [[https://github.com/go-hep/fads][go-hep/fads]]: a fast detector simulation toolkit, built on top of [[https://github.com/go-hep/fwk][go-hep/fwk]]
-- [[https://github.com/go-hep/fmom][go-hep/fmom]]: a 4-vectors library
-- [[https://github.com/go-hep/hbook][go-hep/hbook]]: histograms and n-tuples (WIP)
-- [[https://github.com/go-hep/hplot][go-hep/hplot]]: interactive plotting (WIP)
-- [[https://github.com/go-hep/hepmc][go-hep/hepmc]]: HepMC in pure Go (EDM + I/O)
-- [[https://github.com/go-hep/hepevt][go-hep/hepevt]],[[https://github.com/go-hep/heppdt][go-hep/heppdt]]: HEPEVT bindings and HEP particle data table
-- [[https://github.com/go-hep/lhef][go-hep/lhef]], [[https://github.com/go-hep/slha][go-hep/slha]]: Les Houches Event File format and SUSY Les Houches Accord I/O
-- [[https://github.com/go-hep/croot][go-hep/croot]]: bindings to a subset of ROOT I/O
-- [[https://github.com/go-hep/rio][go-hep/rio]], [[https://github.com/go-hep/sio][go-hep/sio]]: go-hep record oriented I/O and LCIO I/O
-- [[https://github.com/astrogo/fitsio][astrogo/fitsio]]: r/w access to `FITS` files
-
-
+  - [go-hep/fads](https://github.com/go-hep/fads): a fast detector simulation toolkit, built on top of [go-hep/fwk](https://github.com/go-hep/fwk)
+  - [go-hep/fmom](https://github.com/go-hep/fmom): a 4-vectors library
+  - [go-hep/hbook](https://github.com/go-hep/hbook): histograms and n-tuples (WIP)
+  - [go-hep/hplot](https://github.com/go-hep/hplot): interactive plotting (WIP)
+  - [go-hep/hepmc](https://github.com/go-hep/hepmc): HepMC in pure Go (EDM + I/O)
+  - [go-hep/hepevt](https://github.com/go-hep/hepevt),[go-hep/heppdt](https://github.com/go-hep/heppdt): HEPEVT bindings and HEP particle data table
+  - [go-hep/lhef](https://github.com/go-hep/lhef), [go-hep/slha](https://github.com/go-hep/slha): Les Houches Event File format and SUSY Les Houches Accord I/O
+  - [go-hep/croot](https://github.com/go-hep/croot): bindings to a subset of ROOT I/O
+  - [go-hep/rio](https://github.com/go-hep/rio), [go-hep/sio](https://github.com/go-hep/sio): go-hep record oriented I/O and LCIO I/O
+  - [astrogo/fitsio](https://github.com/astrogo/fitsio): r/w access to `FITS` files

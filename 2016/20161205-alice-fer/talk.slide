@@ -1,4 +1,4 @@
-fer: a Go-based FairMQ compatible toolkit
+# fer: a Go-based FairMQ compatible toolkit
 Alice-MRRTF, 2016-12-05
 
 Sébastien Binet
@@ -7,44 +7,44 @@ sebastien.binet@clermont.in2p3.fr
 https://github.com/sbinet
 @0xb1ns
 
-* FairMQ
+## FairMQ
 
 FairMQ is a distributed processing toolkit, written in `C++`, with pluggable transports (`ZeroMQ`, `nanomsg`).
 
 .image _figs/fairmq-example-topology.png 200 _
 
-* FairMQ
+## FairMQ
 
 FairMQ has a concept of `Devices` which are executed and connected together to form various topologies:
 
- class FairMQDevice : <...> {
-  public:
-   int
-   Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+	class FairMQDevice : <...> {
+	 public:
+	  int
+	  Send(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
 
-   int
-   Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
+	  int
+	  Receive(const std::unique_ptr<FairMQMessage>& msg, const std::string& chan, const int i) const;
 
-  protected:
-    virtual void Init();
-    virtual void InitTask();
-    virtual void Run();
-    virtual void Pause();
-    virtual void ResetTask();
-    virtual void Reset();
- };
+	 protected:
+	   virtual void Init();
+	   virtual void InitTask();
+	   virtual void Run();
+	   virtual void Pause();
+	   virtual void ResetTask();
+	   virtual void Reset();
+	};
 
-Users are supposed to *at* *least* override `FairMQDevice::Run()`.
+Users are supposed to **at** **least** override `FairMQDevice::Run()`.
 
-* FairMQ
+## FairMQ
 
 Topologies are created and described via `JSON` files:
 
 .code _code/fair-config.json.txt
 
-* fer
+## fer
 
-* fer
+## fer
 
 As FairMQ is distributed with each device talking over `ZeroMQ` or `nanomsg`, one can write each device in any language (which has support for `nanomsg` or `ZeroMQ`).
 
@@ -52,17 +52,17 @@ Let's do that in `Go`:
 
 .link https://github.com/sbinet-alice/fer
 
-- create `fer.Device`
-- create topologies using the same `JSON` files
-- connect devices via `ZeroMQ` (needs the `C++` libzmq installed: restriction might be lifted at some point)
-- connect devices via `nanomsg` (pure-Go)
+  - create `fer.Device`
+  - create topologies using the same `JSON` files
+  - connect devices via `ZeroMQ` (needs the `C++` libzmq installed: restriction might be lifted at some point)
+  - connect devices via `nanomsg` (pure-Go)
 
 All topologies supported by `FairMQ` should be supported by `fer` too.
 One can mix and match `C++` and `Go` devices, see:
 
 .link https://github.com/FairRootGroup/FairRoot/tree/dev/examples/advanced/GoTutorial
 
-* fer - device
+## fer - device
 
 .code _code/fer-device.go /START RUN/,/STOP RUN/
 
@@ -72,7 +72,7 @@ Optionally, they may also implement:
 
 .code _code/fer-device.go /START CFG/,/STOP CFG/
 
-* fer - controler
+## fer - controler
 
 .code _code/fer-controler.go /START CTL/,/STOP CTL/
 
@@ -83,24 +83,24 @@ Messages and commands are defined as:
 
 .code _code/fer-controler.go /START MSG/,/STOP MSG/
 
-* fer tutorial
+## fer tutorial
 
-* fer - processor
+## fer - processor
 
 .code _code/fer-processor.go /START CFG/,/STOP CFG/
 
-* fer - processor
+## fer - processor
 
 .code _code/fer-processor.go /START RUN/,/STOP RUN/
 
-* fer - processor
+## fer - processor
 
 .code _code/fer-processor.go /START MAIN/,/STOP MAIN/
 
 Build and run like so:
 
- $> go install ./my-device
- $> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
+	$> go install ./my-device
+	$> $GOPATH/bin/my-device --id processor --mq-config ./path-to/config.json
 
 Of course, `fer` is compatible with `JSON` files from `FairMQ`...
 
@@ -108,33 +108,33 @@ More docs:
 
 .link https://godoc.org/github.com/sbinet-alice/fer
 
-* fer features
+## fer features
 
-- `ZeroMQ` (push/pull, pub/sub, ...), needs the `C++` library installed
-- `nanomsg` (push/pull, pub/sub, ...), pure-Go
-- shared-memory: not there yet
-- devices' executables statically compiled (except with `ZeroMQ`)
-- `tcp` and `ipc` supported
-- with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
-- `FairMQ`-compatible program options (but probably not all of them)
+  - `ZeroMQ` (push/pull, pub/sub, ...), needs the `C++` library installed
+  - `nanomsg` (push/pull, pub/sub, ...), pure-Go
+  - shared-memory: not there yet
+  - devices' executables statically compiled (except with `ZeroMQ`)
+  - `tcp` and `ipc` supported
+  - with `nanomsg`: transport via `WebSockets` (think: monitoring via a web server)
+  - `FairMQ`-compatible program options (but probably not all of them)
 
 Non-features:
 
-- plugins for DDS
-- state machine more limited that FairMQ's
-- ROOT I/O (except via [[https://github.com/go-hep/croot][go-hep/croot]])
+  - plugins for DDS
+  - state machine more limited that FairMQ's
+  - ROOT I/O (except via [go-hep/croot](https://github.com/go-hep/croot))
 
-* Conclusions
+## Conclusions
 
-[[https://github.com/sbinet-alice/fer][fer]] is a `FairMQ`-compatible toolkit, written in [[https://golang.org][Go]].
+[fer](https://github.com/sbinet-alice/fer) is a `FairMQ`-compatible toolkit, written in [Go](https://golang.org).
 
 Straightforward installation:
 
-- install [[https://golang.org/doc/install][Go]] for your platform (macOS, linux, windows, ...)
-- install [[http://zeromq.org][C++ ZeroMQ]] (a pure Go package will be used at some point)
-- install [[https://github.com/sbinet-alice/fer][fer]]:
+  - install [Go](https://golang.org/doc/install) for your platform (macOS, linux, windows, ...)
+  - install [C++ ZeroMQ](http://zeromq.org) (a pure Go package will be used at some point)
+  - install [fer](https://github.com/sbinet-alice/fer):
 
-  $> go get github.com/sbinet-alice/fer
+	$> go get github.com/sbinet-alice/fer
 
 and voila!
 
@@ -144,5 +144,4 @@ Give it a try? and let me know.
 
 Possible topics for feedback:
 
-- API, Docs, installation procedure, perfs ?
-
+  - API, Docs, installation procedure, perfs ?

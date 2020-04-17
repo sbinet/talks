@@ -1,4 +1,4 @@
-Introduction to Thread Building Blocks
+# Introduction to Thread Building Blocks
 
 MRRTF, 2016-01-25
 
@@ -6,138 +6,137 @@ Sebastien Binet
 CNRS/IN2P3/LPC
 binet@cern.ch
 
-* Recap from last episode
+## Recap from last episode
 
-* C++11 std::thread
+## C++11 std::thread
 
 `C++11` (finally!) standardized threads
 
-- `std::thread` is now part of the standard `C++` library
-- `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
+  - `std::thread` is now part of the standard `C++` library
+  - `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
 
-* C++11 std::thread
+## C++11 std::thread
 
 .code code/hello-par.cxx
 
- $> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
- $> ./hello-par
- ** inside thread 139800850654976!
- 
-* Programming style
+	$> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
+	$> ./hello-par
+	** inside thread 139800850654976!
 
-- Old school: thread functions (what we just saw)
-- Middle school: function objects (functors)
-- New school: `C++11` lambda functions (aka anonymous functions)
+## Programming style
 
-* Types of parallelism
+  - Old school: thread functions (what we just saw)
+  - Middle school: function objects (functors)
+  - New school: `C++11` lambda functions (aka anonymous functions)
+
+## Types of parallelism
 
 Most common types:
 
-- Data
-- Task
-- Embarrassingly parallel
-- Dataflow
+  - Data
+  - Task
+  - Embarrassingly parallel
+  - Dataflow
 
-* C++ concurrency features
+## C++ concurrency features
 
 .image figs/cxx-features.png
 
-* Futures
+## Futures
 
-*Futures* provide a higher level of abstraction
+**Futures** provide a higher level of abstraction
 
-- you start an asynchronous/parallel operation
-- you are returned a handle to wait for the result
-- thread creation, join and exceptions are handled for you
+  - you start an asynchronous/parallel operation
+  - you are returned a handle to wait for the result
+  - thread creation, join and exceptions are handled for you
 
-* Async tasks and futures
+## Async tasks and futures
 
 .code code/async.cxx
 
-- access the result via the `get()` method
-- one can also use `wait()` to block the thread until the result is available (but doesn't read the result)
+  - access the result via the `get()` method
+  - one can also use `wait()` to block the thread until the result is available (but doesn't read the result)
 
-* Intel Threading Building Blocks
+## Intel Threading Building Blocks
 
-* Intel TBB - Introduction
+## Intel TBB - Introduction
 
 Open source project (GPLv2) for supporting scalable parallel programming `C++`.
 
-It is a *higher* *level* toolkit than `C++11` threads.
+It is a **higher** **level** toolkit than `C++11` threads.
 
 "If it's suitable to your problem, then it's almost certainly a better choice."
 
 `TBB` supports common programming patterns for loops:
 
-- `parallel_for` for independent computations on arrays
-- `parallel_reduce` for a series of computations across an array
-- `parallel_scan` for more general prefix calculations.
+  - `parallel_for` for independent computations on arrays
+  - `parallel_reduce` for a series of computations across an array
+  - `parallel_scan` for more general prefix calculations.
 
-See the [[https://software.intel.com/en-us/node/506140][documentation]] for a complete list.
+See the [documentation](https://software.intel.com/en-us/node/506140) for a complete list.
 
 `TBB` also provides thread-safe containers, a performant thread safe memory allocator and timing primitives.
 
-* Intel TBB - Introduction (cont'd)
+## Intel TBB - Introduction (cont'd)
 
+`TBB` also allows the construction of **graphs** describing the relationship between different parts of a program's execution and the `TBB` **scheduler** can exploit concurrency where different parts of the workflow are independent.
 
-`TBB` also allows the construction of *graphs* describing the relationship between different parts of a program's execution and the `TBB` *scheduler* can exploit concurrency where different parts of the workflow are independent.
+Further, for **task** based workflows, `TBB` allows lower level interaction with its task scheduler, enabling it to be used as an execution engine for a higher level workflow generator.
 
-Further, for *task* based workflows, `TBB` allows lower level interaction with its task scheduler, enabling it to be used as an execution engine for a higher level workflow generator.
+**Using** **TBB**.
 
-*Using* *TBB*.
+  - include the header `"tbb/tbb.h"`
+  - link against `-ltbb` (and, on `Linux`, against `-lrt`)
+  - `TBB` identifiers are under the `tbb::` namespace.
 
-- include the header `"tbb/tbb.h"`
-- link against `-ltbb` (and, on `Linux`, against `-lrt`)
-- `TBB` identifiers are under the `tbb::` namespace.
+## Parallel loop algorithms
 
-* Parallel loop algorithms
-
-* Parallel for
+## Parallel for
 
 Simple parallel operation where the same operation is performed independently over elements of a collection.
 
 Serially:
 
-  for (size_t i=0; i<array_size; ++i) {
-     my_func(x[i]);
-  }
+	for (size_t i=0; i<array_size; ++i) {
+	   my_func(x[i]);
+	}
 
 With `TBB`, to turn this sequential loop into a parallel one, one needs to express the operation as a _callable_ object, which can take a special `TBB` template class' instance as an argument.
 
-* Parallel for - II
+## Parallel for - II
 
- #include "tbb/tbb.h"
- 
- class ApplyFunc {
-     double *const my_x;
- public:
-     void operator()(const tbb::blocked_range<size_t>& r) const {
-         double *x = my_x;
-         for(size_t i=r.begin(); i!=r.end(); ++i)
-             my_func(x[i]);
-     }
-     ApplyFunc(double x[]):
-         my_x{x}
-     {}
- };
+	#include "tbb/tbb.h"
+
+	class ApplyFunc {
+	    double *const my_x;
+	public:
+	    void operator()(const tbb::blocked_range<size_t>& r) const {
+	        double *x = my_x;
+	        for(size_t i=r.begin(); i!=r.end(); ++i)
+	            my_func(x[i]);
+	    }
+	    ApplyFunc(double x[]):
+	        my_x{x}
+	    {}
+	};
 
 The `tbb::blocked_range<size_t>` parameter is used by `TBB` to instruct threads to operate on a certain chunk of the `my_x` array.
 
-* Parallel for - III
+## Parallel for - III
 
 With `ApplyFunc` defined, one can now invoke `tbb::parallel_for` like so:
 
- #include "tbb/tbb.h"
- 
- void ParallelApplyFunc(double x[], size_t n) {
-     tbb::parallel_for(tbb::blocked_range<size_t>(0, n), ApplyFunc(x));
- }
+	#include "tbb/tbb.h"
+
+	void ParallelApplyFunc(double x[], size_t n) {
+	    tbb::parallel_for(tbb::blocked_range<size_t>(0, n), ApplyFunc(x));
+	}
 
 In this case `parallel_for` is instructed to run over the range `[0,n)` on the `ApplyFunc(x)` class instance.
 
 Note that `parallel_for` will take care of setting up the `TBB` thread pool for us (in earlier versions of `TBB`, one needed to call `tbb::task_scheduler_init`, which is still available if you need to setup the `TBB` thread pool with special options).
 
-* Parallel for - IV
+## Parallel for - IV
 
 As for the `std::thread` case, one can also use a lambda function instead of a functor:
 
@@ -145,36 +144,36 @@ As for the `std::thread` case, one can also use a lambda function instead of a f
 
 Using the lambda which copies by value `[=]` satisfies all the criteria needed by `parallel_for` and makes for a very succinct declaration.
 
-* Parallel reduce
+## Parallel reduce
 
-`parallel_for` is great for when operations applied to elements of a collection are *independent*.
+`parallel_for` is great for when operations applied to elements of a collection are **independent**.
 But, there are cases where the operation needs input from the previous steps.
-If the computation can still be broken down into pieces, we can still parallelize this operation, which is called a *reduction*.
+If the computation can still be broken down into pieces, we can still parallelize this operation, which is called a **reduction**.
 
 Here's a simple example: if one needs to sum up 10 numbers one can do it like this
 
-  (((((((((1+2)+3)+4)+5)+6)+7)+8)+9)+10)
+	(((((((((1+2)+3)+4)+5)+6)+7)+8)+9)+10)
 
 which is sequential. But one could also do it like this:
 
-  ((1+2) + (3+4)) + ((5+6) + ((7+8) + (9+10)))
+	((1+2) + (3+4)) + ((5+6) + ((7+8) + (9+10)))
 
 where it's now much easier to see that the calculation can be parallelized.
 There are some extra steps needed here:
 
-- how to *split* the whole collection into smaller chunks
-- how to *join* the results of the smaller chunks into aggregated results.
+  - how to **split** the whole collection into smaller chunks
+  - how to **join** the results of the smaller chunks into aggregated results.
 
-* Parallel reduce - II
+## Parallel reduce - II
 
 .code code/tbb-parallel-reduce.cxx
 
-* Parallel reduce - III
+## Parallel reduce - III
 
 Notice the two new methods that were needed
 
-- A special constructor that takes a reference to an existing `parallel_sum` instance and a special dummy parameter `tbb::split`. This is the *splitting* *constructor* that `TBB` uses to generate new parts of the *reduction* that will run on other threads. (The dummy variable distinguishes this method from the class's copy constructor.)
-- A `join` method that tells `TBB` how to *combine* the results from one fragment of the reduction with another (in this case, just adding up the partial sums).
+  - A special constructor that takes a reference to an existing `parallel_sum` instance and a special dummy parameter `tbb::split`. This is the **splitting** **constructor** that `TBB` uses to generate new parts of the **reduction** that will run on other threads. (The dummy variable distinguishes this method from the class's copy constructor.)
+  - A `join` method that tells `TBB` how to **combine** the results from one fragment of the reduction with another (in this case, just adding up the partial sums).
 
 Once the class is ready, we invoke the reduction by calling `parallel_reduce`:
 
@@ -182,7 +181,7 @@ Once the class is ready, we invoke the reduction by calling `parallel_reduce`:
 
 Note that because of the extra methods that are needed for `parallel_reduce` it's less easy to use a lambda here.
 
-* Different blocked range templates
+## Different blocked range templates
 
 `blocked_range` is designed for `1D` collections.
 However, many times we need to deal with more complicated objects than that.
@@ -194,11 +193,11 @@ So a fragment of a matrix multiply would be something like:
 
 .code code/tbb-matrix-mult.cxx
 
-* Containers
+## Containers
 
 `STL` containers are not thread safe.
 Reading them in parallel is fine.
-But as soon as one thread modifies a container while other threads access it: *corruption*.
+But as soon as one thread modifies a container while other threads access it: **corruption**.
 
 `STL` containers need to be guarded with a `std::mutex` for concurrent r/w access.
 `STL` containers thus are usually bottlenecks in multithreaded applications.
@@ -206,36 +205,36 @@ But as soon as one thread modifies a container while other threads access it: *c
 `TBB` provides concurrency friendly containers with most of the features one can expect of their `STL` counterparts.
 There are two strategies to make such containers:
 
-- Use lock-free techniques, which correct for any interference between threads automatically.
-- Use fine grained locking, where only the part of the container which is being touched is wrapped in a mutex.
+  - Use lock-free techniques, which correct for any interference between threads automatically.
+  - Use fine grained locking, where only the part of the container which is being touched is wrapped in a mutex.
 
-* Concurrent vector
+## Concurrent vector
 
 `concurrent_vector<T>`:
 
-- allows dynamic growth of an array of type `T`.
+  - allows dynamic growth of an array of type `T`.
 
-- can be grown safely while other threads are accessing it, including growing it themselves.
+  - can be grown safely while other threads are accessing it, including growing it themselves.
 
 .code code/vec-add.cxx
 
-- clearing or destroying the vector and accessing it is *unsafe*.
-- `size()` returns the size of all elements, even those being constructed, so accessing those elements might be problematic.
-- unlike an `std::vector`, elements in a concurrent vector are not guaranteed to be contiguous in memory.
+  - clearing or destroying the vector and accessing it is **unsafe**.
+  - `size()` returns the size of all elements, even those being constructed, so accessing those elements might be problematic.
+  - unlike an `std::vector`, elements in a concurrent vector are not guaranteed to be contiguous in memory.
 
-* Other containers
+## Other containers
 
 `TBB` provides many other concurrent containers, including hash maps and queues. We won't cover them here, but having practiced with the concurrent vector you should find them pretty easy to use.
 
-- `tbb::concurrent_unordered_map`
-- `tbb::concurrent_unordered_set`
-- `tbb::concurrent_hash_map`
-- `tbb::concurrent_queue`
+  - `tbb::concurrent_unordered_map`
+  - `tbb::concurrent_unordered_set`
+  - `tbb::concurrent_hash_map`
+  - `tbb::concurrent_queue`
 
-* Pipelines and graphs
+## Pipelines and graphs
 
-Many real-world problems can be addressed with `TBB` `parallel_for`, `parallel_reduce` and more [[https://software.intel.com/en-us/node/506140][sophisticated patterns]].
-But `TBB` also allows for parallelization based on *task* *workflows*.
+Many real-world problems can be addressed with `TBB` `parallel_for`, `parallel_reduce` and more [sophisticated patterns](https://software.intel.com/en-us/node/506140).
+But `TBB` also allows for parallelization based on **task** **workflows**.
 
 _Pipelines_ are a simple execution concept.
 - Tasks to be executed come in a linear sequence, much like an assembly line.
@@ -243,40 +242,39 @@ _Pipelines_ are a simple execution concept.
 - Serial process for any data element.
 - Parallelism arises because we can have many pieces of data moving through the pipeline at the one time.
 
-* Pipelines
+## Pipelines
 
- +---------+
- |  Start  | <- data1, data2, data3, ..., dataN
- +---------+
-     |
-     V
- +---------+
- | Stage 1 |
- +---------+
-     |
-     V
- +---------+
- | Stage 2 |
- +---------+
-     |
-     V
- +---------+
- |  Stop   | -> outN, ... , out3, out2, out1
- +---------+
+	+---------+
+	|  Start  | <- data1, data2, data3, ..., dataN
+	+---------+
+	    |
+	    V
+	+---------+
+	| Stage 1 |
+	+---------+
+	    |
+	    V
+	+---------+
+	| Stage 2 |
+	+---------+
+	    |
+	    V
+	+---------+
+	|  Stop   | -> outN, ... , out3, out2, out1
+	+---------+
 
-* Pipelines
+## Pipelines
 
-- Each stage can either be serial or parallel.
-- No more than one element will be processed by serial stages at a time.
-- Serial stages can be in order or out of order.
+  - Each stage can either be serial or parallel.
+  - No more than one element will be processed by serial stages at a time.
+  - Serial stages can be in order or out of order.
 
-- Multiple elements can be processed by parallel stages at the same time
-- Ordering is obviously not guaranteed.
+  - Multiple elements can be processed by parallel stages at the same time
+  - Ordering is obviously not guaranteed.
 
 Considering the performance one might hope to get with a pipeline, obviously the serial stages are bottlenecks (especially serial in order), so keeping these stages short will help a lot.
 
-
-* Defining a Pipeline
+## Defining a Pipeline
 
 Pipelines are defined as a series of _filters_, each of which takes some input data and produces some transformed output data.
 The first filter's input data is `void`, as is the last filter's output data.
@@ -285,7 +283,7 @@ The first filter's input data is `void`, as is the last filter's output data.
 
 `ntoken` prevents data from piling up at the choke point of the pipeline and consuming resources needlessly.
 
-* How a Pipeline runs
+## How a Pipeline runs
 
 `TBB` actually runs the pipeline by calling the `()` `operator` of each filter for the data element that is going to be processed.
 
@@ -295,7 +293,7 @@ e.g., our `Transform` class might look like this:
 
 Note that as the `()` `operator` might be called on a copy of the original class instance it needs to be `const` to ensure it does not make changes to the body which would be lost in the copy.
 
-* How a Pipeline runs - II
+## How a Pipeline runs - II
 
 Similarly, the `DataWriter` could look like:
 
@@ -304,52 +302,52 @@ Similarly, the `DataWriter` could look like:
 The first stage is a bit more complicated as it needs a mechanism to tell the pipeline there is no more data to process.
 This is what the special `tbb::flow_control` class is for.
 
-* How a Pipeline runs - III
+## How a Pipeline runs - III
 
 .code code/pipeline-datareader.cxx
 
-* TBB Graphs
+## TBB Graphs
 
 The most general kind of task based workflow is a graph, where tasks are nodes and edges are data that flows between the nodes.
 
- +---------+
- |  Start  | <- data1, data2, data3, ..., dataN
- +---------+--------------
-     |      \             \
-     V       \             \
- +---------+  \|            \
- | Node 1  |   +--------+    +--------+
- +---------+   | Node 2 |    | Node 4 |
-     |         +--------+    +--------+
-     V              |             |
- +---------+        |             |
- | Node 3  |        |             |
- +---------+        |             |
-     |              |             |
-     |   +----------+-------------+
-     |   |
-     V   V
- +---------+
- |  Node 5 | -> out1, out2, out3, ..., outN
- +---------+
+	+---------+
+	|  Start  | <- data1, data2, data3, ..., dataN
+	+---------+--------------
+	    |      \             \
+	    V       \             \
+	+---------+  \|            \
+	| Node 1  |   +--------+    +--------+
+	+---------+   | Node 2 |    | Node 4 |
+	    |         +--------+    +--------+
+	    V              |             |
+	+---------+        |             |
+	| Node 3  |        |             |
+	+---------+        |             |
+	    |              |             |
+	    |   +----------+-------------+
+	    |   |
+	    V   V
+	+---------+
+	|  Node 5 | -> out1, out2, out3, ..., outN
+	+---------+
 
-* TBB Graphs - II
+## TBB Graphs - II
 
 Graphs are a very flexible way to execute tasks in parallel.
 `TBB` has many node types that allow for processing, splitting, joining, queueing etc.
 Note also that although the ASCII art example there is a `DAG` (Directed Acyclic Graph), `TBB` can implement graphs with cycles as well.
 
-The Intel [[https://software.intel.com/en-us/node/517340][documentation]] has a good introduction.
+The Intel [documentation](https://software.intel.com/en-us/node/517340) has a good introduction.
 
-* TBB Graph Basics
+## TBB Graph Basics
 
-* Setting Up a Graph
+## Setting Up a Graph
 
 A graph in `TBB` is an object of type `tbb::flow::graph`, and you need to include the header `tbb/flow_graph.h`:
 
 .code code/tbb-graph.cxx
 
-* Attaching nodes to your graph
+## Attaching nodes to your graph
 
 In `TBB`, nodes may have different types.
 A simple case is to use the helper `function_node`:
@@ -358,80 +356,80 @@ A simple case is to use the helper `function_node`:
 
 This creates a basic data processing node that:
 
-- ingests a certain type of data and then
-- produces an output data type.
+  - ingests a certain type of data and then
+  - produces an output data type.
 
 _Note:_ in `TBB` speak, nodes exchange _messages_, but these messages can be meaningful pieces of data.
 
-* Making Edges
+## Making Edges
 
 Once nodes have been connected, one needs to connect them _via_ edges so the graph can do useful work.
 This is done with the `tbb::flow::make_edge` function.
 It takes an input and an output node and connects them together:
 
- tbb::flow::make_edge(n1, n2);
+	tbb::flow::make_edge(n1, n2);
 
 This connects node `n1` to `n2`.
 
-* Getting The Graph Started
+## Getting The Graph Started
 
 You can push data into the graph by using the `try_put` method of a node.
 This pushes a piece of data into the node and will then trigger all of the associated data flows.
 
-  n1.try_put(1.0);
+	n1.try_put(1.0);
 
 Note that `try_put` returns a boolean to say if the node accepted the data.
 
-* At the End
+## At the End
 
 Before the graph object goes out of scope, one needs to wait for all data processing to finish by calling the `wait_for_all()` method:
 
-  g.wait_for_all()
+	g.wait_for_all()
 
-* Simple example
+## Simple example
 
 .code code/tbb-graph-example.cxx / START/,/ END/
 
-* Simple example - II
+## Simple example - II
 
- $> ./tbb-graph-example
- node n 0
- node n 1
- node n 2
- node n 3
- node m 0
- node n 4
- node n 9
- node n 5
- node m 1
- node n 6
- node m 4
- node n 7
- node n 8
- node m 9
- node m 16
- node m 81
- node m 25
- node m 36
- node m 49
- node m 64
+	$> ./tbb-graph-example
+	node n 0
+	node n 1
+	node n 2
+	node n 3
+	node m 0
+	node n 4
+	node n 9
+	node n 5
+	node m 1
+	node n 6
+	node m 4
+	node n 7
+	node n 8
+	node m 9
+	node m 16
+	node m 81
+	node m 25
+	node m 36
+	node m 49
+	node m 64
 
-* Simple example - III
+## Simple example - III
 
-- all messages passed between nodes are *copied*
-- if large pieces of data need to be percolated through nodes, use `std::shared_ptr` (`std::unique_ptr` is not copyable)
+  - all messages passed between nodes are **copied**
+  - if large pieces of data need to be percolated through nodes, use `std::shared_ptr` (`std::unique_ptr` is not copyable)
 
- tbb::flow::function_node< shared_ptr<T>, shared_ptr<T> >
-    generator( g, tbb::flow::unlimited, [](const shared_ptr<T> v) { // note the const
-        shared_ptr<T> v2 = make_shared<T> (some_function(*v));
-        return v2;
- } );
+	tbb::flow::function_node< shared_ptr<T>, shared_ptr<T> >
+	   generator( g, tbb::flow::unlimited, [](const shared_ptr<T> v) { // note the const
+	       shared_ptr<T> v2 = make_shared<T> (some_function(*v));
+	       return v2;
+	} );
 
-- if no data needs to be passed down, one can use the lightweight message `tbb::flow::continue_msg()`.
+  - if no data needs to be passed down, one can use the lightweight message `tbb::flow::continue_msg()`.
 
-* Other node types
+## Other node types
 
-* Broadcast nodes
+## Broadcast nodes
 
 A `broadcast` node sends its input to any output node to which it's connected.
 It doesn't do any processing.
@@ -439,36 +437,36 @@ It's a bit like a plumbing `T` pipe.
 
 .code code/tbb-graph-nodes.cxx
 
-* Source Node
+## Source Node
 
 A source node takes no input, but generates output internally, passing it out to its connected nodes.
 A source node needs to provide a callable that accepts a reference to its data type and sets the value of the reference to the data to be passed to other nodes.
 The call interface itself returns a boolean: `true` if more data might be available, `false` if not.
 
-* Source Node - II
+## Source Node - II
 
 This source node provides the lines from a file as messages, one by one:
 
 .code code/tbb-graph-src-node.cxx
 
-* Combining parallelism
+## Combining parallelism
 
 One of the nice features of `TBB` is that the internal thread pool is managed between all types of parallelisms in an efficient way.
 This means that you can (and _should_) use parallelism within a `TBB` graph node, if that's possible.
 
 In this example a node that processes an array of doubles into another array of doubles uses `parallel_for` to exploit the concurrency available in this operation.
 
- function_node< double *, double * > n1( g, unlimited, [&]( double *a ) -> double * {
-    double *b = new double[N];
-    parallel_for( 0, N, [&](int i) {
-        b[i] = f1(a[i]);
-    } );
-    return b;
- } );
+	function_node< double *, double * > n1( g, unlimited, [&]( double *a ) -> double * {
+	   double *b = new double[N];
+	   parallel_for( 0, N, [&](int i) {
+	       b[i] = f1(a[i]);
+	   } );
+	   return b;
+	} );
 
 _Note:_ lambdas can be nested.
 
-* Conclusions
+## Conclusions
 
 `TBB` is a nice high level parallelism toolkit.
 Applicable to a lot of HENP real world problems and use cases.

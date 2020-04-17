@@ -1,4 +1,4 @@
-AVIRM && Go
+# AVIRM && Go
 Meeting Svc-info-LPC, 2016-07-04
 
 Sébastien Binet
@@ -6,36 +6,35 @@ CNRS/IN2P3/LPC
 binet@clermont.in2p3.fr
 
 
-* Go
 
-You know already about [[https://golang.org][Go]].
+## Go
 
-- Concurrency
-- Python-like, C-like
-- Development speed, runtime speed
-- Garbage collector
+You know already about [Go](https://golang.org).
 
-* Go @AVIRM: application of HEP detectors to medical detectors
+  - Concurrency
+  - Python-like, C-like
+  - Development speed, runtime speed
+  - Garbage collector
 
-Replaced (not by me: [[https://github.com/ebusato][@ebusato]]) a `C++-03/pthreads+ROOT(GUI+histos)` application for data acquisition, with a much improved feature-wise `Go` version:
+## Go @AVIRM: application of HEP detectors to medical detectors
+
+Replaced (not by me: [@ebusato](https://github.com/ebusato)) a `C++-03/pthreads+ROOT(GUI+histos)` application for data acquisition, with a much improved feature-wise `Go` version:
 
 .image _figs/avirm-godaq.png 150 _
 
-- receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
-- checks binary data integrity (`0xCAFEDECA` control words)
-- writes data to disk
-- launches/stops/pauses monitoring
-- listens for instructions from user
+  - receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
+  - checks binary data integrity (`0xCAFEDECA` control words)
+  - writes data to disk
+  - launches/stops/pauses monitoring
+  - listens for instructions from user
 
-Available at [[https://gitlab.in2p3.fr/avirm/analysis-go][gitlab.in2p3.fr/avirm/analysis-go]]
+Available at [gitlab.in2p3.fr/avirm/analysis-go](https://gitlab.in2p3.fr/avirm/analysis-go)
 
-* Go @AVIRM - II
+## Go @AVIRM - II
 
 .image _figs/avirm-detector.jpg 500 _
 
-* Go @AVIRM - III
+## Go @AVIRM - III
 
 .image _figs/avirm-dpga-1.png 300 _
 .image _figs/avirm-dpga-2.png 300 _
-
-

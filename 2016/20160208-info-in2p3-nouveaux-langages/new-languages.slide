@@ -1,4 +1,4 @@
-Nouveaux langages
+# Nouveaux langages
 Réunion annuelle Info IN2P3, 2016-02-08
 
 Sébastien Binet
@@ -9,68 +9,66 @@ Christophe Meessen
 CNRS/IN2P3/CPPM
 meessen@cppm.in2p3.fr
 
-* Nouveaux langages
+## Nouveaux langages
 
-Working group dedicated to the study of new languages: [[http://informatique.in2p3.fr/?q=nouveaux-langages][website]]
+Working group dedicated to the study of new languages: [website](http://informatique.in2p3.fr/?q=nouveaux-langages)
 
 For now, focused on the study of:
 
-- [[http://dlang.org/][D]]: a better `C++`
-- [[https://golang.org/][Go]]: a better `C`, with builtin support for concurrency
+  - [D](http://dlang.org/): a better `C++`
+  - [Go](https://golang.org/): a better `C`, with builtin support for concurrency
 
 ChM investigated `D`.
 SB investigated `Go`.
 
-* D
+## D
 
-- workshop at [[https://indico.in2p3.fr/event/9954/other-view?view=standard][JI-2014]] ([[https://indico.in2p3.fr/event/9954/session/5/contribution/0/material/slides/0.pdf][intro]], [[https://indico.in2p3.fr/event/9954/session/13/contribution/87/material/0/0.pdf][instructions]])
+  - workshop at [JI-2014](https://indico.in2p3.fr/event/9954/other-view?view=standard) ([intro](https://indico.in2p3.fr/event/9954/session/5/contribution/0/material/slides/0.pdf), [instructions](https://indico.in2p3.fr/event/9954/session/13/contribution/87/material/0/0.pdf))
 
-* Go
+## Go
 
-Developed a few proof-of-concepts for the HEP community, available from the [[https://github.com/go-hep][go-hep]] organization:
+Developed a few proof-of-concepts for the HEP community, available from the [go-hep](https://github.com/go-hep) organization:
 
-- [[https://github.com/go-hep/hbook][go-hep/hbook]]: histograms handling
-- [[https://github.com/go-hep/hplot][go-hep/hplot]]: histograms plotting
-- [[https://github.com/go-hep/rio][go-hep/rio]]: building blocks for `I/O` persistency
-- [[https://github.com/go-hep/fwk][go-hep/fwk]]: a concurrent control framework a-la-Gaudi
-- [[https://github.com/go-hep/fads][go-hep/fads]]: a fast detector simulation a-la-Delphes
-- etc...
+  - [go-hep/hbook](https://github.com/go-hep/hbook): histograms handling
+  - [go-hep/hplot](https://github.com/go-hep/hplot): histograms plotting
+  - [go-hep/rio](https://github.com/go-hep/rio): building blocks for `I/O` persistency
+  - [go-hep/fwk](https://github.com/go-hep/fwk): a concurrent control framework a-la-Gaudi
+  - [go-hep/fads](https://github.com/go-hep/fads): a fast detector simulation a-la-Delphes
+  - etc...
 
-Also did the same kind of work for the Astro/Cosmo community with the [[https://github.com/astrogo][astrogo]] organization:
+Also did the same kind of work for the Astro/Cosmo community with the [astrogo](https://github.com/astrogo) organization:
 
-- [[https://github.com/astrogo/fitsio][astrogo/fitsio]]: `FITS` file format r/w handling
-- [[https://github.com/astrogo/asdf][astrogo/asdf]]: `ASDF` file format
+  - [astrogo/fitsio](https://github.com/astrogo/fitsio): `FITS` file format r/w handling
+  - [astrogo/asdf](https://github.com/astrogo/asdf): `ASDF` file format
 
-
-* Go - II
+## Go - II
 
 Investigated application of `Go` for:
 
-- `HEP` physics analyses (c.f. `go-hep/...` packages)
-- `astro` physics analyses (c.f. [[https://github.com/astrogo/snfusion][astrogo/snfusion]])
-- slow control: [[https://github.com/go-lsst/ncs][go-lsst/ncs]], the "nimble control system"
+  - `HEP` physics analyses (c.f. `go-hep/...` packages)
+  - `astro` physics analyses (c.f. [astrogo/snfusion](https://github.com/astrogo/snfusion))
+  - slow control: [go-lsst/ncs](https://github.com/go-lsst/ncs), the "nimble control system"
 
 About to start the investigation of its suitability for the "embedded" (IoT, ...) space.
 
-* Go - talks, confs, etc...
+## Go - talks, confs, etc...
 
-- [[http://inspirehep.net/record/1089636?ln=en][CHEP-2010]]
-- [[http://inspirehep.net/record/1194222?ln=en][ACAT-2011]]
-- [[http://inspirehep.net/record/1215013?ln=en][CHEP-2012]]
-- workshop at [[https://indico.in2p3.fr/event/9954/other-view?view=standard][JI-2014]] ([[https://github.com/sbinet/ji-2014-go][slides]])
-- [[https://github.com/go-hep/talks/tree/master/2015/20150121-binet-fads-hsf][GDR TeraScale-2014]]
-- workshop at [[http://www.devatlr.univ-montp2.fr/Atelier-Go][Dev@LR 2015-06-15]] ([[https://github.com/sbinet/dev-lr-2015-go][slides]])
+  - [CHEP-2010](http://inspirehep.net/record/1089636?ln=en)
+  - [ACAT-2011](http://inspirehep.net/record/1194222?ln=en)
+  - [CHEP-2012](http://inspirehep.net/record/1215013?ln=en)
+  - workshop at [JI-2014](https://indico.in2p3.fr/event/9954/other-view?view=standard) ([slides](https://github.com/sbinet/ji-2014-go))
+  - [GDR TeraScale-2014](https://github.com/go-hep/talks/tree/master/2015/20150121-binet-fads-hsf)
+  - workshop at [Dev@LR 2015-06-15](http://www.devatlr.univ-montp2.fr/Atelier-Go) ([slides](https://github.com/sbinet/dev-lr-2015-go))
 
-* Go usage
+## Go usage
 
-- SB.
-- [[https://github.com/airnandez/cluefs][ClueFS: A tool for tracing I/O activity at the file system level]]
-- [[https://github.com/lhcb-org/lbpkr][lbpkr: Go-based installer for RPMs and Dockers]] (used by `LHCb`)
-- [[https://gitlab.in2p3.fr/avirm/analysis-go][analysis tools for AVIRM]] (Application of the interaction of radiation with material)
+  - SB.
+  - [ClueFS: A tool for tracing I/O activity at the file system level](https://github.com/airnandez/cluefs)
+  - [lbpkr: Go-based installer for RPMs and Dockers](https://github.com/lhcb-org/lbpkr) (used by `LHCb`)
+  - [analysis tools for AVIRM](https://gitlab.in2p3.fr/avirm/analysis-go) (Application of the interaction of radiation with material)
 
-* Go - prospects, ideas
+## Go - prospects, ideas
 
-- *starting* to get some momentum
-- pondering on a L2/L3-level lecture (+hands-on) in [[https://golang.org][Go]] at Universite Blaise Pascal
-- perhaps another workshop+hands-on session at JI-2016 ?
-
+  - **starting** to get some momentum
+  - pondering on a L2/L3-level lecture (+hands-on) in [Go](https://golang.org) at Universite Blaise Pascal
+  - perhaps another workshop+hands-on session at JI-2016 ?

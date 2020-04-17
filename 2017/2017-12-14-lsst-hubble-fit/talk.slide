@@ -1,4 +1,4 @@
-LSST - Hubble Fit Update
+# LSST - Hubble Fit Update
 LSST-LPC, 2017-12-14
 
 Sebastien Binet
@@ -7,40 +7,39 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Hubble Fit
+## Hubble Fit
 
 Last summer, M1 student (Guillaume) migrated the python code hubble-fit to Go:
 
 .link https://github.com/lsst-lpc/hubble-fit
 
-- explore how feasible it is to use Go for analysis
-- assess what is/was missing in Go
-- explore the performances of Go
-- explore how easy/difficult it is to teach Go
+  - explore how feasible it is to use Go for analysis
+  - assess what is/was missing in Go
+  - explore the performances of Go
+  - explore how easy/difficult it is to teach Go
 
-* Interlude: Go
+## Interlude: Go
 
-* Go
+## Go
 
 `Go` is a C-like, compiled, programming language:
 
-- simple syntax, simple language
-- very fast edit-compile-run development cycle
-- built-in concurrency primitives (to leverage multicores)
-- easy deployment on the grid/batch-system
-- available on Linux/Windows/macOS
-- pip-like system
-- w/ a garbage collector (no memory leaks)
+  - simple syntax, simple language
+  - very fast edit-compile-run development cycle
+  - built-in concurrency primitives (to leverage multicores)
+  - easy deployment on the grid/batch-system
+  - available on Linux/Windows/macOS
+  - pip-like system
+  - w/ a garbage collector (no memory leaks)
 
 .link https://golang.org
 
-* Go
+## Go
 
 .play _code/hello.go
 .image _figs/golang-logo.png 300 _
 
-* Go & Science
-
+## Go & Science
 
 .link https://gonum.org
 .link https://github.com/astrogo/fitsio
@@ -50,79 +49,77 @@ Jupyter+Go:
 
 .link https://mybinder.org/repo/neugram/binder
 .link https://mybinder.org/v2/gh/go-hep/binder/master
-
 .image _figs/gonum-logo.png
 
-* Go & Science
+## Go & Science
 
 .image _figs/h1d.png 500 _
 
-* Go & Science
+## Go & Science
 
 .image _figs/h2d.png 500 _
 
-* Hubble Fit
+## Hubble Fit
 
-* Python2 - Results
+## Python2 - Results
 
- $> ./run-py2
- [...]
- fval = 682.8910357476947 | total call = 90 | ncalls = 90
- edm = 5.6711138504257765e-05 (Goal: 1e-05) | up = 1.0
-    omgM =  0.2951  |  0.03327
-   alpha =  0.1412  |  0.006571
-    beta =  3.102   |  0.08064
-      Mb = -19.05   |  0.02317
- delta_M = -0.07008 |  0.02216
+	$> ./run-py2
+	[...]
+	fval = 682.8910357476947 | total call = 90 | ncalls = 90
+	edm = 5.6711138504257765e-05 (Goal: 1e-05) | up = 1.0
+	   omgM =  0.2951  |  0.03327
+	  alpha =  0.1412  |  0.006571
+	   beta =  3.102   |  0.08064
+	     Mb = -19.05   |  0.02317
+	delta_M = -0.07008 |  0.02216
 
- real=50.13 user=40.90 sys=3.16 CPU=87% MaxRSS=446160 I/O=194592/1312
- 
-* Go - Results
+	real=50.13 user=40.90 sys=3.16 CPU=87% MaxRSS=446160 I/O=194592/1312
 
- $> go get github.com/lsst-lpc/hubble-fit
- $> cd github.com/lsst-lpc/hubble-fit
- $> ./run-go
- [...]
- Omega M = +0.2950
- Alpha   = +0.1410
- Beta    = +3.1010
- Mb      = -19.0500
- Delta M = -0.0700
- minimal function value:  652.761
- number of parameters: 5
- par-000: +2.950000e-01 +/- 2.436849e-02
- par-001: +1.410000e-01 +/- 4.814579e-03
- par-002: +3.101000e+00 +/- 5.855395e-02
- par-003: -1.905000e+01 +/- 1.671196e-02
- par-004: -7.000000e-02 +/- 1.668935e-02
- 
- real=44.48 user=46.67 sys=0.22 CPU=109% MaxRSS=179372 I/O=112936/336
+## Go - Results
 
-* Go - Results
+	$> go get github.com/lsst-lpc/hubble-fit
+	$> cd github.com/lsst-lpc/hubble-fit
+	$> ./run-go
+	[...]
+	Omega M = +0.2950
+	Alpha   = +0.1410
+	Beta    = +3.1010
+	Mb      = -19.0500
+	Delta M = -0.0700
+	minimal function value:  652.761
+	number of parameters: 5
+	par-000: +2.950000e-01 +/- 2.436849e-02
+	par-001: +1.410000e-01 +/- 4.814579e-03
+	par-002: +3.101000e+00 +/- 5.855395e-02
+	par-003: -1.905000e+01 +/- 1.671196e-02
+	par-004: -7.000000e-02 +/- 1.668935e-02
+
+	real=44.48 user=46.67 sys=0.22 CPU=109% MaxRSS=179372 I/O=112936/336
+
+## Go - Results
 
 .image _figs/hubble_diagram2.png
 
-(just to show a plot made with [[https://godoc.org/gonum.org/v1/plot][gonum/plot]])
+(just to show a plot made with [gonum/plot](https://godoc.org/gonum.org/v1/plot))
 
-* Go/Py2 - results
+## Go/Py2 - results
 
 Same numerical results, within error bars.
 
 On a more computer-science-y note, though:
 
-- Py2:
+  - Py2:
 
- real=50.13 user=40.90 sys=3.16 CPU=87% MaxRSS=446160 I/O=194592/1312
+	real=50.13 user=40.90 sys=3.16 CPU=87% MaxRSS=446160 I/O=194592/1312
 
-- Go:
+  - Go:
 
- real=44.48 user=46.67 sys=0.22 CPU=109% MaxRSS=179372 I/O=112936/336
+	real=44.48 user=46.67 sys=0.22 CPU=109% MaxRSS=179372 I/O=112936/336
 
-Go is faster *and* uses less memory (`~180` Mb _vs_ `~450` Mb)
+Go is faster **and** uses less memory (`~180` Mb _vs_ `~450` Mb)
 
 And when we don't disable the concurrent evaluation of minima, Go is ~2 faster:
 
- real=20.63 user=47.85 sys=0.23 CPU=233% MaxRSS=391056 I/O=0/336
+	real=20.63 user=47.85 sys=0.23 CPU=233% MaxRSS=391056 I/O=0/336
 
 (and still uses less memory: `~390` Mb)
-

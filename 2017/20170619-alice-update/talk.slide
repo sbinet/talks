@@ -1,4 +1,4 @@
-fer: update
+# fer: update
 ALICE LPC, 2017-06-19
 
 Sébastien Binet
@@ -7,68 +7,64 @@ sebastien.binet@clermont.in2p3.fr
 https://github.com/sbinet
 @0xb1ns
 
-* fer
+## fer
 
 `fer` is a Go-based toolkit compatible with the `C++` `O2` framework, developed for Run-3.
 
 .link https://github.com/sbinet-alice/fer
 .link https://github.com/FairRootGroup/FairRoot/tree/master/examples/advanced/GoTutorial
-
 .image _figs/fairmq-example-topology.png 200 _
 
+## fer - update
 
+`fer` was presented at last ALICE Offline week: [here](https://indico.cern.ch/event/624025/).
 
-* fer - update
-
-`fer` was presented at last ALICE Offline week: [[https://indico.cern.ch/event/624025/][here]].
-
-- no tomatoes were thrown,
-- ALICE software coordinator enthusiastic,
-- FAIR software coordinator, ditto.
+  - no tomatoes were thrown,
+  - ALICE software coordinator enthusiastic,
+  - FAIR software coordinator, ditto.
 
 Success.
 
-* fer - update II
+## fer - update II
 
-For the ALICE Offline week presentation, developed a program to show the interesting features of [[https://golang.org][Go]]:
+For the ALICE Offline week presentation, developed a program to show the interesting features of [Go](https://golang.org):
 
-- static compilation, "duck-typing" *interfaces*, easy cross-compilation
-- easy concurrency (*goroutines*, *channels*), garbage collector
-- fast development, fast runtime, easy deployment
-- network programming
+  - static compilation, "duck-typing" **interfaces**, easy cross-compilation
+  - easy concurrency (**goroutines**, **channels**), garbage collector
+  - fast development, fast runtime, easy deployment
+  - network programming
 
 Created a little web browser based driver for the standard `sampler/processor/sink` example:
 
 .link https://github.com/sbinet-alice/fer/blob/master/example/cmd/fer-ex-web-ctl/main.go
 
- $> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
- $> fer-ex-web-ctl &
- $> open localhost:8080
+	$> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
+	$> fer-ex-web-ctl &
+	$> open localhost:8080
 
-* fer: (web) demo time
+## fer: (web) demo time
 
-You can try it now, w/o any [[https://golang.org][Go]] toolchain.
+You can try it now, w/o any [Go](https://golang.org) toolchain.
 
-Download it (for your OS/arch) from [[https://cern.ch/binet/alice/fer]]
+Download it (for your OS/arch) from [cern.ch/binet/alice/fer](https://cern.ch/binet/alice/fer)
 
- $> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
- $> ./fer-ex-web-ctl-linux-amd64.exe
+	$> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
+	$> ./fer-ex-web-ctl-linux-amd64.exe
 
 Buzz words compliant:
 
-- WebSockets
-- JSON & binary serialization via (runtime type) reflection
-- concurrency (via goroutines+channels)
-- cloud friendly
+  - WebSockets
+  - JSON & binary serialization via (runtime type) reflection
+  - concurrency (via goroutines+channels)
+  - cloud friendly
 
-* fer: (web) demo time
+## fer: (web) demo time
 
 .image _figs/fer-ex-web-ctl.png 555 _
 
-* fer - update III
+## fer - update III
 
 Developed more I/O capabilities _wrt_ `ROOT` during last MRRTF hackathon.
-Now can read `ROOT` `TFiles` and `TTrees` that contain data like (see [[https://go-hep.org/x/hep/rootio][go-hep.org]]):
+Now can read `ROOT` `TFiles` and `TTrees` that contain data like (see [go-hep.org](https://go-hep.org/x/hep/rootio)):
 
 .code _code/event.cxx
-

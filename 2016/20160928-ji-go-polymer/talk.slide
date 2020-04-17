@@ -1,4 +1,4 @@
-Go & Polymer: slow-control, monitoring & computing
+# Go & Polymer: slow-control, monitoring & computing
 JI-2016
 
 Sébastien Binet
@@ -7,172 +7,171 @@ binet@clermont.in2p3.fr
 https://github.com/sbinet
 @0xb1ns
 
-* Background
+## Background
 
-- Since ~2006: offline developer (`Athena/Gaudi`, control frameworks for LHC experiments)
-- Since ~2010: [[https://golang.org][Go]] enthusiast
-- 2014: wanted to do/see something else than control frameworks & offline development
+  - Since ~2006: offline developer (`Athena/Gaudi`, control frameworks for LHC experiments)
+  - Since ~2010: [Go](https://golang.org) enthusiast
+  - 2014: wanted to do/see something else than control frameworks & offline development
 
 (not so) Hidden agenda: is `Go` suitable for other workloads and environments than control frameworks for LHC?
 
-- adequacy? (garbage collector? architecture?)
-- maturity of the language?
-- maturity of the libraries?
-- are there even libraries for the protocols we have to deal with?
+  - adequacy? (garbage collector? architecture?)
+  - maturity of the language?
+  - maturity of the libraries?
+  - are there even libraries for the protocols we have to deal with?
 
-* Go
+## Go
 
-You know already about [[https://golang.org][Go]].
+You know already about [Go](https://golang.org).
 
-- Builtin tools for *concurrency* (`goroutines` & `channels`)
-- Python-like, C-like
-- Development speed, runtime speed, *Garbage* *collector*
-- builtin reflection, *static* binaries by default
+  - Builtin tools for **concurrency** (`goroutines` & `channels`)
+  - Python-like, C-like
+  - Development speed, runtime speed, **Garbage** **collector**
+  - builtin reflection, **static** binaries by default
 
 .image _figs/gopher-cloud.png 150 _
 
 This makes sense for big-iron applications or cloud plumbing.
 But: what about other "niches" and use cases?
 
-* Small analysis/simulation
+## Small analysis/simulation
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
-- replaced an Excel-based (!) supernovae fusion simulation
-- [[https://github.com/astrogo/sn-fusion][astrogo/snfusion (aka FuSil)]]
+  - replaced an Excel-based (!) supernovae fusion simulation
+  - [astrogo/snfusion (aka FuSil)](https://github.com/astrogo/sn-fusion)
 
-- Split into 2 commands: `snfusion-gen` and `snfusion-plot`
+  - Split into 2 commands: `snfusion-gen` and `snfusion-plot`
 
-  $ snfusion-gen -n 30000
-  snfusion-gen: processing...
-  snfusion-gen: composition of 10000 nuclei:
-  Nucleus{A: 12, Z: 6}: 6127
-  Nucleus{A: 16, Z: 8}: 3873
-  snfusion-gen: iter #3000/30000...
-  [...]
-  snfusion-gen: iter #30000/30000...
-  snfusion-gen: composition of 3066 nuclei:
-  Nucleus{A: 12, Z: 6}: 71
-  Nucleus{A: 16, Z: 8}: 63
-  [...]
-  Nucleus{A: 56, Z:28}: 639
-  snfusion-gen: processing... [done]: 10.52320492s
+	$ snfusion-gen -n 30000
+	snfusion-gen: processing...
+	snfusion-gen: composition of 10000 nuclei:
+	Nucleus{A: 12, Z: 6}: 6127
+	Nucleus{A: 16, Z: 8}: 3873
+	snfusion-gen: iter #3000/30000...
+	[...]
+	snfusion-gen: iter #30000/30000...
+	snfusion-gen: composition of 3066 nuclei:
+	Nucleus{A: 12, Z: 6}: 71
+	Nucleus{A: 16, Z: 8}: 63
+	[...]
+	Nucleus{A: 56, Z:28}: 639
+	snfusion-gen: processing... [done]: 10.52320492s
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
-  $ snfusion-plot -f output.csv -o output.png
-  snfusion-plot: plotting...
-  snfusion-plot: NumIters:   30000
-  snfusion-plot: NumCarbons: 60
-  snfusion-plot: Seed:       1234
-  snfusion-plot: Nuclei:     [Nucleus{A: 12, Z: 6} [...] Nucleus{A: 52, Z:26} Nucleus{A: 56, Z:28}]
+	$ snfusion-plot -f output.csv -o output.png
+	snfusion-plot: plotting...
+	snfusion-plot: NumIters:   30000
+	snfusion-plot: NumCarbons: 60
+	snfusion-plot: Seed:       1234
+	snfusion-plot: Nuclei:     [Nucleus{A: 12, Z: 6} [...] Nucleus{A: 52, Z:26} Nucleus{A: 56, Z:28}]
 
 .image _figs/snfusion-output.png 400 _
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
-For ease of use, added a simulation web portal [[https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web][snfusion-web]]
+For ease of use, added a simulation web portal [snfusion-web](https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web)
 
-- a production-grade web server written in `Go` (using `net/http`)
-- user enters a few simulation parameters in a form
-- fires the simulation
-- produces and display a plot of the result (in `SVG`)
-- sends back a `ZIP` file containing the `CSV` simulated output file and the `PNG` plot file
-- `websockets` are used for communication between the server and the client
-- `GUI` is based on [[https://www.polymer-project.org][Polymer]]
+  - a production-grade web server written in `Go` (using `net/http`)
+  - user enters a few simulation parameters in a form
+  - fires the simulation
+  - produces and display a plot of the result (in `SVG`)
+  - sends back a `ZIP` file containing the `CSV` simulated output file and the `PNG` plot file
+  - `websockets` are used for communication between the server and the client
+  - `GUI` is based on [Polymer](https://www.polymer-project.org)
 
 => a single, statically-compiled binary, with all the assets (CSS, JS, HTML, polymer, ...) embedded in the final executable, no external call to subprocesses.
 
 Deployment is a simple `scp` away.
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
-For ease of use, added a simulation web portal [[https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web][snfusion-web]]
+For ease of use, added a simulation web portal [snfusion-web](https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web)
 
 .image _figs/snfusion-web.png 500 _
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
 Happy physicist++
 (But, sadly, not yet a fellow `Go` developer)
 
-* LSST, CCS, FCS & LPC-testbench
+## LSST, CCS, FCS & LPC-testbench
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
 .image _figs/Camera_Layout-full.jpg 400 _
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
 Replaced a `Java` based application to control a set of motors to rotate a (dummy for now) telescope apparatus:
 
 .image _figs/orig-ccs-fcs.png 400 _
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
-- a web server written in `Go` (with `net/http`), serves as the GUI (`WebSocket` + [[https://www.polymer-project.org][Polymer]])
-- handles authentication, authorization
-- commands relayed to the motors over [[https://en.wikipedia.org/wiki/Modbus][Modbus]]
-- displays webcam stream, stores motors' status in a database ([[https://github.com/boltdb/bolt][BoltDB]])
+  - a web server written in `Go` (with `net/http`), serves as the GUI (`WebSocket` + [Polymer](https://www.polymer-project.org))
+  - handles authentication, authorization
+  - commands relayed to the motors over [Modbus](https://en.wikipedia.org/wiki/Modbus)
+  - displays webcam stream, stores motors' status in a database ([BoltDB](https://github.com/boltdb/bolt))
 
 .image _figs/fcs-testbench.png 300 _
-.caption The [[https://github.com/go-lsst/fcs-lpc-motor-ctl][fcs-lpc-motor-ctl]] architecture.
+The [[https://github.com/go-lsst/fcs-lpc-motor-ctl][fcs-lpc-motor-ctl]] architecture.
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
 .image _figs/fcs-lsst.png 550 _
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
 Replaced a `Java` based application (with a `255Mb` `RSS` memory footprint) with:
 
-- a single binary executable
-- easily cross-compilable (to ARM, ARM64, ...)
-- with a `10Mb` `RSS` memory footprint
-- a few additional features _wrt_ the original version
-- and a way easier time to tinker with and develop :)
+  - a single binary executable
+  - easily cross-compilable (to ARM, ARM64, ...)
+  - with a `10Mb` `RSS` memory footprint
+  - a few additional features _wrt_ the original version
+  - and a way easier time to tinker with and develop :)
 
-* Particle Physics & Medical applications
+## Particle Physics & Medical applications
 
-* Go @AVIRM: application of HEP detectors to medical detectors
+## Go @AVIRM: application of HEP detectors to medical detectors
 
 .image _figs/avirm-detector.jpg 500 _
 
-* Go @AVIRM
+## Go @AVIRM
 
-Replaced (not by me: [[https://github.com/ebusato][@ebusato]]) a `C++-03/pthreads+ROOT(GUI+histos)` application for data acquisition, with a much improved feature-wise `Go` version:
+Replaced (not by me: [@ebusato](https://github.com/ebusato)) a `C++-03/pthreads+ROOT(GUI+histos)` application for data acquisition, with a much improved feature-wise `Go` version:
 
 .image _figs/avirm-godaq.png 150 _
 
-- receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
-- checks binary data integrity (`0xCAFEDECA` control words)
-- writes data to disk
-- launches/stops/pauses monitoring
-- listens for instructions from user
+  - receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
+  - checks binary data integrity (`0xCAFEDECA` control words)
+  - writes data to disk
+  - launches/stops/pauses monitoring
+  - listens for instructions from user
 
-Available at [[https://gitlab.in2p3.fr/avirm/analysis-go][gitlab.in2p3.fr/avirm/analysis-go]]
+Available at [gitlab.in2p3.fr/avirm/analysis-go](https://gitlab.in2p3.fr/avirm/analysis-go)
 
-* Go @AVIRM
+## Go @AVIRM
 
 .image _figs/avirm-dpga-1.png 300 _
 .image _figs/avirm-dpga-2.png 300 _
 
-* Go @AVIRM
+## Go @AVIRM
 
 Happy physicist++
 And a new (enthusiast) `Go` developer (yay! lonelyness--)
 
-* Conclusions
+## Conclusions
 
 `Go` makes sense in other environments beside LHC-like control frameworks:
 
-- elegant code that grows with grace
-- from the "embedded" `PC-104` or `Raspberry` `Pi-III` form factor
-- to the large clusters of `x86-64` machines
-- from the analysis/simulation scale of a 1-physicist user to large teams of developers
-- usable even in the context of _soft_ real-time control command applications and DAQ applications
+  - elegant code that grows with grace
+  - from the "embedded" `PC-104` or `Raspberry` `Pi-III` form factor
+  - to the large clusters of `x86-64` machines
+  - from the analysis/simulation scale of a 1-physicist user to large teams of developers
+  - usable even in the context of _soft_ real-time control command applications and DAQ applications
 
 And regular physicists can appreciate what `Go` can offer.
 
-Write your next analysis/simulation/command-line-tool/web-server in [[https://golang.org][Go]] ?
-
+Write your next analysis/simulation/command-line-tool/web-server in [Go](https://golang.org) ?

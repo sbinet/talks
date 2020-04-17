@@ -1,4 +1,4 @@
-GoFer Update
+# GoFer Update
 MRRTF, 2018-02-20
 
 Sebastien Binet
@@ -7,49 +7,48 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Fer
+## Fer
 
 `fer` didn't get much updates itself:
 
-- update to new [[https://godoc.org/gonum.org/v1/gonum][gonum.org/v1/...]] layout
-- update to new [[https://godoc.org/go-hep.org/x/hep/hplot][go-hep.org/x/hep/hplot API]]
+  - update to new [gonum.org/v1/...](https://godoc.org/gonum.org/v1/gonum) layout
+  - update to new [go-hep.org/x/hep/hplot API](https://godoc.org/go-hep.org/x/hep/hplot)
 
-* Go-HEP/rootio
+## Go-HEP/rootio
 
 Improved (reading) compatibility with `ROOT` files, `TTrees` and `TBranches`
 
-- support for `ROOT` files compressed with LZMA
-- support for `ROOT` files compressed with LZ4
-- support scanning `ROOT` trees with branches holding multiple leaves
-- support for `ROOT` trees holding `bool`, `[X]bool` and `std::vector<bool>`
-- support for `ROOT` files holding `TBranch` version 10
-- support for `ROOT` files holding `TBranchElement` version 8
-- support for `ROOT` files holding `TH1` version 5
-- support for `ROOT` trees and branches produced with `ROOT-6.12`
+  - support for `ROOT` files compressed with LZMA
+  - support for `ROOT` files compressed with LZ4
+  - support scanning `ROOT` trees with branches holding multiple leaves
+  - support for `ROOT` trees holding `bool`, `[X]bool` and `std::vector<bool>`
+  - support for `ROOT` files holding `TBranch` version 10
+  - support for `ROOT` files holding `TBranchElement` version 8
+  - support for `ROOT` files holding `TH1` version 5
+  - support for `ROOT` trees and branches produced with `ROOT-6.12`
 
 Improved code dealing with `TStreamerInfo/TStreamerElement`: `TClonesArrays` are within reach (and `AliESD` files as well. Just a few more commits.)
 
-* Fer + ZeroMQ
+## Fer + ZeroMQ
 
 Development of a C/C++ free library for ZeroMQ:
 
-- started during last hackathon
-- `push/pull` (mostly) implemented
-- `pub/sub`, `req/rep`, `dealer/router` and `pair/bus` still to go...
-- implement multipart messages (re-use from development from [[https://neugram.io][neugram]] interpreter)
+  - started during last hackathon
+  - `push/pull` (mostly) implemented
+  - `pub/sub`, `req/rep`, `dealer/router` and `pair/bus` still to go...
+  - implement multipart messages (re-use from development from [neugram](https://neugram.io) interpreter)
 
-* Fer + ZeroMQ - II
+## Fer + ZeroMQ - II
 
 Eventually: be able to run `fer` (+ `ZeroMQ`) completely inside the browser or inside a `Jupyter` notebook:
 
-- [[https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F01-display-data.ipynb][Notebook: display-data with Go]]
-- [[https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F02-gonum-stat.ipynb][Notebook: stats with Go]]
-- [[https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F03-go-hep-hplot.ipynb][Notebook: hplot with Go]]
-- [[https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F04-go-hep-rootio.ipynb][Notebook: ROOT-I/O with Go]]
+  - [Notebook: display-data with Go](https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F01-display-data.ipynb)
+  - [Notebook: stats with Go](https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F02-gonum-stat.ipynb)
+  - [Notebook: hplot with Go](https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F03-go-hep-hplot.ipynb)
+  - [Notebook: ROOT-I/O with Go](https://mybinder.org/v2/gh/go-hep/binder/master?filepath=examples%2F04-go-hep-rootio.ipynb)
 
 WIP: pure-Go `xrootd` client (Google Summer of Code 2018):
 
-- read remote `ROOT` files
-- integration with `CERNBox` and `EOS`
-- integration with [[https://upspin.io][upspin.io]]
-
+  - read remote `ROOT` files
+  - integration with `CERNBox` and `EOS`
+  - integration with [upspin.io](https://upspin.io)

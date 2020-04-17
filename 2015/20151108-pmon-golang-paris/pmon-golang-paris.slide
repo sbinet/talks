@@ -1,0 +1,26 @@
+# pmon: monitoring processes
+pre-DotGo-2015, 2015/11/08
+
+Sebastien Binet
+CNRS/IN2P3
+
+## Scene 1
+
+  - a physicist is developing her favorite physics analysis number-cruncher
+  - she develops it on her MacOSX laptop
+  - once the analysis code reasonably debugged, she sends it on her local cluster
+
+Unfortunately she sent it on the wrong queue, using up all the alloted CPU
+resources before the job finished.
+
+## Scene 2
+
+  - another physicist, performance minded, wants to monitor the resources' utilization of her code, during its development to detect performance regressions
+  - she develops on MacOSX but her main production platform is Linux-64b
+
+## Issues
+
+  - using the output of `/usr/bin/time` may be too coarse a solution
+  - what about `VMem` and `RSS`?
+  - what about `I/O`?
+  - what about monitoring `C++`, `python` scripts, ... (ie: non-`Go`)

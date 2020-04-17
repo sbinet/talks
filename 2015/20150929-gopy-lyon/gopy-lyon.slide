@@ -1,56 +1,53 @@
-gopy: extend CPython with Go
+# gopy: extend CPython with Go
 Golang-Lyon, 2015/09/29
 
 Sebastien Binet
 CNRS/IN2P3
 
 
-* Go in High Energy Physics (HEP)
+
+## Go in High Energy Physics (HEP)
 
 .image _figs/mad-scientist-gopher.jpg
 
-* HEP (High Energy Physics)
+## HEP (High Energy Physics)
 
 Field of physics which studies the fundamental laws of Nature and the
 properties of the constituents of matter.
 
 Many labs working on HEP around the world. 
-But, perhaps one of the most famous ones is [[http://cern.ch][CERN]].
+But, perhaps one of the most famous ones is [CERN](http://cern.ch).
 
-
-* CERN
+## CERN
 
 .image _figs/cernaerial.jpg 500 700
 
-
-* CERN-LHC
+## CERN-LHC
 
 LHC: Large Hadron Collider.
 A proton-proton collider of 27km of circumference.
 
 .image _figs/cernring-l.jpg 450 700
 
-
-* ATLAS installation
+## ATLAS installation
 
 .image _figs/pit.png
 
-* Software in HEP
+## Software in HEP
 
-Historically, software in HEP has been written in *FORTRAN-77*.
+Historically, software in HEP has been written in **FORTRAN-77**.
 
-- HEP people even wrote compilers
-- HEP community even defined a few extensions (*MORTRAN*)
+  - HEP people even wrote compilers
+  - HEP community even defined a few extensions (**MORTRAN**)
 
-Mid-90's: migration to *C++*
+Mid-90's: migration to **C++**
 
-Mid-2000's: *Python* gained tremendous mindshare 
+Mid-2000's: **Python** gained tremendous mindshare 
 
-- first thru the steering of *C++* binaries
-- then as complete analyses glueing *C++* libraries together
+  - first thru the steering of **C++** binaries
+  - then as complete analyses glueing **C++** libraries together
 
-
-* Software in HEP - some numbers
+## Software in HEP - some numbers
 
 An LHC experiment (_e.g._ ATLAS, CMS) is ~3000 physicists but only a
 fraction of those is developing code.
@@ -59,400 +56,382 @@ Reconstruction frameworks grew from ~3M SLOC to ~5M
 
 Summing over all HEP software stack for e.g. ATLAS:
 
-- event generators: ~1.4M SLOC (C++, FORTRAN-77)
-- I/O libraries ~1.7M SLOC (C++)
-- simulation libraries ~1.2M SLOC (C++)
-- reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [[http://acode-browser.usatlas.bnl.gov/lxr/source/][ATLAS code]]? [[https://github.com/cms-sw/cmssw][CMS code]]?)
+  - event generators: ~1.4M SLOC (C++, FORTRAN-77)
+  - I/O libraries ~1.7M SLOC (C++)
+  - simulation libraries ~1.2M SLOC (C++)
+  - reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [ATLAS code](http://acode-browser.usatlas.bnl.gov/lxr/source/)? [CMS code](https://github.com/cms-sw/cmssw)?)
 
+**GCC:** ~7M SLOC
 
+**Linux** **kernel** **3.6:** 15.9M SLOC
 
-
-*GCC:* ~7M SLOC
-
-*Linux* *kernel* *3.6:* 15.9M SLOC
-
-* People committing code to VCS per month
+## People committing code to VCS per month
 
 Variety of skills
 Huge turn-around
 Once the physics data is pouring, people go doing physics instead of software
 
-
 .image _figs/cmssw-commits.png 400 600
 
-
-* Software developers
+## Software developers
 
 ~300 active developers (per experiment)
 
 ~1000 different developers integrated over the lifetime of a single LHC experiment.
 
-- few "real" s/w experts
-- some physicists with strong skill set in s/w
-- many with some experience in s/w development
-- some with *no* experience in s/w development
+  - few "real" s/w experts
+  - some physicists with strong skill set in s/w
+  - many with some experience in s/w development
+  - some with **no** experience in s/w development
 
 A multi-timezone environment
 
-- Europe, North-America, Japan, Russia
+  - Europe, North-America, Japan, Russia
 
 Many communities (core s/w people, generators, simulation, ...)
 
 Development and infrastructures usually CERN-centric
 
-Heavily Linux based ([[http://cern.ch/linux][Scientific Linux CERN]])
+Heavily Linux based ([Scientific Linux CERN](http://cern.ch/linux))
 
-
-* Software development cycle
+## Software development cycle
 
 VCS (CVS, then SVN. GIT: not yet)
 
 Nightlies (Jenkins or homegrown solution)
 
-- need a sizeable cluster of build machines (distcc, ccache, ...)
-- builds the framework stack in ~8h
-- produces ~2000 shared libraries
-- installs them on AFS (also creates RPMs and tarballs)
+  - need a sizeable cluster of build machines (distcc, ccache, ...)
+  - builds the framework stack in ~8h
+  - produces ~2000 shared libraries
+  - installs them on AFS (also creates RPMs and tarballs)
 
 Devs can then test and develop off the nightly _via_ AFS
 
 Every 6 months or so a new production release is cut, validated (then patched) and deployed on the World Wide LHC Computing Grid (WLCG).
 
-Release size: *~5Gb*
+Release size: **~5Gb**
 
-- binaries, libraries (externals+framework stack)
-- extra data (sqlite files, physics processes' modelisation data, ...)
+  - binaries, libraries (externals+framework stack)
+  - extra data (sqlite files, physics processes' modelisation data, ...)
 
-
-* Software runtime ?
+## Software runtime ?
 
 Big science, big data, big software, big numbers
 
-- ~1min to initialize the application
-- loading >500 shared libraries
-- connecting to databases (detector description, geometry, ...)
-- instantiating ~2000 C++ components
-- 2Gb/4Gb memory footprint per process
+  - ~1min to initialize the application
+  - loading >500 shared libraries
+  - connecting to databases (detector description, geometry, ...)
+  - instantiating ~2000 C++ components
+  - 2Gb/4Gb memory footprint per process
 
-* (obligatory xkcd reference)
+## (obligatory xkcd reference)
 
 .image _figs/xkcd-compiling.png 550 550
 
-
-* 
+## 
 
 We learn to love hating our framework. (every step of the way)
 
 And even more so in the future:
 
-- work to make our software stack thread-safe
-- or at least parts of it multithread friendly to harness multicore machines
-- quite a lot of fun ahead
+  - work to make our software stack thread-safe
+  - or at least parts of it multithread friendly to harness multicore machines
+  - quite a lot of fun ahead
 
+## Remember Go ?
 
-* Remember Go ?
+  - compiles quickly (no warnings, imports)
+  - enforces coherent coding rules (across projects)
+  - builtin test/benchmark/documentation facilities
+  - deploys easily, cross-compiles easily
+  - installs easily (also 3rd-party packages: _"go get"_)
+  - fast to pick up, not as complicated as **C++**
+  - builtin reflection system
+  - builtin (de)serialization capabilities
+  - concurrency support
+  - garbage collected
 
-- compiles quickly (no warnings, imports)
-- enforces coherent coding rules (across projects)
-- builtin test/benchmark/documentation facilities
-- deploys easily, cross-compiles easily
-- installs easily (also 3rd-party packages: _"go_get"_)
-- fast to pick up, not as complicated as *C++*
-- builtin reflection system
-- builtin (de)serialization capabilities
-- concurrency support
-- garbage collected
+**Perfect** **match** for many HEP use cases.
 
+## Migrating to Go ? (evil plan for (HEP) world domination)
 
-*Perfect* *match* for many HEP use cases.
+Migrating ~5M SLOC of C++ code to Go, during data taking, **unfortunately**, won't fly.
 
-* Migrating to Go ? (evil plan for (HEP) world domination)
+Creating new applications for data massaging or post-processing **might**.
 
-Migrating ~5M SLOC of C++ code to Go, during data taking, *unfortunately*, won't fly.
-
-Creating new applications for data massaging or post-processing *might*.
-
-Creating a new concurrent and parallel framework for the next accelerator *might*.
+Creating a new concurrent and parallel framework for the next accelerator **might**.
 
 Need to build a critical mass of Go HEP enthusiasts
 
-
 So far:
 
-- building the packages to read/write data in HEP formats (see under [[http://github.com/go-hep][go-hep]])
-- built a proof of concept of a concurrent framework: [[http://github.com/go-hep/gaudi-fwk][go-hep/gaudi-fwk]]
-- now building the real thing [[http://github.com/go-hep/fwk][go-hep/fwk]]
-- building a physics simulation detector app on top of go-hep/fwk: [[http://github.com/go-hep/fads][go-hep/fads]]
-- building a package of data analysis facilities
+  - building the packages to read/write data in HEP formats (see under [go-hep](http://github.com/go-hep))
+  - built a proof of concept of a concurrent framework: [go-hep/gaudi-fwk](http://github.com/go-hep/gaudi-fwk)
+  - now building the real thing [go-hep/fwk](http://github.com/go-hep/fwk)
+  - building a physics simulation detector app on top of go-hep/fwk: [go-hep/fads](http://github.com/go-hep/fads)
+  - building a package of data analysis facilities
 
+And, of course... [gopy](https://github.com/go-python/gopy)!
 
-And, of course... [[https://github.com/go-python/gopy][gopy]]!
-
-* gopy
+## gopy
 
 With `go-1.5`, introduction of a new feature: the ability to build a `C` shared
 library from a `Go` package.
 
-- enabled with `-buildmode=c-shared`
-- described in the [[https://docs.google.com/document/d/1nr-TQHw_er6GOQRsF6T43GGhFDelrAP0NqSS_00RgZQ/edit]["execution modes"]] design document
-- leveraged by the `gomobile` command and sub-commands to build applications for mobile platforms (Android + iOS)
+  - enabled with `-buildmode=c-shared`
+  - described in the ["execution modes"](https://docs.google.com/document/d/1nr-TQHw_er6GOQRsF6T43GGhFDelrAP0NqSS_00RgZQ/edit) design document
+  - leveraged by the `gomobile` command and sub-commands to build applications for mobile platforms (Android + iOS)
 
 `gopy` is heavily inspired from `gomobile` (and reuses some of the code/design of `gomobile`)
 
+## gopy - II
 
-* gopy - II
-
-[[https://github.com/go-python/gopy][gopy]] automates the drudgery work of
+[gopy](https://github.com/go-python/gopy) automates the drudgery work of
 creating a `python` C-extension module out of a `Go` package:
 
-- inspects a `Go` package
-- extracts the exported `types`, `funcs`, `vars` and `consts`
-- creates a `Go` package that `cgo` exports the exported entities
-- creates a `C` extension module, using the `CPython` API, calling these `cgo` exported entities
-- compiles everything together into a `.so` shared object
+  - inspects a `Go` package
+  - extracts the exported `types`, `funcs`, `vars` and `consts`
+  - creates a `Go` package that `cgo` exports the exported entities
+  - creates a `C` extension module, using the `CPython` API, calling these `cgo` exported entities
+  - compiles everything together into a `.so` shared object
 
-* gopy - installation
+## gopy - installation
 
 `gopy` is a pure-Go command, so the installation is as simple as:
 
- $ go get github.com/go-python/gopy/...
+	$ go get github.com/go-python/gopy/...
 
 And voila. Done.
 
-
 For `gopy` to create the `.so` module, it will need:
 
-- the `python-dev` package (python development headers)
-- `pkg-config` and the `python2` config files (to correctly detect the `-I`, `-L` and `-l` incantations)
-- a `$CC` compiler (obviously)
+  - the `python-dev` package (python development headers)
+  - `pkg-config` and the `python2` config files (to correctly detect the `-I`, `-L` and `-l` incantations)
+  - a `$CC` compiler (obviously)
 
-* gopy - hello world
+## gopy - hello world
 
 Consider this simple package `github.com/me/hello`:
 
 .code _code/hello.go
 
-* gopy - hello world - II
+## gopy - hello world - II
 
 To create a `CPython` C-extension module out of it:
 
- $ cd somewhere # anywhere in $PYTHONPATH
- $ gopy bind github.com/me/hello
- 2015/09/28 15:12:44 work: /tmp/gopy-655556935
+	$ cd somewhere # anywhere in $PYTHONPATH
+	$ gopy bind github.com/me/hello
+	2015/09/28 15:12:44 work: /tmp/gopy-655556935
 
- $ ls
- hello.so
+	$ ls
+	hello.so
 
- $ python2
- >>> import hello
- >>> dir(hello)
- ['Hello', '__doc__', '__file__', '__name__', '__package__']
- 
- >>> print hello.Hello("Golang-Lyon")
- hello "Golang-Lyon" from Go
+	$ python2
+	>>> import hello
+	>>> dir(hello)
+	['Hello', '__doc__', '__file__', '__name__', '__package__']
 
- >>> print hello.__doc__
- hello is a simple package
+	>>> print hello.Hello("Golang-Lyon")
+	hello "Golang-Lyon" from Go
 
- >>> print hello.Hello.__doc__
- Hello(str name) str
+	>>> print hello.__doc__
+	hello is a simple package
 
- Hello greets someone.
- 
-  
-* gopy - hello world - III
+	>>> print hello.Hello.__doc__
+	Hello(str name) str
 
-- extracts the `Go` doc-strings, attachs them onto their `python` counterpart
-- creates a function, translates the `Go` native types into their `python` counterpart
+	Hello greets someone.
+
+	 
+
+## gopy - hello world - III
+
+  - extracts the `Go` doc-strings, attachs them onto their `python` counterpart
+  - creates a function, translates the `Go` native types into their `python` counterpart
 
 Let's see what `gopy` has  actually generated:
 
-#.code _code/hello-cgo.go
+	$ ls /tmp/gopy-655556935
+	hello.c  hello.go  hello.h
 
- $ ls /tmp/gopy-655556935
- hello.c  hello.go  hello.h
- 
- $ cat /tmp/gopy-655556935/hello.go
- package main
+	$ cat /tmp/gopy-655556935/hello.go
+	package main
 
- [...]
+	[...]
 
- //export cgo_func_hello_Hello
- // cgo_func_hello_Hello wraps hello.Hello
- func cgo_func_hello_Hello(name string) (string) {
- 	_gopy_000 := hello.Hello(name)
- 	return _gopy_000
- }
+	//export cgo_func_hello_Hello
+	// cgo_func_hello_Hello wraps hello.Hello
+	func cgo_func_hello_Hello(name string) (string) {
+		_gopy_000 := hello.Hello(name)
+		return _gopy_000
+	}
 
-* gopy - hello world - IV
+## gopy - hello world - IV
 
- $ cat /tmp/gopy-655556935/hello.c
- [...]
+	$ cat /tmp/gopy-655556935/hello.c
+	[...]
 
- #include "Python.h"
+	#include "Python.h"
 
- #if PY_VERSION_HEX > 0x03000000
- #  error "Python-3 is not yet supported by gopy"
- #endif
+	#if PY_VERSION_HEX > 0x03000000
+	#  error "Python-3 is not yet supported by gopy"
+	#endif
 
- [...]
+	[...]
 
- /* pythonization of: hello.Hello */
- static PyObject*
- cpy_func_hello_Hello(PyObject *self, PyObject *args) {
-        GoString c_name;
-        GoString c_gopy_ret;
-        
-        if (!PyArg_ParseTuple(args, "O&", cgopy_cnv_py2c_string, &c_name)) {
-                return NULL;
-        }
-        
-        c_gopy_ret = cgo_func_hello_Hello(c_name);
-        
-        return Py_BuildValue("O&", cgopy_cnv_c2py_string, &c_gopy_ret);
- }
+	/* pythonization of: hello.Hello */
+	static PyObject*
+	cpy_func_hello_Hello(PyObject *self, PyObject *args) {
+	       GoString c_name;
+	       GoString c_gopy_ret;
+	       
+	       if (!PyArg_ParseTuple(args, "O&", cgopy_cnv_py2c_string, &c_name)) {
+	               return NULL;
+	       }
+	       
+	       c_gopy_ret = cgo_func_hello_Hello(c_name);
+	       
+	       return Py_BuildValue("O&", cgopy_cnv_c2py_string, &c_gopy_ret);
+	}
 
-* gopy - hello world - V
+## gopy - hello world - V
 
- $ cat /tmp/gopy-655556935/hello.c
- [...]
+	$ cat /tmp/gopy-655556935/hello.c
+	[...]
 
- /* functions for package hello */
- static PyMethodDef cpy_hello_methods[] = {
-        {"Hello", cpy_func_hello_Hello, METH_VARARGS, "Hello(str name) str\n\nHello greets someone.\n"},
-        {NULL, NULL, 0, NULL}        /* Sentinel */
- };
+	/* functions for package hello */
+	static PyMethodDef cpy_hello_methods[] = {
+	       {"Hello", cpy_func_hello_Hello, METH_VARARGS, "Hello(str name) str\n\nHello greets someone.\n"},
+	       {NULL, NULL, 0, NULL}        /* Sentinel */
+	};
 
- PyMODINIT_FUNC
- inithello(void)
- {
-        PyObject *module = NULL;
-        
-        /* make sure Cgo is loaded and initialized */
-        cgo_pkg_hello_init();
-        
-        module = Py_InitModule3("hello", cpy_hello_methods, "hello is a simple package\n");
-        
- }
- 
+	PyMODINIT_FUNC
+	inithello(void)
+	{
+	       PyObject *module = NULL;
+	       
+	       /* make sure Cgo is loaded and initialized */
+	       cgo_pkg_hello_init();
+	       
+	       module = Py_InitModule3("hello", cpy_hello_methods, "hello is a simple package\n");
+	       
+	}
 
-* gopy - implementation notes
+## gopy - implementation notes
 
 `gopy` binds together 2 languages with a garbage collector.
 
-- the bindings need to tell each side when a given value is not used anymore
-- `gopy` notes when a `Go` value goes to the `python` side and increments a counter
-- `Go` values that are returned and/or passed to `python` need to be on the heap
-- `gopy` will do that for you via the `cgo` exported package
+  - the bindings need to tell each side when a given value is not used anymore
+  - `gopy` notes when a `Go` value goes to the `python` side and increments a counter
+  - `Go` values that are returned and/or passed to `python` need to be on the heap
+  - `gopy` will do that for you via the `cgo` exported package
 
- // Call sequence (lots of hand-waving)
+	// Call sequence (lots of hand-waving)
 
- -> python:    hello.Hello("foo")
-  -> cpython:  cpy_func_hello_Hello(...)
-   -> cgo:     cgo_func_hello_Hello(...)
-    -> go:     hello.Hello(...)
+	-> python:    hello.Hello("foo")
+	 -> cpython:  cpy_func_hello_Hello(...)
+	  -> cgo:     cgo_func_hello_Hello(...)
+	   -> go:     hello.Hello(...)
 
-
-* gopy - wrapping a struct
+## gopy - wrapping a struct
 
 Now consider:
 
 .code _code/structs.go
 
-* gopy - wrapping a struct
+## gopy - wrapping a struct
 
- $ gopy bind github.com/me/structs
+	$ gopy bind github.com/me/structs
 
- $ python2
- >>> import structs as st
- >>> s = st.NewStruct(1)
- >>> print s
- structs.Struct{private:2, Public:1}
- >>> s.Public = 3
- >>> print s
- structs.Struct{private:2, Public:3}
- >>> print s.Public
- 3
- >>> u = st.Struct(42)
- >>> print u
- structs.Struct{private:0, Public:42}
+	$ python2
+	>>> import structs as st
+	>>> s = st.NewStruct(1)
+	>>> print s
+	structs.Struct{private:2, Public:1}
+	>>> s.Public = 3
+	>>> print s
+	structs.Struct{private:2, Public:3}
+	>>> print s.Public
+	3
+	>>> u = st.Struct(42)
+	>>> print u
+	structs.Struct{private:0, Public:42}
 
- >>> u = st.Struct()
- >>> print u
- structs.Struct{private:0, Public:0}
- >>> u.private = 42
- Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
- AttributeError: 'structs.Struct' object has no attribute 'private'
- 
-* gopy - wrapping a struct
+	>>> u = st.Struct()
+	>>> print u
+	structs.Struct{private:0, Public:0}
+	>>> u.private = 42
+	Traceback (most recent call last):
+	 File "<stdin>", line 1, in <module>
+	AttributeError: 'structs.Struct' object has no attribute 'private'
+
+## gopy - wrapping a struct
 
 `gopy` generated a `CPython` `PyObject` like so:
 
- /* --- decls for struct structs.Struct --- */
- typedef void* cgo_type_structs_Struct;
+	/* --- decls for struct structs.Struct --- */
+	typedef void* cgo_type_structs_Struct;
 
- /* Python type for struct structs.Struct
-  */
- typedef struct {
-        PyObject_HEAD
-        cgo_type_structs_Struct cgopy; /* unsafe.Pointer to structs.Struct */
- } cpy_type_structs_Struct;
+	/* Python type for struct structs.Struct
+	 */
+	typedef struct {
+	       PyObject_HEAD
+	       cgo_type_structs_Struct cgopy; /* unsafe.Pointer to structs.Struct */
+	} cpy_type_structs_Struct;
 
-* gopy - wrapping a struct
+## gopy - wrapping a struct
 
 `gopy` generated a `getter/setter` for the public fields of the `struct`:
 
- /* tp_getset for structs.Struct */
- static PyGetSetDef cpy_type_structs_Struct_getsets[] = {
-        {"Public", 
-          (getter)cpy_func_structs_Struct_getter_2,
-          (setter)cpy_func_structs_Struct_setter_2, 
-          "doc for Public", NULL},
-        {NULL} /* Sentinel */
- };
+	/* tp_getset for structs.Struct */
+	static PyGetSetDef cpy_type_structs_Struct_getsets[] = {
+	       {"Public", 
+	         (getter)cpy_func_structs_Struct_getter_2,
+	         (setter)cpy_func_structs_Struct_setter_2, 
+	         "doc for Public", NULL},
+	       {NULL} /* Sentinel */
+	};
 
 (but not for the private fields)
 
 `gopy` also generated a `__str__` method (but it would have wired it to `String()` if the type were to implement the `Stringer` interface)
 
-* gopy - other features (and missing features)
+## gopy - other features (and missing features)
 
-- translates the comma-error `Go` idiom into the equivalent `python` idiom (raises an `Exception`)
-- slices and arrays implement the sequence protocol (but not yet subslices assignment)
-- implements the buffer protocol for slices and arrays
-- `maps` aren't supported yet
-- `interfaces` aren't supported yet (except for `error`)
-- functions/methods taking pointers to values are not supported yet
-- implementing a `Go` interface from `python` isn't supported yet either
-- channels are not supported yet
-- packages exposing other packages in their API are not supported (yet?)
+  - translates the comma-error `Go` idiom into the equivalent `python` idiom (raises an `Exception`)
+  - slices and arrays implement the sequence protocol (but not yet subslices assignment)
+  - implements the buffer protocol for slices and arrays
+  - `maps` aren't supported yet
+  - `interfaces` aren't supported yet (except for `error`)
+  - functions/methods taking pointers to values are not supported yet
+  - implementing a `Go` interface from `python` isn't supported yet either
+  - channels are not supported yet
+  - packages exposing other packages in their API are not supported (yet?)
 
-* gopy - gopy.py
+## gopy - gopy.py
 
 `gopy` also ships a little `gopy.py` module that calls into the `gopy` command
 to generate and compile a `Go` package from the `python` prompt:
 
- >>> import gopy
- >>> hi = gopy.load("github.com/go-python/gopy/_examples/hi")
- gopy> inferring package name...
- gopy> loading 'github.com/go-python/gopy/_examples/hi'...
- gopy> importing 'github.com/go-python/gopy/_examples/hi'
+	>>> import gopy
+	>>> hi = gopy.load("github.com/go-python/gopy/_examples/hi")
+	gopy> inferring package name...
+	gopy> loading 'github.com/go-python/gopy/_examples/hi'...
+	gopy> importing 'github.com/go-python/gopy/_examples/hi'
 
- >>> print hi
- <module 'github.com/go-python/gopy/_examples/hi' from '/some/path/.../hi.so'>
+	>>> print hi
+	<module 'github.com/go-python/gopy/_examples/hi' from '/some/path/.../hi.so'>
 
- >>> print hi.__doc__
- package hi exposes a few Go functions to be wrapped and used from Python.
+	>>> print hi.__doc__
+	package hi exposes a few Go functions to be wrapped and used from Python.
 
-
-* Conclusions
+## Conclusions
 
 Thanks to the simple rules and formalism of `Go` it is reasonnably easy to
 automate:
 
-- the extraction of the exported API
-- the generation of bindings to a (number of) language(s)
+  - the extraction of the exported API
+  - the generation of bindings to a (number of) language(s)
 
 `gopy` is released under `BSD-3` and accepts pull requests (eagerly!)
 Come join the fun of the complete world "Gomination" via `CPython`.
@@ -461,19 +440,17 @@ Come join the fun of the complete world "Gomination" via `CPython`.
 .link https://github.com/go-python/gopy/issues
 .link https://github.com/go-python/gopy/pulls
 
+## Prospects
 
-* Prospects
-
-- [[https://github.com/golang/go/issues/12416][new rules]] for `cgo` in `go-1.6` and the improved garbage collector will constrain the way `C` extension modules and `.so` can be built.
-- will need to reuse `gomobile` 's IPC (I=intra) [[https://godoc.org/golang.org/x/mobile/bind/seq][mobile/bind/seq]] protocol
-- implement the missing features
-- handle cycles between values, across language boundaries
-- support for `python-3`
-- support for `cffi` (and perhaps target `PyPy`, and/or other platforms using `cffi`, _e.g._ `IronPython`) 
+  - [new rules](https://github.com/golang/go/issues/12416) for `cgo` in `go-1.6` and the improved garbage collector will constrain the way `C` extension modules and `.so` can be built.
+  - will need to reuse `gomobile` 's IPC (I=intra) [mobile/bind/seq](https://godoc.org/golang.org/x/mobile/bind/seq) protocol
+  - implement the missing features
+  - handle cycles between values, across language boundaries
+  - support for `python-3`
+  - support for `cffi` (and perhaps target `PyPy`, and/or other platforms using `cffi`, _e.g._ `IronPython`) 
 
 Grand (ambitious) vision:
 
-- perhaps extract some of the bits and pieces of `gopy` and create
-- [[https://github.com/go-binder][go-binder]] to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `R`, `C++`, ...
-- ie: a `SWIG` for `Go` ?
-
+  - perhaps extract some of the bits and pieces of `gopy` and create
+  - [go-binder](https://github.com/go-binder) to generate and compile (idiomatic) bindings for `Ruby`, `Perl`, `R`, `C++`, ...
+  - ie: a `SWIG` for `Go` ?

@@ -1,4 +1,4 @@
-Go-HEP: Updates
+# Go-HEP: Updates
 LPC-ITT, 2018-10-19
 
 Sebastien Binet
@@ -7,51 +7,51 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Software in HEP
+## Software in HEP
 
-- *50's-90's*: `FORTRAN77`
-- *90's-...*: `C++`
-- *00's-...*: `Python`
+  - **50's-90's**: `FORTRAN77`
+  - **90's-...**: `C++`
+  - **00's-...**: `Python`
 
 Software in HEP is mostly `C++/Python` (with "pockets" of `Java` and `Fortran`.)
 
 .image _figs/data-flux-summary-all.png 300 _
 
-* Software in HEP is painful
+## Software in HEP is painful
 
-*Painful* to develop:
+**Painful** to develop:
 
-- deep and complex software stacks
-- huge dependencies issues (install, support)
-- compilation time
-- complex deployment of multi-GB stacks (shared libraries, configuration, DBs, ...)
-- `C++` is a complex language to learn, read, write and maintain
-- unpleasant edit-compile-run development cycle
+  - deep and complex software stacks
+  - huge dependencies issues (install, support)
+  - compilation time
+  - complex deployment of multi-GB stacks (shared libraries, configuration, DBs, ...)
+  - `C++` is a complex language to learn, read, write and maintain
+  - unpleasant edit-compile-run development cycle
 
-* Software in HEP is painful
+## Software in HEP is painful
 
-*Painful* to use:
+**Painful** to use:
 
-- overly complicated Object Oriented systems
-- overly complicated inheritance hierarchies
-- overly complicated meta-template programming
-- installation of dependencies
-- granularity of dependencies
-- no simple, nor standard, way to handle dependencies across OSes, experiments, groups, ...
-- documentation
+  - overly complicated Object Oriented systems
+  - overly complicated inheritance hierarchies
+  - overly complicated meta-template programming
+  - installation of dependencies
+  - granularity of dependencies
+  - no simple, nor standard, way to handle dependencies across OSes, experiments, groups, ...
+  - documentation
 
 End-users tend to prefer `Python` because of its nicer development cycle, despite its runtime performances (or lack thereof.)
 
-* Software in HEP: optimization and performances
+## Software in HEP: optimization and performances
 
 Software is painful and does not perform well:
 
-- most of our stack is not optimized (OO anti-patterns, code-bloat from `C++` templates)
-- memory leaks, slow to initialize (loading `.so/.dll`), slow to run
-- resources hungry to run and develop (`CPU`, `VMem`, people)
-- most of our stack has to be re-written: support of multi-cores machine, parallelism/concurrency
+  - most of our stack is not optimized (OO anti-patterns, code-bloat from `C++` templates)
+  - memory leaks, slow to initialize (loading `.so/.dll`), slow to run
+  - resources hungry to run and develop (`CPU`, `VMem`, people)
+  - most of our stack has to be re-written: support of multi-cores machine, parallelism/concurrency
 
-*Parallelism* and *concurrency* need to be exposed and leveraged, but the language (`C++14`, `C++17`, ...) is *ill* *equiped* for these tasks.
+**Parallelism** and **concurrency** need to be exposed and leveraged, but the language (`C++14`, `C++17`, ...) is **ill** **equiped** for these tasks.
 
 And `C++` is not well adapted for large, distributed development teams (of varying programming skills.)
 
@@ -59,70 +59,68 @@ And `C++` is not well adapted for large, distributed development teams (of varyi
 
 Time for something new?
 
-* Are those our only options ?
+## Are those our only options ?
 
 .image _figs/funfast-nogo.svg 500 _
 
-* Enter... Go
+## Enter... Go
 
-* What is Go ?
+## What is Go ?
 
 .play _code/hello.go
 
- $ go run hello.go
- Hello from Go
+	$ go run hello.go
+	Hello from Go
 
 A nice language with a nice mascot.
 
 .image _figs/golang-logo.png 200 400
 
+## History
 
-* History
-
-- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
-- Open source release in November 2009
-- More than 1100 contributors have joined the project
-- Version 1.0 release in March 2012
-- Version 1.1 release in May 2013
-- Version 1.2 release in December 2013
-- _[...]_
-- Version 1.8 release in February 2017
-- Version 1.9 release in August 2017
-- Version 1.10 release in February 2018
-- Version 1.11 release in August 2018
+  - Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+  - Open source release in November 2009
+  - More than 1100 contributors have joined the project
+  - Version 1.0 release in March 2012
+  - Version 1.1 release in May 2013
+  - Version 1.2 release in December 2013
+  - _[...]_
+  - Version 1.8 release in February 2017
+  - Version 1.9 release in August 2017
+  - Version 1.10 release in February 2018
+  - Version 1.11 release in August 2018
 
 .link https://golang.org
 
-* Elements of Go
+## Elements of Go
 
-- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+  - Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
 
-
-- *Concurrent*, *garbage-collected*
-- An Open-source general progamming language (BSD-3)
-- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
-- safety of a *static* *type* *system*
-- compiled down to machine language (so it is fast, goal is ~10% of C)
-- *object-oriented* but w/o classes, *builtin* *reflection*
-- first-class functions with *closures*
-- implicitly satisfied *interfaces*
+  - **Concurrent**, **garbage-collected**
+  - An Open-source general progamming language (BSD-3)
+  - feel of a **dynamic** **language**: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+  - safety of a **static** **type** **system**
+  - compiled down to machine language (so it is fast, goal is ~10% of C)
+  - **object-oriented** but w/o classes, **builtin** **reflection**
+  - first-class functions with **closures**
+  - implicitly satisfied **interfaces**
 
 Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
 
-* Concurrency
+## Concurrency
 
 .image _figs/busy.jpg
 
-Go's concurrency primitives - *goroutines* and *channels* - derive from Hoare's Communicating Sequential Processes (CSP.)
+Go's concurrency primitives - **goroutines** and **channels** - derive from Hoare's Communicating Sequential Processes (CSP.)
 
 Goroutines are like threads: they share memory.
 
 But cheaper:
 
-- Smaller, segmented stacks.
-- Many goroutines per operating system thread
+  - Smaller, segmented stacks.
+  - Many goroutines per operating system thread
 
-* More on Go
+## More on Go
 
 .link https://tour.golang.org
 .link https://golang.org/doc/effective_go.html
@@ -138,246 +136,244 @@ About s/w engineering with Go:
 
 .link https://talks.golang.org/2012/splash.article
 
-* Go-HEP
+## Go-HEP
 
-* What can Go bring to science and HEP?
+## What can Go bring to science and HEP?
 
-- a *simple* language anybody can learn in days, proficient in a couple of months
-- *standard* tool to handle *dependencies* (across OSes, architectures)
-- *fast* edit-compile-run development cycle
-- *simple* deployment (on clusters, laptops, ...), *easiest* *cross-compilation* system to date
-- fast at runtime, builtin tools for profiling (CPU, mem, flamegraph, tracing)
-- support for *concurrency* programming and multi-core machines
-- no magic, no voodoo, *reduce* disconnect b/w HEP sw experts and HEP users
-- *easy* code sharing: between packages, between experiments, between scientists
-- easier *reproducibility* and cross-check tests
-- *refactoring* tools & linters, builtin/standard testing tools
+  - a **simple** language anybody can learn in days, proficient in a couple of months
+  - **standard** tool to handle **dependencies** (across OSes, architectures)
+  - **fast** edit-compile-run development cycle
+  - **simple** deployment (on clusters, laptops, ...), **easiest** **cross-compilation** system to date
+  - fast at runtime, builtin tools for profiling (CPU, mem, flamegraph, tracing)
+  - support for **concurrency** programming and multi-core machines
+  - no magic, no voodoo, **reduce** disconnect b/w HEP sw experts and HEP users
+  - **easy** code sharing: between packages, between experiments, between scientists
+  - easier **reproducibility** and cross-check tests
+  - **refactoring** tools & linters, builtin/standard testing tools
 
 .link https://sbinet.github.io/posts/2018-07-31-go-hep-manifesto
 
-* Go for HEP: challenges
+## Go for HEP: challenges
 
 `$EXPERIMENT` is taking data:
 
-- one can't really migrate (monolithic) MLoC software stacks while taking data, neither during a long shutdown
+  - one can't really migrate (monolithic) MLoC software stacks while taking data, neither during a long shutdown
 
-*Convincing* physicists:
+**Convincing** physicists:
 
-- need to prove `Go` is useful, pleasant to use and viable
-- need to prove one can carry an analysis in `Go`, faster than by other means
-- provide 1 or 2 "poster child" applications
+  - need to prove `Go` is useful, pleasant to use and viable
+  - need to prove one can carry an analysis in `Go`, faster than by other means
+  - provide 1 or 2 "poster child" applications
 
-*Need* to implement:
+**Need** to implement:
 
-- histograms, PDFs, plotting, fits, BLAS/LAPACK, I/O
-- (some level of) inter-operability with `C++/ROOT`
+  - histograms, PDFs, plotting, fits, BLAS/LAPACK, I/O
+  - (some level of) inter-operability with `C++/ROOT`
 
-=> [[https://go-hep.org][go-hep.org]] is the beginning of such an endeavour
+=> [go-hep.org](https://go-hep.org) is the beginning of such an endeavour
 
-* 
+## 
 
 .image _figs/go-hep-home.png 550 _
 
-* 
+## 
 
 Available and tested (TravisCI, AppVeyor) on Windows, Linux, Darwin, ... AMD64, 386, ARM, ARM64, ...
 
-- [[https://go-hep.org/x/hep/brio][go-hep.org/x/hep/brio]]: a toolkit to generate serialization code
-- [[https://go-hep.org/x/hep/fads][go-hep.org/x/hep/fads]]: a fast detector simulation toolkit
-- [[https://go-hep.org/x/hep/fastjet][go-hep.org/x/hep/fastjet]]: a jet clustering algorithms package (WIP)
-- [[https://go-hep.org/x/hep/fit][go-hep.org/x/hep/fit]]: a fitting function toolkit (WIP)
-- [[https://go-hep.org/x/hep/fmom][go-hep.org/x/hep/fmom]]: a 4-vectors library
-- [[https://go-hep.org/x/hep/fwk][go-hep.org/x/hep/fwk]]: a concurrency-enabled framework
-- [[https://go-hep.org/x/hep/hbook][go-hep.org/x/hep/hbook]]: histograms and n-tuples (WIP)
-- [[https://go-hep.org/x/hep/hplot][go-hep.org/x/hep/hplot]]: interactive plotting (WIP)
-- _[...]_
-- [[https://go-hep.org/x/hep/rootio][go-hep.org/x/hep/rootio]]: a pure [[https://golang.org][Go]] package to for [[https://root.cern.ch][ROOT]] I/O (WIP) 
-- [[https://go-hep.org/x/hep/xrootd][go-hep.org/x/hep/xrootd]]: [[http://xrootd.org][XRootD]] client in pure [[https://golang.org][Go]]
+  - [go-hep.org/x/hep/brio](https://go-hep.org/x/hep/brio): a toolkit to generate serialization code
+  - [go-hep.org/x/hep/fads](https://go-hep.org/x/hep/fads): a fast detector simulation toolkit
+  - [go-hep.org/x/hep/fastjet](https://go-hep.org/x/hep/fastjet): a jet clustering algorithms package (WIP)
+  - [go-hep.org/x/hep/fit](https://go-hep.org/x/hep/fit): a fitting function toolkit (WIP)
+  - [go-hep.org/x/hep/fmom](https://go-hep.org/x/hep/fmom): a 4-vectors library
+  - [go-hep.org/x/hep/fwk](https://go-hep.org/x/hep/fwk): a concurrency-enabled framework
+  - [go-hep.org/x/hep/hbook](https://go-hep.org/x/hep/hbook): histograms and n-tuples (WIP)
+  - [go-hep.org/x/hep/hplot](https://go-hep.org/x/hep/hplot): interactive plotting (WIP)
+  - _[...]_
+  - [go-hep.org/x/hep/rootio](https://go-hep.org/x/hep/rootio): a pure [Go](https://golang.org) package to for [ROOT](https://root.cern.ch) I/O (WIP) 
+  - [go-hep.org/x/hep/xrootd](https://go-hep.org/x/hep/xrootd): [XRootD](http://xrootd.org) client in pure [Go](https://golang.org)
 
-
-* Go-HEP
+## Go-HEP
 
 .link https://doi.org/10.5281/zenodo.597940 DOI:10.5281 (Zenodo:597940)
 .link http://joss.theoj.org/papers/0b007c81073186f7c61f95ea26ad7971 JOSS Paper
 
 2 work areas to demonstrate `Go`'s applicability for HEP use cases have been identified:
 
-- `DAQ`, monitoring, control command
-- detector fast simulation toolkit (a la [[https://cp3.irmp.ucl.ac.be/projects/delphes][Delphes]])
+  - `DAQ`, monitoring, control command
+  - detector fast simulation toolkit (a la [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes))
 
-* Go-DAQ
+## Go-DAQ
 
 `DAQ`, monitoring and control command need `I/O`, network libraries and performances.
 `Go` is a great fit for these and has concurrency building blocks to top it all.
 
 These have been already tested at LPC and is gaining traction outside:
 
-- LSST@LPC: control command + monitoring of the LPC testbench for LSST ([[https://github.com/go-lsst/fcs-lpc-motor-ctl][code]])
-- AVIRM@LPC: DAQ + monitoring for a medical application ([[https://gitlab.in2p3.fr/avirm/analysis-go][code]])
-- SoLid@Oxford: DAQ ([[https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf][talk@IEEE (PDF)]])
-- SoLid@LPC: sensor monitoring application for RaspBerry-3 ([[https://github.com/sbinet-solid/solid-mon-rpi][code]])
+  - LSST@LPC: control command + monitoring of the LPC testbench for LSST ([code](https://github.com/go-lsst/fcs-lpc-motor-ctl))
+  - AVIRM@LPC: DAQ + monitoring for a medical application ([code](https://gitlab.in2p3.fr/avirm/analysis-go))
+  - SoLid@Oxford: DAQ ([talk@IEEE (PDF)](https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf))
+  - SoLid@LPC: sensor monitoring application for RaspBerry-3 ([code](https://github.com/sbinet-solid/solid-mon-rpi))
 
-Started to gather DAQ-HEP oriented packages under the [[https://github.com/go-daq][go-daq]] organization.
+Started to gather DAQ-HEP oriented packages under the [go-daq](https://github.com/go-daq) organization.
 
-* Go-DAQ (LSST)
+## Go-DAQ (LSST)
 
 .image _figs/fcs-lsst.png 550 _
 
-* Go-DAQ (AVIRM)
+## Go-DAQ (AVIRM)
 
 .image _figs/avirm-dpga-1.png 500 _
 
-* Go-DAQ (SoLiD)
+## Go-DAQ (SoLiD)
 
 .image _figs/solid-mon-rpi-1.png 550 _
 
-* Go-DAQ
+## Go-DAQ
 
-- `i2c`, `smbus`
-- drivers for various sensors (H, P, T, ADCs, ...)
-- quadcopters, arduinos, RaspBerry-Pis, ...
-- [[https://github.com/wmnsk/gopcua][OPC UA]]
-- ipbus
-- modbus, canbus
-- ??? _[put_ _your_ _request_ _here]_
+  - `i2c`, `smbus`
+  - drivers for various sensors (H, P, T, ADCs, ...)
+  - quadcopters, arduinos, RaspBerry-Pis, ...
+  - [OPC UA](https://github.com/wmnsk/gopcua)
+  - ipbus
+  - modbus, canbus
+  - ??? _[put_ _your_ _request_ _here]_
 
 .link https://github.com/go-daq
 .link https://periph.io
 
-* Go-HEP - fast-simulation & analysis
+## Go-HEP - fast-simulation & analysis
 
-* fads
+## fads
 
 `fads` is a "FAst Detector Simulation" toolkit.
 
-- morally a translation of [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]] into Go
-- uses [[https://go-hep.org/x/hep/fwk][hep/fwk]] to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
-- uses [[https://go-hep.org/x/hep/hbook][hep/hbook]] for histogramming, [[htpps://go-hep.org/x/hep/hepmc][hep/hepmc]] for `HepMC` input/output
+  - morally a translation of [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes) into Go
+  - uses [hep/fwk](https://go-hep.org/x/hep/fwk) to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
+  - uses [hep/hbook](https://go-hep.org/x/hep/hbook) for histogramming, [hep/hepmc](htpps://go-hep.org/x/hep/hepmc) for `HepMC` input/output
 
 Code is on github (BSD-3):
 
 .link https://go-hep.org/x/hep/fwk
 .link https://go-hep.org/x/hep/fads
 
-Documentation is served by [[https://godoc.org][godoc.org]]:
+Documentation is served by [godoc.org](https://godoc.org):
 
 .link https://godoc.org/go-hep.org/x/hep/fwk
 .link https://godoc.org/go-hep.org/x/hep/fads
 
-* go-hep/fads - Installation
+## go-hep/fads - Installation
 
-- step 1:
+  - step 1:
 
-  $> go get go-hep.org/x/hep/fads/...
+	$> go get go-hep.org/x/hep/fads/...
 
 Yes, with the ellipsis at the end, to also install sub-packages.
 
-- `go` `get` will recursively download and install all the packages that [[https://go-hep.org/x/hep/fads][hep/fads]] depends on
-- then actually build and install [[https://go-hep.org/x/hep/fads][hep/fads]]
-- no `Makefile`, no `CMakeList.txt` involved in the process
+  - `go` `get` will recursively download and install all the packages that [hep/fads](https://go-hep.org/x/hep/fads) depends on
+  - then actually build and install [hep/fads](https://go-hep.org/x/hep/fads)
+  - no `Makefile`, no `CMakeList.txt` involved in the process
 
 There's no step 2.
 
-* Reproducibility
+## Reproducibility
 
 Go (with Go >= 1.11) has support for:
 
-- completely reproducible builds
-- across time and space, produces (by default) a *static* binary
+  - completely reproducible builds
+  - across time and space, produces (by default) a **static** binary
 
 Developpers specify which version of their deps they use, through the `go.mod` file:
 
 .code _code/go.mod
 
-* Reproducibility - security
+## Reproducibility - security
 
 Go will also generate a `go.sum` file that holds hashes of the deps:
 
 .code _code/go.sum
 
-* go-hep/fads - real world use case
+## go-hep/fads - real world use case
 
-- translated [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]]' ATLAS data-card into Go
-- [[https://github.com/go-hep/hep/blob/master/fads/cmd/fads-app/main.go][go-hep/fads-app]]
-- installation:
+  - translated [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes)' ATLAS data-card into Go
+  - [go-hep/fads-app](https://github.com/go-hep/hep/blob/master/fads/cmd/fads-app/main.go)
+  - installation:
 
-  $ go get go-hep.org/x/hep/fads/cmd/fads-app
-  $ fads-app -help
-  Usage: fads-app [options] <hepmc-input-file>
-  
-  ex:
-   $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
-  
-  options:
-    -cpu-prof=false: enable CPU profiling
-    -evtmax=-1: number of events to process
-    -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
-    -nprocs=0: number of concurrent events to process
+	$ go get go-hep.org/x/hep/fads/cmd/fads-app
+	$ fads-app -help
+	Usage: fads-app [options] <hepmc-input-file>
 
-* go-hep/fads - components
+	ex:
+	 $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
 
-- a `HepMC` converter
-- particle propagator
-- calorimeter simulator
-- energy rescaler, momentum smearer
-- isolation
-- b-tagging, tau-tagging
-- jet-finder (reimplementation of FastJet in Go: [[https://go-hep.org/x/hep/fastjet][go-hep/fastjet]])
-- histogram service (from [[https://go-hep.org/x/hep/fwk][go-hep/fwk]])
+	options:
+	  -cpu-prof=false: enable CPU profiling
+	  -evtmax=-1: number of events to process
+	  -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
+	  -nprocs=0: number of concurrent events to process
+
+## go-hep/fads - components
+
+  - a `HepMC` converter
+  - particle propagator
+  - calorimeter simulator
+  - energy rescaler, momentum smearer
+  - isolation
+  - b-tagging, tau-tagging
+  - jet-finder (reimplementation of FastJet in Go: [go-hep/fastjet](https://go-hep.org/x/hep/fastjet))
+  - histogram service (from [go-hep/fwk](https://go-hep.org/x/hep/fwk))
 
 Caveats:
 
-- jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
+  - jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
 
-* 
+## 
 
 .image _figs/fads-dflow.png 600 600
 
+## Results - testbenches
 
-* Results - testbenches
+  - Linux: Intel(R) Xeon(R) CPU X5650  @ 2.67GHz, 24 cores, 56Gb RAM
+  - Linux: Intel(R) Xeon(R) CPU E5-4620 0 @ 2.20GHz, 64 cores, 128Gb RAM
 
-- Linux: Intel(R) Xeon(R) CPU X5650  @ 2.67GHz, 24 cores, 56Gb RAM
-- Linux: Intel(R) Xeon(R) CPU E5-4620 0 @ 2.20GHz, 64 cores, 128Gb RAM
+  - Delphes, 3.0.12, gcc4.8
+  - fads, Go-1.9
 
-- Delphes, 3.0.12, gcc4.8
-- fads, Go-1.9
+	$> time delphes ./input.hepmc
+	$> time fads-app ./input.hepmc
 
- $> time delphes ./input.hepmc
- $> time fads-app ./input.hepmc
-
-* 
+## 
 
 .image _figs/linux-64-cores-rss.png 600 _
 
-* 
+## 
 
 .image _figs/linux-64-cores-hz.png 600 _
 
-* ROOT I/O
+## ROOT I/O
 
-[[https://go-hep.org][Go-HEP]] provides some amount of interoperability with `ROOT-{5,6}` via [[https://go-hep.org/x/hep/rootio]], a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [[https://golang.org][Go]]) that:
+[Go-HEP](https://go-hep.org) provides some amount of interoperability with `ROOT-{5,6}` via [go-hep.org/x/hep/rootio](https://go-hep.org/x/hep/rootio), a pure-Go package (no `C++`, no `ROOT`, no `PyROOT`, just [Go](https://golang.org)) that:
 
-- decodes and understands the structure of `TFiles`, `TKeys`, `TDirectory` and `TStreamerInfos`,
-- decodes, deserializes `TH1x`, `TH2x`, `TLeaf`, `TBranch` and `TTrees` (w/ support of user classes)
+  - decodes and understands the structure of `TFiles`, `TKeys`, `TDirectory` and `TStreamerInfos`,
+  - decodes, deserializes `TH1x`, `TH2x`, `TLeaf`, `TBranch` and `TTrees` (w/ support of user classes)
 
-The last version of Go-HEP (`v0.15.0`) has support for also *writing* `TH1x`, `TH2x`. (support for `TTrees` slated for end of 2018.) Still in pure-Go.
+The last version of Go-HEP (`v0.15.0`) has support for also **writing** `TH1x`, `TH2x`. (support for `TTrees` slated for end of 2018.) Still in pure-Go.
 
-- `cmd/root-ls`, `root-cp`
-- `cmd/root-dump`, `cmd/root-diff`, `cmd/root-print`, `cmd/root-gen-datareader`
-- `cmd/root2csv`, `cmd/root2npy`, `cmd/root2yoda`
-- `cmd/root-srv`
+  - `cmd/root-ls`, `root-cp`
+  - `cmd/root-dump`, `cmd/root-diff`, `cmd/root-print`, `cmd/root-gen-datareader`
+  - `cmd/root2csv`, `cmd/root2npy`, `cmd/root2yoda`
+  - `cmd/root-srv`
 
-* root-srv (served by AppEngine)
+## root-srv (served by AppEngine)
 
 .image _figs/root-srv-screenshot.jpg 550 _
 
-* XRootD
+## XRootD
 
-Thanks to GSoC-2018, Go-HEP has now a client for [[http://xrootd.org][XRootD]] in pure-Go:
+Thanks to GSoC-2018, Go-HEP has now a client for [XRootD](http://xrootd.org) in pure-Go:
 
-- login, auth (`unix`, `krb5`, `pwd`)
-- mkdir, ls, cp, ...
-- FUSE client (in pure-Go as well)
+  - login, auth (`unix`, `krb5`, `pwd`)
+  - mkdir, ls, cp, ...
+  - FUSE client (in pure-Go as well)
 
 and the beginnings of a pure-Go server too.
 
@@ -387,148 +383,146 @@ Thanks to:
 
 .link https://github.com/EgorMatirov Mikhail Ivchenko (a.k.a @EgorMatirov)
 
-Go-XRootD has sparked interest from 2 development teams [[https://home.cern][@CERN]]:
+Go-XRootD has sparked interest from 2 development teams [@CERN](https://home.cern):
 
-- [[https://cernbox.web.cern.ch/][CERNBox]]: migrating from PHP to Go
-- [[http://information-technology.web.cern.ch/][CERN IT (stockage)]]: interest in integrating with a Go backup tool ([[https://rclone.org/][rclone]]).
+  - [CERNBox](https://cernbox.web.cern.ch/): migrating from PHP to Go
+  - [CERN IT (stockage)](http://information-technology.web.cern.ch/): interest in integrating with a Go backup tool ([rclone](https://rclone.org/)).
 
-
-* Conclusions
+## Conclusions
 
 Go is great at writing small and large (concurrent) programs.
-Also true for *science-y* programs, even if the amount of libraries can still be improved.
+Also true for **science-y** programs, even if the amount of libraries can still be improved.
 
 .image _figs/funfast.svg 320 _
 
-Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]? and [[https://go-hep.org][Go-HEP]] or [[https://github.com/astrogo][astrogo]], or [[https://github.com/biogo][Biogo]], or [[https://gonum.org][Gonum]], or ...
+Write your next tool/analysis/simulation/software in [Go](https://golang.org/)? and [Go-HEP](https://go-hep.org) or [astrogo](https://github.com/astrogo), or [Biogo](https://github.com/biogo), or [Gonum](https://gonum.org), or ...
 
-* Conclusions
+## Conclusions
 
 Go is great at writing small and large (concurrent) programs.
-Also true for *science-y* programs, even if the amount of libraries can still be improved.
+Also true for **science-y** programs, even if the amount of libraries can still be improved.
 
 .image _figs/funfast.svg 320 _
 
-  Software engineering is what happens to programming
-  when you add time and other programmers.
-  (Russ Cox)
+	Software engineering is what happens to programming
+	when you add time and other programmers.
+	(Russ Cox)
 
-* Thank you
+## Thank you
 
 Sebastien Binet
 CNRS/IN2P3/LPC-Clermont
-[[https://github.com/sbinet]]
-[[https://twitter.com/0xb1ns][@0xbins]]
-[[mailto:sebastien.binet@clermont.in2p3.fr]]
+[github.com/sbinet](https://github.com/sbinet)
+[@0xbins](https://twitter.com/0xb1ns)
+[sebastien.binet@clermont.in2p3.fr](mailto:sebastien.binet@clermont.in2p3.fr)
 
-* Extra
+## Extra
 
-* Rivet & fads
+## Rivet & fads
 
-* Rivet
+## Rivet
 
-The [[http://rivet.hepforge.org/][Rivet]] toolkit (Robust Independent Validation of Experiment and Theory) is a system for validation of Monte Carlo event generators. It provides a large (and ever growing) set of experimental analyses useful for MC generator development, validation, and tuning, as well as a convenient infrastructure for adding your own analyses.
+The [Rivet](http://rivet.hepforge.org/) toolkit (Robust Independent Validation of Experiment and Theory) is a system for validation of Monte Carlo event generators. It provides a large (and ever growing) set of experimental analyses useful for MC generator development, validation, and tuning, as well as a convenient infrastructure for adding your own analyses.
 
- $> repeat 10 'time rivet --analysis=MC_GENERIC -q  ./Z-hadronic-LEP.hepmc > /dev/null'
- real=13.32 user=12.97 sys=0.33 CPU=99% MaxRSS=26292
- real=13.31 user=12.93 sys=0.37 CPU=99% MaxRSS=26356
- real=13.29 user=12.93 sys=0.35 CPU=99% MaxRSS=26440
- real=13.31 user=12.95 sys=0.35 CPU=99% MaxRSS=26356
- real=13.29 user=13.01 sys=0.27 CPU=99% MaxRSS=26280
- real=13.31 user=12.97 sys=0.32 CPU=99% MaxRSS=26328
- real=13.35 user=12.93 sys=0.41 CPU=99% MaxRSS=26276
- real=13.30 user=12.96 sys=0.33 CPU=99% MaxRSS=26624
- real=13.30 user=12.93 sys=0.36 CPU=99% MaxRSS=26440
- real=13.35 user=12.98 sys=0.36 CPU=99% MaxRSS=26484
+	$> repeat 10 'time rivet --analysis=MC_GENERIC -q  ./Z-hadronic-LEP.hepmc > /dev/null'
+	real=13.32 user=12.97 sys=0.33 CPU=99% MaxRSS=26292
+	real=13.31 user=12.93 sys=0.37 CPU=99% MaxRSS=26356
+	real=13.29 user=12.93 sys=0.35 CPU=99% MaxRSS=26440
+	real=13.31 user=12.95 sys=0.35 CPU=99% MaxRSS=26356
+	real=13.29 user=13.01 sys=0.27 CPU=99% MaxRSS=26280
+	real=13.31 user=12.97 sys=0.32 CPU=99% MaxRSS=26328
+	real=13.35 user=12.93 sys=0.41 CPU=99% MaxRSS=26276
+	real=13.30 user=12.96 sys=0.33 CPU=99% MaxRSS=26624
+	real=13.30 user=12.93 sys=0.36 CPU=99% MaxRSS=26440
+	real=13.35 user=12.98 sys=0.36 CPU=99% MaxRSS=26484
 
-* fads-rivet-mc-generic
+## fads-rivet-mc-generic
 
-Reimplementation on top of [[https://godoc.org/go-hep.org/x/hep/fwk][go-hep/fwk+fads]] of the `MC_GENERIC` analysis.
+Reimplementation on top of [go-hep/fwk+fads](https://godoc.org/go-hep.org/x/hep/fwk) of the `MC_GENERIC` analysis.
 
 Bit-to-bit identical results.
 
- $> go get go-hep.org/x/hep/fads/cmd/fads-rivet-mc-generic
- 
- $> repeat 10 'time fads-rivet-mc-generic -nprocs=1 ./Z-hadronic-LEP.hepmc > /dev/null'
- real=6.04 user=5.66 sys=0.12 CPU= 95% MaxRSS=23384
- real=5.70 user=5.62 sys=0.09 CPU=100% MaxRSS=21128
- real=5.71 user=5.58 sys=0.11 CPU= 99% MaxRSS=22208
- real=5.68 user=5.60 sys=0.08 CPU=100% MaxRSS=23156
- real=5.71 user=5.63 sys=0.08 CPU=100% MaxRSS=20672
- real=5.78 user=5.62 sys=0.09 CPU= 98% MaxRSS=22328
- real=5.67 user=5.62 sys=0.05 CPU=100% MaxRSS=20968
- real=5.68 user=5.57 sys=0.07 CPU= 99% MaxRSS=23748
- real=5.70 user=5.60 sys=0.10 CPU=100% MaxRSS=21360
- real=5.72 user=5.65 sys=0.07 CPU=100% MaxRSS=22764
+	$> go get go-hep.org/x/hep/fads/cmd/fads-rivet-mc-generic
 
-* ROOT I/O
+	$> repeat 10 'time fads-rivet-mc-generic -nprocs=1 ./Z-hadronic-LEP.hepmc > /dev/null'
+	real=6.04 user=5.66 sys=0.12 CPU= 95% MaxRSS=23384
+	real=5.70 user=5.62 sys=0.09 CPU=100% MaxRSS=21128
+	real=5.71 user=5.58 sys=0.11 CPU= 99% MaxRSS=22208
+	real=5.68 user=5.60 sys=0.08 CPU=100% MaxRSS=23156
+	real=5.71 user=5.63 sys=0.08 CPU=100% MaxRSS=20672
+	real=5.78 user=5.62 sys=0.09 CPU= 98% MaxRSS=22328
+	real=5.67 user=5.62 sys=0.05 CPU=100% MaxRSS=20968
+	real=5.68 user=5.57 sys=0.07 CPU= 99% MaxRSS=23748
+	real=5.70 user=5.60 sys=0.10 CPU=100% MaxRSS=21360
+	real=5.72 user=5.65 sys=0.07 CPU=100% MaxRSS=22764
 
- f, err := rootio.Open("my-file.root")
- obj, err := f.Get("my-tree")
- tree := obj.(rootio.Tree)
- 
- type Data struct {
- 	I64    int64       `rootio:"Int64"`
- 	F64    float64     `rootio:"Float64"`
- 	Str    string      `rootio:"Str"`
- 	ArrF64 [10]float64 `rootio:"ArrayFloat64"`
- 	N      int32       `rootio:"N"`
- 	SliF64 []float64   `rootio:"SliceFloat64"`
- }
- 
- var data Data
- sc, err := rootio.NewScanner(tree, &data)
- 
- for sc.Next() {
- 	err := sc.Scan()
- 	if err != nil {
- 		log.Fatal(err)
- 	}
- 	fmt.Printf("entry[%d]: %+v\n", sc.Entry(), data)
- }
+## ROOT I/O
 
- 
-* ROOT I/O features
+	f, err := rootio.Open("my-file.root")
+	obj, err := f.Get("my-tree")
+	tree := obj.(rootio.Tree)
 
-- read flat TTrees with C/C++ builtins, static/dynamic arrays of C/C++ builtins
-- read "event" TTrees with user defined classes containing: `std::vector<T>` (where `T` is a C/C++ builtin or a `std::string`/`TString`), another user defined class, `std::string` or `TString`, static/dynamic arrays of C/C++ builtins and, of course C/C++ builtins
+	type Data struct {
+		I64    int64       `rootio:"Int64"`
+		F64    float64     `rootio:"Float64"`
+		Str    string      `rootio:"Str"`
+		ArrF64 [10]float64 `rootio:"ArrayFloat64"`
+		N      int32       `rootio:"N"`
+		SliF64 []float64   `rootio:"SliceFloat64"`
+	}
 
- struct P3 { int32_t Px; double  Py; int32_t Pz; };
- 
- struct Event {
-   int16_t  I16;  int32_t  I32; int64_t  I64; uint32_t U32;
-   float    F32;  double   F64;
-   TString  TStr; std::string StdStr;
-   P3       P3;
-   int16_t  ArrayI16[ARRAYSZ]; int32_t  ArrayI32[ARRAYSZ];
-   double   ArrayF64[ARRAYSZ];
-   int32_t  N;
-   int16_t  *SliceI16;  //[N]
-   int32_t  *SliceI32;  //[N]
-   double   *SliceF64;  //[N]
-   std::vector<int64_t> StlVecI64; std::vector<std::string> StlVecStr;
- };
+	var data Data
+	sc, err := rootio.NewScanner(tree, &data)
 
-* ROOT I/O performances
+	for sc.Next() {
+		err := sc.Scan()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("entry[%d]: %+v\n", sc.Entry(), data)
+	}
 
-- Input files:
+## ROOT I/O features
 
- $> ll *root
- -rw-r--r-- 1 binet binet 686M Aug 16 11:00 f64s-default-compress.root
- -rw-r--r-- 1 binet binet 764M Aug 16 15:39 f64s-no-compress.root
- 
- $> root-ls -t f64s-no-compress.root
- === [f64s-no-compress.root] ===
- version: 61002
- TTree       tree          tree    (entries=1000000)
-   Scalar_0  "Scalar_0/D"  TBranch
-   Scalar_1  "Scalar_1/D"  TBranch
-   Scalar_2  "Scalar_2/D"  TBranch
-   [...]
-   Scalar_98 "Scalar_98/D" TBranch
-   Scalar_99 "Scalar_99/D" TBranch
+  - read flat TTrees with C/C++ builtins, static/dynamic arrays of C/C++ builtins
+  - read "event" TTrees with user defined classes containing: `std::vector<T>` (where `T` is a C/C++ builtin or a `std::string / TString`), another user defined class, `std::string` or `TString`, static/dynamic arrays of C/C++ builtins and, of course C/C++ builtins
 
-* ROOT - C++
+	struct P3 { int32_t Px; double  Py; int32_t Pz; };
+
+	struct Event {
+	  int16_t  I16;  int32_t  I32; int64_t  I64; uint32_t U32;
+	  float    F32;  double   F64;
+	  TString  TStr; std::string StdStr;
+	  P3       P3;
+	  int16_t  ArrayI16[ARRAYSZ]; int32_t  ArrayI32[ARRAYSZ];
+	  double   ArrayF64[ARRAYSZ];
+	  int32_t  N;
+	  int16_t  *SliceI16;  //[N]
+	  int32_t  *SliceI32;  //[N]
+	  double   *SliceF64;  //[N]
+	  std::vector<int64_t> StlVecI64; std::vector<std::string> StlVecStr;
+	};
+
+## ROOT I/O performances
+
+  - Input files:
+
+	$> ll *root
+	-rw-r--r-- 1 binet binet 686M Aug 16 11:00 f64s-default-compress.root
+	-rw-r--r-- 1 binet binet 764M Aug 16 15:39 f64s-no-compress.root
+
+	$> root-ls -t f64s-no-compress.root
+	=== [f64s-no-compress.root] ===
+	version: 61002
+	TTree       tree          tree    (entries=1000000)
+	  Scalar_0  "Scalar_0/D"  TBranch
+	  Scalar_1  "Scalar_1/D"  TBranch
+	  Scalar_2  "Scalar_2/D"  TBranch
+	  [...]
+	  Scalar_98 "Scalar_98/D" TBranch
+	  Scalar_99 "Scalar_99/D" TBranch
+
+## ROOT - C++
 
 	auto f = TFile::Open(argv[1], "read");
 	auto t = (TTree*)f->Get("tree");
@@ -551,7 +545,7 @@ Bit-to-bit identical results.
 
 	std::cout << "sum= " << sum << "\n";
 
-* Go-HEP/rootio
+## Go-HEP/rootio
 
 	f, err := rootio.Open(flag.Arg(0))
 	obj, err := f.Get("tree")
@@ -578,38 +572,38 @@ Bit-to-bit identical results.
 
 	fmt.Printf("sum= %v\n", sum)
 
-* Results -- No Compression
+## Results -- No Compression
 
- $> time ./cxx-read-data
- $> time ./go-read-data
+	$> time ./cxx-read-data
+	$> time ./go-read-data
 
- === ROOT === (VMem=517Mb)
- real=6.70 user=6.18 sys=0.51 CPU= 99% MaxRSS=258296
- real=6.84 user=6.32 sys=0.51 CPU= 99% MaxRSS=257748
- real=6.82 user=6.29 sys=0.52 CPU= 99% MaxRSS=258348
- real=6.66 user=6.13 sys=0.53 CPU=100% MaxRSS=258440
- 
- === go-hep/rootio === (VMem=43Mb)
- real=12.94 user=12.39 sys=0.56 CPU=100% MaxRSS=42028
- real=12.93 user=12.37 sys=0.56 CPU=100% MaxRSS=42072
- real=12.96 user=12.38 sys=0.58 CPU=100% MaxRSS=41984
- real=12.94 user=12.36 sys=0.57 CPU=100% MaxRSS=42048
+	=== ROOT === (VMem=517Mb)
+	real=6.70 user=6.18 sys=0.51 CPU= 99% MaxRSS=258296
+	real=6.84 user=6.32 sys=0.51 CPU= 99% MaxRSS=257748
+	real=6.82 user=6.29 sys=0.52 CPU= 99% MaxRSS=258348
+	real=6.66 user=6.13 sys=0.53 CPU=100% MaxRSS=258440
 
-* Results -- with default compression
+	=== go-hep/rootio === (VMem=43Mb)
+	real=12.94 user=12.39 sys=0.56 CPU=100% MaxRSS=42028
+	real=12.93 user=12.37 sys=0.56 CPU=100% MaxRSS=42072
+	real=12.96 user=12.38 sys=0.58 CPU=100% MaxRSS=41984
+	real=12.94 user=12.36 sys=0.57 CPU=100% MaxRSS=42048
 
- === ROOT === (VMem=529Mb)
- real=20.61 user=11.86 sys=0.63 CPU=60% MaxRSS=292640
- real=12.56 user=11.54 sys=0.51 CPU=96% MaxRSS=290124
- real=12.04 user=11.50 sys=0.52 CPU=99% MaxRSS=290444
- real=12.05 user=11.54 sys=0.50 CPU=99% MaxRSS=290324
- 
- === go-hep/rootio === (VMem=83Mb)
- real=36.43 user=35.20 sys=0.69 CPU= 98% MaxRSS=81196
- real=35.75 user=35.15 sys=0.63 CPU=100% MaxRSS=81644
- real=35.76 user=35.10 sys=0.69 CPU=100% MaxRSS=81856
- real=35.70 user=35.18 sys=0.54 CPU=100% MaxRSS=81944
+## Results -- with default compression
 
-*Only* ~2 times slower, w/o any optimization wrt baskets buffering, TTreeCache, ...
+	=== ROOT === (VMem=529Mb)
+	real=20.61 user=11.86 sys=0.63 CPU=60% MaxRSS=292640
+	real=12.56 user=11.54 sys=0.51 CPU=96% MaxRSS=290124
+	real=12.04 user=11.50 sys=0.52 CPU=99% MaxRSS=290444
+	real=12.05 user=11.54 sys=0.50 CPU=99% MaxRSS=290324
+
+	=== go-hep/rootio === (VMem=83Mb)
+	real=36.43 user=35.20 sys=0.69 CPU= 98% MaxRSS=81196
+	real=35.75 user=35.15 sys=0.63 CPU=100% MaxRSS=81644
+	real=35.76 user=35.10 sys=0.69 CPU=100% MaxRSS=81856
+	real=35.70 user=35.18 sys=0.54 CPU=100% MaxRSS=81944
+
+**Only** ~2 times slower, w/o any optimization wrt baskets buffering, TTreeCache, ...
 No concurrency (yet.)
 
 Of course, `go-hep/rootio` provides less features than ROOT, isn't as battle-tested and is probably full of bugs.

@@ -1,4 +1,4 @@
-Introduction to Go
+# Introduction to Go
 Clermont'ech, 2018-01-23
 
 Sebastien Binet
@@ -7,76 +7,74 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Go ?
+## Go ?
 
 .image _figs/funfast-nogo.svg 500 _
 
-* What is Go ?
+## What is Go ?
 
 .play _code/hello.go
 
- $ go run hello.go
- Hello from Go
+	$ go run hello.go
+	Hello from Go
 
 A nice language with a nice mascot.
 
 .image _figs/golang-logo.png 200 400
 
+## History
 
-* History
-
-- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
-- Open source release in November 2009
-- More than 900 contributors have joined the project
-- Version 1.0 release in March 2012
-- Version 1.1 release in May 2013
-- Version 1.2 release in December 2013
-- _[...]_
-- Version 1.7 release in August 2016
-- Version 1.8 release in February 2017
-- Version 1.9 release in August 2017
-- Version 1.10 in the coming weeks...
+  - Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+  - Open source release in November 2009
+  - More than 900 contributors have joined the project
+  - Version 1.0 release in March 2012
+  - Version 1.1 release in May 2013
+  - Version 1.2 release in December 2013
+  - _[...]_
+  - Version 1.7 release in August 2016
+  - Version 1.8 release in February 2017
+  - Version 1.9 release in August 2017
+  - Version 1.10 in the coming weeks...
 
 .link https://golang.org
 
-* Elements of Go
+## Elements of Go
 
-- Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+  - Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
 
-
-- *Concurrent*, *garbage-collected*
-- An Open-source general progamming language (BSD-3)
-- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
-- safety of a *static* *type* *system*
-- compiled down to machine language (so it is fast, goal is ~10% of C)
-- *object-oriented* but w/o classes, *builtin* *reflection*
-- first-class functions with *closures*
-- implicitly satisfied *interfaces*
+  - **Concurrent**, **garbage-collected**
+  - An Open-source general progamming language (BSD-3)
+  - feel of a **dynamic** **language**: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+  - safety of a **static** **type** **system**
+  - compiled down to machine language (so it is fast, goal is ~10% of C)
+  - **object-oriented** but w/o classes, **builtin** **reflection**
+  - first-class functions with **closures**
+  - implicitly satisfied **interfaces**
 
 Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
 
-* Concurrency: basic examples
+## Concurrency: basic examples
 
-* A boring function
+## A boring function
 
 We need an example to show the interesting properties of the concurrency primitives.
 To avoid distraction, we make it a boring example.
 
 .play _code/boring.go /START/,/STOP/
 
-* Slightly less boring
+## Slightly less boring
 
 Make the intervals between messages unpredictable (still under a second).
 
 .code _code/lessboring.go /START/,/STOP/
 
-* Running it
+## Running it
 
 The boring function runs on forever, like a boring party guest.
 
 .play _code/lessboring.go /^func.main/,$
 
-* Ignoring it
+## Ignoring it
 
 The `go` statement runs the function as usual, but doesn't make the caller wait.
 
@@ -86,8 +84,7 @@ The functionality is analogous to the `&` on the end of a shell command.
 
 .play _code/goboring.go 1,/^}/
 
-
-* Ignoring it a little less
+## Ignoring it a little less
 
 When `main` returns, the program exits and takes the boring function down with it.
 
@@ -95,7 +92,7 @@ We can hang around a little, and on the way show that both main and the launched
 
 .play _code/waitgoboring.go /func.main/,/^}/
 
-* Goroutines
+## Goroutines
 
 What is a goroutine? It's an independently executing function, launched by a go statement.
 
@@ -111,7 +108,7 @@ Instead, goroutines are multiplexed dynamically onto threads as needed to keep a
 
 But if you think of it as a very cheap thread, you won't be far off.
 
-* Communication
+## Communication
 
 Our boring examples cheated: the main function couldn't see the output from the other goroutine.
 
@@ -119,7 +116,7 @@ It was just printed to the screen, where we pretended we saw a conversation.
 
 Real conversations require communication.
 
-* Channels
+## Channels
 
 A channel in Go provides a connection between two goroutines, allowing them to communicate.
 
@@ -127,14 +124,14 @@ A channel in Go provides a connection between two goroutines, allowing them to c
 .code _code/helpers.go /START2/,/STOP2/
 .code _code/helpers.go /START3/,/STOP3/
 
-* Using channels
+## Using channels
 
 A channel connects the main and boring goroutines so they can communicate.
 
 .play _code/changoboring.go /START1/,/STOP1/
 .code _code/changoboring.go /START2/,/STOP2/
 
-* Synchronization
+## Synchronization
 
 When the main function executes <–c, it will wait for a value to be sent.
 
@@ -144,20 +141,20 @@ A sender and receiver must both be ready to play their part in the communication
 
 Thus channels both communicate and synchronize.
 
-* The Go approach
+## The Go approach
 
 Don't communicate by sharing memory, share memory by communicating.
 
-* "Patterns"
+## "Patterns"
 
-* Generator: function that returns a channel
+## Generator: function that returns a channel
 
 Channels are first-class values, just like strings or integers.
 
 .play _code/generatorboring.go /START1/,/STOP1/
 .code _code/generatorboring.go /START2/,/STOP2/
 
-* Channels as a handle on a service
+## Channels as a handle on a service
 
 Our boring function returns a channel that lets us communicate with the boring service it provides.
 
@@ -165,7 +162,7 @@ We can have more instances of the service.
 
 .play _code/generator2boring.go /START1/,/STOP1/
 
-* Multiplexing
+## Multiplexing
 
 These programs make Joe and Ann count in lockstep.
 We can instead use a fan-in function to let whosoever is ready talk.
@@ -173,11 +170,11 @@ We can instead use a fan-in function to let whosoever is ready talk.
 .code _code/faninboring.go /START3/,/STOP3/
 .play _code/faninboring.go /START1/,/STOP1/
 
-* Fan-in
+## Fan-in
 
 .image _figs/gophermegaphones.jpg
 
-* Restoring sequencing
+## Restoring sequencing
 
 Send a channel on a channel, making goroutine wait its turn.
 
@@ -187,7 +184,7 @@ First we define a message type that contains a channel for the reply.
 
 .code _code/sequenceboring.go /START0/,/STOP0/
 
-* Restoring sequencing.
+## Restoring sequencing.
 
 Each speaker must wait for a go-ahead.
 
@@ -195,112 +192,110 @@ Each speaker must wait for a go-ahead.
 .code _code/sequenceboring.go /START2/,/STOP2/
 .play _code/sequenceboring.go /START3/,/STOP3/
 
-* Select
+## Select
 
 A control structure unique to concurrency.
 
 The reason channels and goroutines are built into the language.
 
-* Select
+## Select
 
 The select statement provides another way to handle multiple channels.
 It's like a switch, but each case is a communication:
 
-- All channels are evaluated.
-- Selection blocks until one communication can proceed, which then does.
-- If multiple can proceed, select chooses pseudo-randomly.
-- A default clause, if present, executes immediately if no channel is ready.
+  - All channels are evaluated.
+  - Selection blocks until one communication can proceed, which then does.
+  - If multiple can proceed, select chooses pseudo-randomly.
+  - A default clause, if present, executes immediately if no channel is ready.
 
 .code _code/select.go /START0/,/STOP0/
 
-* Fan-in again
+## Fan-in again
 
 Rewrite our original fanIn function. Only one goroutine is needed. Old:
 
 .code _code/faninboring.go /START3/,/STOP3/
 
-* Fan-in using select
+## Fan-in using select
 
 Rewrite our original fanIn function. Only one goroutine is needed. New:
 
 .play _code/selectboring.go /START3/,/STOP3/
 
-* Timeout using select
+## Timeout using select
 
 The time.After function returns a channel that blocks for the specified duration.
 After the interval, the channel delivers the current time, once.
 
 .play _code/timeout.go /START1/,/STOP1/
 
-* Timeout for whole conversation using select
+## Timeout for whole conversation using select
 
 Create the timer once, outside the loop, to time out the entire conversation.
 (In the previous program, we had a timeout for each message.)
 
 .play _code/timeoutall.go /START1/,/STOP1/
 
-
-* Quit channel
+## Quit channel
 
 We can turn this around and tell Joe to stop when we're tired of listening to him.
 
 .code _code/quit.go /START1/,/STOP1/
 .play _code/quit.go /START2/,/STOP2/
 
-
-* Receive on quit channel
+## Receive on quit channel
 
 How do we know it's finished? Wait for it to tell us it's done: receive on the quit channel
 
 .code _code/rcvquit.go /START1/,/STOP1/
 .play _code/rcvquit.go /START2/,/STOP2/
 
-* Daisy-chain
+## Daisy-chain
 
 .play _code/daisy.go /func/,$
 
-* Chinese whispers, gopher style
+## Chinese whispers, gopher style
 
 .image _figs/gophereartrumpet.jpg
 
-* Conclusions
+## Conclusions
 
 Goroutines and channels make it easy to express complex operations dealing with:
 
-- multiple inputs
-- multiple outputs
-- timeouts
-- failure
+  - multiple inputs
+  - multiple outputs
+  - timeouts
+  - failure
 
 And they're fun to use.
 
-* Conclusions - II
+## Conclusions - II
 
-[[https://golang.org][Go]] improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
+[Go](https://golang.org) improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
 
-- code distribution
-- code installation
-- compilation/development speed
-- runtime speed
-- simple language
+  - code distribution
+  - code installation
+  - compilation/development speed
+  - runtime speed
+  - simple language
 
 and:
 
-- serviceable standard library ([[https://golang.org/pkg][stdlib doc]])
-- builtin facilities to tackle concurrency programming
+  - serviceable standard library ([stdlib doc](https://golang.org/pkg))
+  - builtin facilities to tackle concurrency programming
 
-* Conclusions - III
+## Conclusions - III
 
 Don't communicate by sharing memory, share memory by communicating.
 
 Go is great at writing small and large (concurrent) programs.
-Also true for *science-y* programs, even if the amount of libraries can still be improved.
+Also true for **science-y** programs, even if the amount of libraries can still be improved.
 
 .image _figs/funfast.svg 320 _
 
-Write your next tool/application in [[https://golang.org/][Go]]?
+Write your next tool/application in [Go](https://golang.org/)?
 
-* Acknowledgements / resources
+## Acknowledgements / resources
 
 .link https://tour.golang.org
 .link https://talks.golang.org/2012/splash.slide
@@ -313,16 +308,15 @@ Write your next tool/application in [[https://golang.org/][Go]]?
 .link https://talks.golang.org/2016/applicative.slide
 .link https://agenda.infn.it/getFile.py/access?contribId=24&sessionId=3&resId=0&materialId=slides&confId=11680
 
+## Backup
 
-* Backup
+## Interlude: concurrency & parallelism
 
-* Interlude: concurrency & parallelism
+## Interlude: Sequential, Concurrent & Parallel pizzas
 
-* Interlude: Sequential, Concurrent & Parallel pizzas
+## Pizza recipe
 
-* Pizza recipe
-
-(*Disclaimer:* don't ever eat any pizza prepared or cooked by me.)
+(**Disclaimer:** don't ever eat any pizza prepared or cooked by me.)
 
 How to prepare a (sequential) pizza?
 
@@ -330,73 +324,73 @@ How to prepare a (sequential) pizza?
 
 Estimated time (1 chef, 1 pizza):
 
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
 How to make this faster?
 
-* (Sequential) Pizza recipe
- 
+## (Sequential) Pizza recipe
+
 Tasks:
 
-- wash tomatoes and onions
-- cut tomatoes, onions
-- prepare pizza dough
-- put tomato sauce on top of pizza dough
-- toppings: put tomatoes, onions, ham and mozzarella
-- (pre-)heat oven, bake
-- (cut, then eat)
+  - wash tomatoes and onions
+  - cut tomatoes, onions
+  - prepare pizza dough
+  - put tomato sauce on top of pizza dough
+  - toppings: put tomatoes, onions, ham and mozzarella
+  - (pre-)heat oven, bake
+  - (cut, then eat)
 
 Estimated time (1 chef, 1 pizza):
 
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
-* Concurrent pizzas - Parallel pizzas
+## Concurrent pizzas - Parallel pizzas
 
 Estimated time (1 chef, 1 kitchen, 2 pizzas):
 
-  xx-oooo-xxx-oo-###-xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###-xx-oooo-xxx-oo-###
 
 Estimated time (1 chef, 2 kitchens, 2 pizzas):
 
-  xx-oooo-xxx-oo+###
-                +xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo+###
+	              +xx-oooo-xxx-oo-###
 
 Estimated time (2 chefs, 1 kitchen, 2 pizzas):
 
-  xx-xxx-+-xx-xxx-+
-         +###     +###
-  oooo-oo+-oooo-oo+
+	xx-xxx-+-xx-xxx-+
+	       +###     +###
+	oooo-oo+-oooo-oo+
 
 Estimated time (2 chefs, 2 kitchens, 2 pizzas):
 
-  xx-oooo-xxx-oo-###
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
-* Interlude: concurrency & parallelism
+## Interlude: concurrency & parallelism
 
-- *Concurrency* is about _dealing_ with lots of things at once.
-- *Parallelism* is about _doing_ lots of things at once.
-- Not the same, but related.
-- Concurrency is about _structure_, parallelism is about _execution_.
+  - **Concurrency** is about _dealing_ with lots of things at once.
+  - **Parallelism** is about _doing_ lots of things at once.
+  - Not the same, but related.
+  - Concurrency is about _structure_, parallelism is about _execution_.
 
 .image _figs/conc-para.png 200 600
 
 Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
 Communication is the means to coordinate the independent executions.
 
-* Concurrency vs Parallelism
+## Concurrency vs Parallelism
 
 Concurrency is about dealing with lots of things at once.
 Parallelism is about doing lots of things at once.
 
-Concurrency is about (program) *structure*.
-Parallelism is about (program) *execution*.
+Concurrency is about (program) **structure**.
+Parallelism is about (program) **execution**.
 
 .image _figs/conc-vs-par-prog.png 300 _
 
-Concurrency is *not* parallelism, it's better :)
+Concurrency is **not** parallelism, it's better :)
 
-* Concurrency plus communication
+## Concurrency plus communication
 
 Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
 
@@ -406,25 +400,24 @@ This is the Go model and (like Erlang and others) it's based on CSP:
 
 C. A. R. Hoare: Communicating Sequential Processes (CACM 1978)
 
-* Concurrency strategies
+## Concurrency strategies
 
-* Multi-processing
+## Multi-processing
 
 Launch _N_ instances of an application on a node with _N_ cores
 
-- re-use pre-existing code
-- _a_ _priori_ no required modification of pre-existing code
-- satisfactory _scalability_ with the number of cores
+  - re-use pre-existing code
+  - _a_ _priori_ no required modification of pre-existing code
+  - satisfactory _scalability_ with the number of cores
 
-*But:*
+**But:**
 
-- resource requirements increase with the number of processes
-- memory footprint *increases*
-- as do other O/S (limited) resources (file descriptors, network sockets, ...)
-- scalability of *I/O* debatable when number of cores > ~100
+  - resource requirements increase with the number of processes
+  - memory footprint **increases**
+  - as do other O/S (limited) resources (file descriptors, network sockets, ...)
+  - scalability of **I/O** debatable when number of cores > ~100
 
-
-* Multi-threading
+## Multi-threading
 
 .image _figs/mt-cxx.png
 
@@ -432,5 +425,3 @@ Launch _N_ instances of an application on a node with _N_ cores
 - `std::lambda`, `std::thread`, `std::promise`
 - (Intel) Threading Building Blocks
 - ...
-
-

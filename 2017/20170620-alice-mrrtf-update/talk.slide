@@ -1,4 +1,4 @@
-Go, fer & ROOT-I/O
+# Go, fer & ROOT-I/O
 ALICE MRRTF, 2017-06-20
 
 Sébastien Binet
@@ -7,164 +7,162 @@ sebastien.binet@clermont.in2p3.fr
 https://github.com/sbinet
 @0xb1ns
 
-* fer
+## fer
 
 `fer` is a Go-based toolkit compatible with the `C++` `O2` framework, developed for Run-3.
 
 .link https://github.com/sbinet-alice/fer
 .link https://github.com/FairRootGroup/FairRoot/tree/master/examples/advanced/GoTutorial
-
 .image _figs/fairmq-example-topology.png 200 _
 
-* fer - update
+## fer - update
 
-`fer` was presented at last ALICE Offline week: [[https://indico.cern.ch/event/624025/][here]].
+`fer` was presented at last ALICE Offline week: [here](https://indico.cern.ch/event/624025/).
 
-- no tomatoes were thrown,
-- ALICE software coordinator enthusiastic,
-- FAIR software coordinator, ditto.
+  - no tomatoes were thrown,
+  - ALICE software coordinator enthusiastic,
+  - FAIR software coordinator, ditto.
 
 Success.
 
-(*Note:* that's not an endorsement of Go as an official language for ALICE O2)
+(**Note:** that's not an endorsement of Go as an official language for ALICE O2)
 
-* fer - update II
+## fer - update II
 
-For the ALICE Offline week presentation, developed a program to show the interesting features of [[https://golang.org][Go]]:
+For the ALICE Offline week presentation, developed a program to show the interesting features of [Go](https://golang.org):
 
-- static compilation, "duck-typing" *interfaces*, easy cross-compilation
-- easy concurrency (*goroutines*, *channels*), garbage collector
-- fast development, fast runtime, easy deployment
-- network programming
+  - static compilation, "duck-typing" **interfaces**, easy cross-compilation
+  - easy concurrency (**goroutines**, **channels**), garbage collector
+  - fast development, fast runtime, easy deployment
+  - network programming
 
 Created a little web browser based driver for the standard `sampler/processor/sink` example:
 
 .link https://github.com/sbinet-alice/fer/blob/master/example/cmd/fer-ex-web-ctl/main.go
 
- $> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
- $> fer-ex-web-ctl &
- $> open localhost:8080
+	$> go get github.com/sbinet-alice/fer/example/cmd/fer-ex-web-ctl
+	$> fer-ex-web-ctl &
+	$> open localhost:8080
 
-* fer: (web) demo time
+## fer: (web) demo time
 
-You can try it now, w/o any [[https://golang.org][Go]] toolchain.
+You can try it now, w/o any [Go](https://golang.org) toolchain.
 
-Download it (for your OS/arch) from [[https://cern.ch/binet/alice/fer]]
+Download it (for your OS/arch) from [cern.ch/binet/alice/fer](https://cern.ch/binet/alice/fer)
 
- $> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
- $> ./fer-ex-web-ctl-linux-amd64.exe
+	$> curl -O -L https://cern.ch/binet/alice/fer/fer-ex-web-ctl-linux-amd64.exe
+	$> ./fer-ex-web-ctl-linux-amd64.exe
 
 Buzz words compliant:
 
-- WebSockets
-- JSON & binary serialization via (runtime type) reflection
-- concurrency (via goroutines+channels)
-- cloud friendly
+  - WebSockets
+  - JSON & binary serialization via (runtime type) reflection
+  - concurrency (via goroutines+channels)
+  - cloud friendly
 
-* fer: (web) demo time
+## fer: (web) demo time
 
 .image _figs/fer-ex-web-ctl.png 555 _
 
-* Go & ROOT
+## Go & ROOT
 
-* Go & ROOT I/O
+## Go & ROOT I/O
 
-For [[https://golang.org][Go]] to be truly useful in all environments in a HEP context, one needs to be able to interoperate with [[https://root.cern.ch][ROOT]].
+For [Go](https://golang.org) to be truly useful in all environments in a HEP context, one needs to be able to interoperate with [ROOT](https://root.cern.ch).
 
-During last hackathon, I greatly improved the capabilities of [[https://go-hep.org/x/hep/rootio][Go-HEP]] _wrt_ ROOT.
+During last hackathon, I greatly improved the capabilities of [Go-HEP](https://go-hep.org/x/hep/rootio) _wrt_ ROOT.
 
-- updated `go-hep.org/x/hep/rootio` package that deals with ROOT I/O
-- `hep/rootio` is a bit of a misnommer (for now) because it can only read ROOT stuff, not write (but `hep/rooti` didn't look nice)
+  - updated `go-hep.org/x/hep/rootio` package that deals with ROOT I/O
+  - `hep/rootio` is a bit of a misnommer (for now) because it can only read ROOT stuff, not write (but `hep/rooti` didn't look nice)
 
-[[https://go-hep.org/x/hep/rootio][`hep/rootio`]] is gaining some mindshare: mentionned at last [[https://indico.cern.ch/event/611563/contributions/2465909/attachments/1474259/2282775/2017-June-RootIO.pdf][ROOT I/O workshop]].
+[`hep/rootio`](https://go-hep.org/x/hep/rootio) is gaining some mindshare: mentionned at last [ROOT I/O workshop](https://indico.cern.ch/event/611563/contributions/2465909/attachments/1474259/2282775/2017-June-RootIO.pdf).
 
-* go-hep/x/hep/rootio features
+## go-hep/x/hep/rootio features
 
-* Decode basic structure of a TFile
+## Decode basic structure of a TFile
 
-  f, err := rootio.Open("test.root")
-  if err != nil { log.Fatal(err) }
-  defer f.Close()
+	f, err := rootio.Open("test.root")
+	if err != nil { log.Fatal(err) }
+	defer f.Close()
 
-  for _, key := range f.Keys() {
-     log.Printf("key=%v title=%v", key.Name(), key.Title())
-  }
+	for _, key := range f.Keys() {
+	   log.Printf("key=%v title=%v", key.Name(), key.Title())
+	}
 
-  // including streamers
-  for _, info := range f.StreamerInfos() {
-     log.Printf(
-        " StreamerInfo for %q version=%d title=%q\n",
-        info.Name(), info.ClassVersion(), info.Title(),
-     )
-  }
+	// including streamers
+	for _, info := range f.StreamerInfos() {
+	   log.Printf(
+	      " StreamerInfo for %q version=%d title=%q\n",
+	      info.Name(), info.ClassVersion(), info.Title(),
+	   )
+	}
 
+## Access data from a TFile
 
-* Access data from a TFile
+	// retrieve histo-1D "h1d"
+	h1d := f.Get("h1d").Value().(*rootio.H1D)
 
- // retrieve histo-1D "h1d"
- h1d := f.Get("h1d").Value().(*rootio.H1D)
+	// retrieve TTree "tree"
+	tree := f.Get("tree").Value().(rootio.Tree)
 
- // retrieve TTree "tree"
- tree := f.Get("tree").Value().(rootio.Tree)
+## Access data from a TTree
 
-* Access data from a TTree
+	tree := f.Get("tree").Value().(rootio.Tree)
+	scan, err := rootio.NewScannerVars(tree, []rootio.ScanVar{
+	   {Name: "MyInt32"}, {Name: "MyDouble"},
+	})
+	defer scan.Close()
 
- tree := f.Get("tree").Value().(rootio.Tree)
- scan, err := rootio.NewScannerVars(tree, []rootio.ScanVar{
-    {Name: "MyInt32"}, {Name: "MyDouble"},
- })
- defer scan.Close()
- 
- for scan.Next() {
-    var i32 int32
-    var f64 float64
-    err = scan.Scan(&i32, f64)
-    log.Printf("entry-%d: i32=%v f64=%v", scan.Entry(), i32, f64)
- }
+	for scan.Next() {
+	   var i32 int32
+	   var f64 float64
+	   err = scan.Scan(&i32, f64)
+	   log.Printf("entry-%d: i32=%v f64=%v", scan.Entry(), i32, f64)
+	}
 
 For a `TTree` created with the following event data:
 
-  struct Event {
-    Int_t    MyInt32;
-    Double_t MyDouble;
-  };
+	struct Event {
+	  Int_t    MyInt32;
+	  Double_t MyDouble;
+	};
 
-* Access data from a TTree - II
+## Access data from a TTree - II
 
 One can also directly bind data from a `TTree` to a Go struct:
 
- type Data struct {
-   I32 int32   `rootio:"MyInt32"`
-   F64 float64 `rootio:"MyDouble"`
- }
+	type Data struct {
+	  I32 int32   `rootio:"MyInt32"`
+	  F64 float64 `rootio:"MyDouble"`
+	}
 
- var data Data
- scan, err := rootio.NewScanner(tree, &data)
- for scan.Next() {
-   err = scan.Scan(&data)
-   log.Printf("entry-%d: %+v", scan.Entry(), data)
- }
+	var data Data
+	scan, err := rootio.NewScanner(tree, &data)
+	for scan.Next() {
+	  err = scan.Scan(&data)
+	  log.Printf("entry-%d: %+v", scan.Entry(), data)
+	}
 
-* More TTree event data
+## More TTree event data
 
 .code _code/event.cxx
 
-* Missing TTree features
+## Missing TTree features
 
-- `std::vector<UserData>`
-- `TClonesArray`
-- classes with inheritance
-- classes with virtual inheritance
-- classes with multiple inheritance
-- ...
+  - `std::vector<UserData>`
+  - `TClonesArray`
+  - classes with inheritance
+  - classes with virtual inheritance
+  - classes with multiple inheritance
+  - ...
 
 and... writing `ROOT` stuff back.
 
-* Go & ROOT-I/O
+## Go & ROOT-I/O
 
 Have a look at:
 
-- [[https://go-hep.org/x/hep/rootio/cmd/root-ls][root-ls]], a pure-Go `ROOT` file inspector,
-- [[https://go-hep.org/x/hep/rootio/cmd/root-srv][root-srv]], a pure-Go `ROOT` file inspector/browser that displays stuff in your favorite `$WEB_BROWSER` (test it online: [[http://rootio-inspector.appspot.com]])
+  - [root-ls](https://go-hep.org/x/hep/rootio/cmd/root-ls), a pure-Go `ROOT` file inspector,
+  - [root-srv](https://go-hep.org/x/hep/rootio/cmd/root-srv), a pure-Go `ROOT` file inspector/browser that displays stuff in your favorite `$WEB_BROWSER` (test it online: [rootio-inspector.appspot.com](http://rootio-inspector.appspot.com))
 
 What's missing to `go-hep/rootio` so `fer` can be used as an O2 source executable for `ROOT` files ?

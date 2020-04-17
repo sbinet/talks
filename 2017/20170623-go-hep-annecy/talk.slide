@@ -1,4 +1,4 @@
-HEP Software: Parallelism strikes back
+# HEP Software: Parallelism strikes back
 LAPP Seminar, 2017-06-23
 
 Sebastien Binet
@@ -7,121 +7,114 @@ https://github.com/sbinet
 @0xbins
 sebastien.binet@clermont.in2p3.fr
 
-* Parallelism: why?
+## Parallelism: why?
 
 .image _figs/cpu-free-lunch.png 550 550
 
-* (a brief) History of software in HEP
+## (a brief) History of software in HEP
 
-* 50's-90's: FORTRAN77
+## 50's-90's: FORTRAN77
 
-#.code _code/hello.f
 .play _code/hello.f.go /START OMIT/,/END OMIT/
 
- $ gfortran -c hello.f && gfortran -o hello hello.o
- $ ./hello
- Hello from FORTRAN
+	$ gfortran -c hello.f && gfortran -o hello hello.o
+	$ ./hello
+	Hello from FORTRAN
 
-- `FORTRAN77` is the *king*
-- 1964: *CERNLIB*
-- REAP (paper tape measurements), THRESH (geometry reconstruction)
-- SUMX, *HBOOK* (statistical analysis chain)
-- ZEBRA (memory management, I/O, ...)
-- GEANT3, *PAW*
+  - `FORTRAN77` is the **king**
+  - 1964: **CERNLIB**
+  - REAP (paper tape measurements), THRESH (geometry reconstruction)
+  - SUMX, **HBOOK** (statistical analysis chain)
+  - ZEBRA (memory management, I/O, ...)
+  - GEANT3, **PAW**
 
-* 90's-...: C++
+## 90's-...: C++
 
-#.code _code/hello.cxx
 .play _code/hello.cxx.go /START OMIT/,/END OMIT/
 
- $ c++ -o hello hello.cxx && ./hello
- Hello from C++
- 
+	$ c++ -o hello hello.cxx && ./hello
+	Hello from C++
+
 .image _figs/my-root6splash.png 190 190
 
-- object-oriented programming (OOP) is the cool kid on the block
-- *ROOT*, POOL, LHC++, AIDA, *Geant4*
-- `C++` takes roots in HEP
+  - object-oriented programming (OOP) is the cool kid on the block
+  - **ROOT**, POOL, LHC++, AIDA, **Geant4**
+  - `C++` takes roots in HEP
 
-* 00's-...: python
+## 00's-...: python
 
-#.code _code/hello.py
 .play _code/hello.py.go /START OMIT/,/END OMIT/
 
- $ python ./hello.py
- Hello from python
- 
+	$ python ./hello.py
+	Hello from python
+
 .image _figs/my-python-logo.png 100 250
 
-- `python` becomes the _de_ _facto_ scripting language in HEP
-- framework data-cards
-- analysis glue, (whole) analyses in `python`
-- *PyROOT*, rootpy
-- numpy, scipy, matplotlib, *IPython/Jupyter*
+  - `python` becomes the _de_ _facto_ scripting language in HEP
+  - framework data-cards
+  - analysis glue, (whole) analyses in `python`
+  - **PyROOT**, rootpy
+  - numpy, scipy, matplotlib, **IPython/Jupyter**
 
-* Current software in a nutshell
+## Current software in a nutshell
 
-- *Generators*: generation of true particles from fondamental physics first principles
-- *Full* *Simulation*: tracking of all stable particles in magnetic field through the detector simulating interaction, recording energy deposition (*CPU* *intensive*)
-- *Reconstruction*: from real data, or from `Monte-Carlo` simulation data as above
-- *Fast* *Simulation*: parametric simulation, faster, coarser
-- *Analysis*: daily work of physicists, running on output of reconstruction to derive analysis specific information (*I/O* *intensive*)
-- everything in the same `C++` offline control framework (except analysis)
+  - **Generators**: generation of true particles from fondamental physics first principles
+  - **Full** **Simulation**: tracking of all stable particles in magnetic field through the detector simulating interaction, recording energy deposition (**CPU** **intensive**)
+  - **Reconstruction**: from real data, or from `Monte-Carlo` simulation data as above
+  - **Fast** **Simulation**: parametric simulation, faster, coarser
+  - **Analysis**: daily work of physicists, running on output of reconstruction to derive analysis specific information (**I/O** **intensive**)
+  - everything in the same `C++` offline control framework (except analysis)
 
 .image _figs/data-flux-summary-all.png 210 800
 
+## 
 
-* 
-
-- `C++`: *slow* (very slow?) to compile/develop, *fast* to execute
-- `python`: *fast* development cycle (no compilation), *slow* to execute
-# (can be mitigated if leveraging/rewriting(parts in) `C++`. more work)
+  - `C++`: **slow** (very slow?) to compile/develop, **fast** to execute
+  - `python`: **fast** development cycle (no compilation), **slow** to execute
 
 .image _figs/xkcd-compiling.png 400 400
 
-* Are those our only options ?
+## Are those our only options ?
 
 .image _figs/funfast-nogo.svg 500 _
 
+## Meanwhile on the Hardware side...
 
-* Meanwhile on the Hardware side...
-
-* Moore's law
+## Moore's law
 
 .image _figs/cpu-free-lunch.png 550 550
 
-* The hardware/software contract
+## The hardware/software contract
 
 .image _figs/par-prog-old-days.png _ 850
 
-* Hardware diversity: combining building blocks
+## Hardware diversity: combining building blocks
 
 .image _figs/par-prog-heterogeneous.png
 
-* Moore's law
+## Moore's law
 
-- Moore's law still observed at the hardware level
-- *However* the _effective_ perceived computing power is mitigated
+  - Moore's law still observed at the hardware level
+  - **However** the _effective_ perceived computing power is mitigated
 
 _"Easy_ _life"_ during the last 20-30 years:
 
-- Moore's law translated into *doubling* compute capacity every ~18 months (_via_ clock frequency)
-- *Concurrency* and *parallelism* necessary to efficiently harness the compute power of our new multi-core CPU architectures.
+  - Moore's law translated into **doubling** compute capacity every ~18 months (_via_ clock frequency)
+  - **Concurrency** and **parallelism** necessary to efficiently harness the compute power of our new multi-core CPU architectures.
 
 _But_ our current software isn't prepared for parallel/concurrent environments.
 
-
-* Free lunch is over
+## Free lunch is over
 
 .image _figs/head-on.png _ 900
 
-* Interlude: concurrency & parallelism
+## Interlude: concurrency & parallelism
 
-* Interlude: Sequential, Concurrent & Parallel pizzas
+## Interlude: Sequential, Concurrent & Parallel pizzas
 
-* Pizza recipe
+## Pizza recipe
 
-(*Disclaimer:* don't ever eat any pizza prepared or cooked by me.)
+(**Disclaimer:** don't ever eat any pizza prepared or cooked by me.)
 
 How to prepare a (sequential) pizza?
 
@@ -129,73 +122,73 @@ How to prepare a (sequential) pizza?
 
 Estimated time (1 chef, 1 pizza):
 
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
 How to make this faster?
 
-* (Sequential) Pizza recipe
- 
+## (Sequential) Pizza recipe
+
 Tasks:
 
-- wash tomatoes and onions
-- cut tomatoes, onions
-- prepare pizza dough
-- put tomato sauce on top of pizza dough
-- toppings: put tomatoes, onions, ham and mozzarella
-- (pre-)heat oven, bake
-- (cut, then eat)
+  - wash tomatoes and onions
+  - cut tomatoes, onions
+  - prepare pizza dough
+  - put tomato sauce on top of pizza dough
+  - toppings: put tomatoes, onions, ham and mozzarella
+  - (pre-)heat oven, bake
+  - (cut, then eat)
 
 Estimated time (1 chef, 1 pizza):
 
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
-* Concurrent pizzas - Parallel pizzas
+## Concurrent pizzas - Parallel pizzas
 
 Estimated time (1 chef, 1 kitchen, 2 pizzas):
 
-  xx-oooo-xxx-oo-###-xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###-xx-oooo-xxx-oo-###
 
 Estimated time (1 chef, 2 kitchens, 2 pizzas):
 
-  xx-oooo-xxx-oo+###
-                +xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo+###
+	              +xx-oooo-xxx-oo-###
 
 Estimated time (2 chefs, 1 kitchen, 2 pizzas):
 
-  xx-xxx-+-xx-xxx-+
-         +###     +###
-  oooo-oo+-oooo-oo+
+	xx-xxx-+-xx-xxx-+
+	       +###     +###
+	oooo-oo+-oooo-oo+
 
 Estimated time (2 chefs, 2 kitchens, 2 pizzas):
 
-  xx-oooo-xxx-oo-###
-  xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
+	xx-oooo-xxx-oo-###
 
-* Interlude: concurrency & parallelism
+## Interlude: concurrency & parallelism
 
-- *Concurrency* is about _dealing_ with lots of things at once.
-- *Parallelism* is about _doing_ lots of things at once.
-- Not the same, but related.
-- Concurrency is about _structure_, parallelism is about _execution_.
+  - **Concurrency** is about _dealing_ with lots of things at once.
+  - **Parallelism** is about _doing_ lots of things at once.
+  - Not the same, but related.
+  - Concurrency is about _structure_, parallelism is about _execution_.
 
 .image _figs/conc-para.png 200 600
 
 Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
 Communication is the means to coordinate the independent executions.
 
-* Concurrency vs Parallelism
+## Concurrency vs Parallelism
 
 Concurrency is about dealing with lots of things at once.
 Parallelism is about doing lots of things at once.
 
-Concurrency is about (program) *structure*.
-Parallelism is about (program) *execution*.
+Concurrency is about (program) **structure**.
+Parallelism is about (program) **execution**.
 
 .image _figs/conc-vs-par-prog.png 300 _
 
-Concurrency is *not* parallelism, it's better :)
+Concurrency is **not** parallelism, it's better :)
 
-* Concurrency plus communication
+## Concurrency plus communication
 
 Concurrency is a way to structure a program by breaking it into pieces that can be executed independently.
 
@@ -205,38 +198,33 @@ This is the Go model and (like Erlang and others) it's based on CSP:
 
 C. A. R. Hoare: Communicating Sequential Processes (CACM 1978)
 
-* Concurrency in HEP software
+## Concurrency in HEP software
 
 .image _figs/conc-level.png 600 400
 
-* Concurrency in HEP software - II
+## Concurrency in HEP software - II
 
 .image _figs/levels-of-conc.png
-
-# Graal of concurrent software:
-
 .image _figs/gaudi-hive-2.png 250 350
 
+## Concurrency strategies
 
-* Concurrency strategies
-
-* Multi-processing
+## Multi-processing
 
 Launch _N_ instances of an application on a node with _N_ cores
 
-- re-use pre-existing code
-- _a_ _priori_ no required modification of pre-existing code
-- satisfactory _scalability_ with the number of cores
+  - re-use pre-existing code
+  - _a_ _priori_ no required modification of pre-existing code
+  - satisfactory _scalability_ with the number of cores
 
-*But:*
+**But:**
 
-- resource requirements increase with the number of processes
-- memory footprint *increases*
-- as do other O/S (limited) resources (file descriptors, network sockets, ...)
-- scalability of *I/O* debatable when number of cores > ~100
+  - resource requirements increase with the number of processes
+  - memory footprint **increases**
+  - as do other O/S (limited) resources (file descriptors, network sockets, ...)
+  - scalability of **I/O** debatable when number of cores > ~100
 
-
-* Multi-threading
+## Multi-threading
 
 .image _figs/mt-cxx.png
 
@@ -245,92 +233,88 @@ Launch _N_ instances of an application on a node with _N_ cores
 - (Intel) Threading Building Blocks
 - ...
 
-* Time for a new language ?
+## Time for a new language ?
 
 .image _figs/new-lang.png 600 800
 
-* Candidates
+## Candidates
 
-- python/pypy
-- FORTRAN-2008
-- Vala
-- Swift
-- Rust
-- Go
-- Chapel
-- Scala
-- Haskell
-- Clojure
+  - python/pypy
+  - FORTRAN-2008
+  - Vala
+  - Swift
+  - Rust
+  - Go
+  - Chapel
+  - Scala
+  - Haskell
+  - Clojure
 
-* Let's Go
+## Let's Go
 
-* What is Go ?
+## What is Go ?
 
 .play _code/hello.go
-#.play _code/hello.go.go /START OMIT/,/END OMIT/
 
- $ go run hello.go
- Hello from Go
+	$ go run hello.go
+	Hello from Go
 
 A nice language with a nice mascot.
 
 .image _figs/golang-logo.png 200 400
 
+## History
 
-* History
-
-- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
-- Open source release in November 2009
-- More than 700 contributors have joined the project
-- Version 1.0 release in March 2012
-- Version 1.1 release in May 2013
-- Version 1.2 release in December 2013
-- _[...]_
-- Version 1.6 release in February 2016
-- Version 1.7 release in August 2016
-- Version 1.8 release in February 2017
+  - Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+  - Open source release in November 2009
+  - More than 700 contributors have joined the project
+  - Version 1.0 release in March 2012
+  - Version 1.1 release in May 2013
+  - Version 1.2 release in December 2013
+  - _[...]_
+  - Version 1.6 release in February 2016
+  - Version 1.7 release in August 2016
+  - Version 1.8 release in February 2017
 
 .link https://golang.org
 
-* Elements of Go
+## Elements of Go
 
-- Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
+  - Founding fathers: Russ Cox, Robert Griesemer, Ian Lance Taylor, Rob Pike, Ken Thompson
 
-
-- Concurrent, garbage-collected
-- An Open-source general progamming language (BSD-3)
-- feel of a *dynamic* *language*: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
-- safety of a *static* *type* *system*
-- compiled down to machine language (so it is fast, goal is ~10% of C)
-- *object-oriented* but w/o classes, *builtin* *reflection*
-- first-class functions with *closures*
-- implicitly satisfied *interfaces*
+  - Concurrent, garbage-collected
+  - An Open-source general progamming language (BSD-3)
+  - feel of a **dynamic** **language**: limited verbosity thanks to the _type_ _inference_ _system_, map, slices
+  - safety of a **static** **type** **system**
+  - compiled down to machine language (so it is fast, goal is ~10% of C)
+  - **object-oriented** but w/o classes, **builtin** **reflection**
+  - first-class functions with **closures**
+  - implicitly satisfied **interfaces**
 
 Available on all major platforms (`Linux`, `Windows`, `macOS`, `Android`, `iOS`, ...) and for many architectures (`amd64`, `arm`, `arm64`, `i386`, `s390x`, `mips64`, ...)
 
+## Concurrency in Go: basic examples
 
-* Concurrency in Go: basic examples
-
-* A boring function
+## A boring function
 
 We need an example to show the interesting properties of the concurrency primitives.
 To avoid distraction, we make it a boring example.
 
 .play _code/boring.go /START/,/STOP/
 
-* Slightly less boring
+## Slightly less boring
 
 Make the intervals between messages unpredictable (still under a second).
 
 .play _code/lessboring.go /START/,/STOP/
 
-* Running it
+## Running it
 
 The boring function runs on forever, like a boring party guest.
 
 .play _code/lessboring.go /^func.main/,$
 
-* Ignoring it
+## Ignoring it
 
 The `go` statement runs the function as usual, but doesn't make the caller wait.
 
@@ -340,8 +324,7 @@ The functionality is analogous to the `&` on the end of a shell command.
 
 .play _code/goboring.go 1,/^}/
 
-
-* Ignoring it a little less
+## Ignoring it a little less
 
 When `main` returns, the program exits and takes the boring function down with it.
 
@@ -349,7 +332,7 @@ We can hang around a little, and on the way show that both main and the launched
 
 .play _code/waitgoboring.go /func.main/,/^}/
 
-* Goroutines
+## Goroutines
 
 What is a goroutine? It's an independently executing function, launched by a go statement.
 
@@ -365,7 +348,7 @@ Instead, goroutines are multiplexed dynamically onto threads as needed to keep a
 
 But if you think of it as a very cheap thread, you won't be far off.
 
-* Communication
+## Communication
 
 Our boring examples cheated: the main function couldn't see the output from the other goroutine.
 
@@ -373,7 +356,7 @@ It was just printed to the screen, where we pretended we saw a conversation.
 
 Real conversations require communication.
 
-* Channels
+## Channels
 
 A channel in Go provides a connection between two goroutines, allowing them to communicate.
 
@@ -381,14 +364,14 @@ A channel in Go provides a connection between two goroutines, allowing them to c
 .code _code/helpers.go /START2/,/STOP2/
 .code _code/helpers.go /START3/,/STOP3/
 
-* Using channels
+## Using channels
 
 A channel connects the main and boring goroutines so they can communicate.
 
 .play _code/changoboring.go /START1/,/STOP1/
 .code _code/changoboring.go /START2/,/STOP2/
 
-* Synchronization
+## Synchronization
 
 When the main function executes <–c, it will wait for a value to be sent.
 
@@ -398,20 +381,20 @@ A sender and receiver must both be ready to play their part in the communication
 
 Thus channels both communicate and synchronize.
 
-* The Go approach
+## The Go approach
 
 Don't communicate by sharing memory, share memory by communicating.
 
-* "Patterns"
+## "Patterns"
 
-* Generator: function that returns a channel
+## Generator: function that returns a channel
 
 Channels are first-class values, just like strings or integers.
 
 .play _code/generatorboring.go /START1/,/STOP1/
 .code _code/generatorboring.go /START2/,/STOP2/
 
-* Channels as a handle on a service
+## Channels as a handle on a service
 
 Our boring function returns a channel that lets us communicate with the boring service it provides.
 
@@ -419,7 +402,7 @@ We can have more instances of the service.
 
 .play _code/generator2boring.go /START1/,/STOP1/
 
-* Multiplexing
+## Multiplexing
 
 These programs make Joe and Ann count in lockstep.
 We can instead use a fan-in function to let whosoever is ready talk.
@@ -427,11 +410,11 @@ We can instead use a fan-in function to let whosoever is ready talk.
 .code _code/faninboring.go /START3/,/STOP3/
 .play _code/faninboring.go /START1/,/STOP1/
 
-* Fan-in
+## Fan-in
 
 .image _figs/gophermegaphones.jpg
 
-* Restoring sequencing
+## Restoring sequencing
 
 Send a channel on a channel, making goroutine wait its turn.
 
@@ -441,7 +424,7 @@ First we define a message type that contains a channel for the reply.
 
 .code _code/sequenceboring.go /START0/,/STOP0/
 
-* Restoring sequencing.
+## Restoring sequencing.
 
 Each speaker must wait for a go-ahead.
 
@@ -449,360 +432,343 @@ Each speaker must wait for a go-ahead.
 .code _code/sequenceboring.go /START2/,/STOP2/
 .play _code/sequenceboring.go /START3/,/STOP3/
 
-* Select
+## Select
 
 A control structure unique to concurrency.
 
 The reason channels and goroutines are built into the language.
 
-* Select
+## Select
 
 The select statement provides another way to handle multiple channels.
 It's like a switch, but each case is a communication:
 
-- All channels are evaluated.
-- Selection blocks until one communication can proceed, which then does.
-- If multiple can proceed, select chooses pseudo-randomly.
-- A default clause, if present, executes immediately if no channel is ready.
+  - All channels are evaluated.
+  - Selection blocks until one communication can proceed, which then does.
+  - If multiple can proceed, select chooses pseudo-randomly.
+  - A default clause, if present, executes immediately if no channel is ready.
 
 .code _code/select.go /START0/,/STOP0/
 
-* Fan-in again
+## Fan-in again
 
 Rewrite our original fanIn function. Only one goroutine is needed. Old:
 
 .code _code/faninboring.go /START3/,/STOP3/
 
-* Fan-in using select
+## Fan-in using select
 
 Rewrite our original fanIn function. Only one goroutine is needed. New:
 
 .play _code/selectboring.go /START3/,/STOP3/
 
-* Timeout using select
+## Timeout using select
 
 The time.After function returns a channel that blocks for the specified duration.
 After the interval, the channel delivers the current time, once.
 
 .play _code/timeout.go /START1/,/STOP1/
 
-* Timeout for whole conversation using select
+## Timeout for whole conversation using select
 
 Create the timer once, outside the loop, to time out the entire conversation.
 (In the previous program, we had a timeout for each message.)
 
 .play _code/timeoutall.go /START1/,/STOP1/
 
-
-* Quit channel
+## Quit channel
 
 We can turn this around and tell Joe to stop when we're tired of listening to him.
 
 .code _code/quit.go /START1/,/STOP1/
 .play _code/quit.go /START2/,/STOP2/
 
-
-* Receive on quit channel
+## Receive on quit channel
 
 How do we know it's finished? Wait for it to tell us it's done: receive on the quit channel
 
 .code _code/rcvquit.go /START1/,/STOP1/
 .play _code/rcvquit.go /START2/,/STOP2/
 
-* Daisy-chain
+## Daisy-chain
 
 .play _code/daisy.go /func/,$
 
-* Chinese whispers, gopher style
+## Chinese whispers, gopher style
 
 .image _figs/gophereartrumpet.jpg
 
-* Conclusions
+## Conclusions
 
 Goroutines and channels make it easy to express complex operations dealing with:
 
-- multiple inputs
-- multiple outputs
-- timeouts
-- failure
+  - multiple inputs
+  - multiple outputs
+  - timeouts
+  - failure
 
 And they're fun to use.
 
-* Real-world application?
+## Real-world application?
 
-OK, [[https://golang.org][Go]] is great.
+OK, [Go](https://golang.org) is great.
 
-And it's being used by [[https://github.com/golang/go/wiki/GoUsers][many companies]] (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
+And it's being used by [many companies](https://github.com/golang/go/wiki/GoUsers) (beside `Google`): Mozilla, New-York Times, CoreOS, Docker Inc., SpaceX, ...
 
 But what about `HEP`? and `astro/cosmo`?
 
+## fads
 
-* fads
-
-* fads
+## fads
 
 `fads` is a "FAst Detector Simulation" toolkit.
 
-- morally a translation of [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]] into Go
-- uses [[https://go-hep.org/x/hep/fwk][go-hep/fwk]] to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
-- uses [[https://go-hep.org/x/hep/hbook][go-hep/hbook]] for histogramming, [[htpps://go-hep.org/x/hep/hepmc][go-hep/hepmc]] for `HepMC` input/output
+  - morally a translation of [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes) into Go
+  - uses [go-hep/fwk](https://go-hep.org/x/hep/fwk) to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
+  - uses [go-hep/hbook](https://go-hep.org/x/hep/hbook) for histogramming, [go-hep/hepmc](htpps://go-hep.org/x/hep/hepmc) for `HepMC` input/output
 
 Code is on github (BSD-3):
 
 .link https://go-hep.org/x/hep/fwk
 .link https://go-hep.org/x/hep/fads
 
-Documentation is served by [[https://godoc.org][godoc.org]]:
+Documentation is served by [godoc.org](https://godoc.org):
 
 .link https://godoc.org/go-hep.org/x/hep/fwk
 .link https://godoc.org/go-hep.org/x/hep/fads
 
-* go-hep/fads - Installation
+## go-hep/fads - Installation
 
 As easy as:
 
-  $ export GOPATH=$HOME/dev/gocode
-  $ export PATH=$GOPATH/bin:$PATH
-  
-  $ go get go-hep.org/x/hep/fads/...
+	$ export GOPATH=$HOME/dev/gocode
+	$ export PATH=$GOPATH/bin:$PATH
+
+	$ go get go-hep.org/x/hep/fads/...
 
 Yes, with the ellipsis at the end, to also install sub-packages.
 
-- `go` `get` will recursively download and install all the packages that [[https://go-hep.org/x/hep/fads][go-hep/fads]] depends on. (no `Makefile` needed)
+  - `go` `get` will recursively download and install all the packages that [go-hep/fads](https://go-hep.org/x/hep/fads) depends on. (no `Makefile` needed)
 
+## go-hep/fwk - Examples
 
-* go-hep/fwk - Examples
+	$ fwk-ex-tuto-1 -help
+	Usage: fwk-ex-tuto1 [options]
 
+	ex:
+	 $ fwk-ex-tuto-1 -l=INFO -evtmax=-1
 
-  $ fwk-ex-tuto-1 -help
-  Usage: fwk-ex-tuto1 [options]
-  
-  ex:
-   $ fwk-ex-tuto-1 -l=INFO -evtmax=-1
-  
-  options:
-    -evtmax=10: number of events to process
-    -l="INFO": message level (DEBUG|INFO|WARN|ERROR)
-    -nprocs=0: number of events to process concurrently
+	options:
+	  -evtmax=10: number of events to process
+	  -l="INFO": message level (DEBUG|INFO|WARN|ERROR)
+	  -nprocs=0: number of events to process concurrently
 
 Runs 2 tasks.
 
-#- task 1 stores 2 `int`s under `"t1-ints1"` and `"t2-ints2"`.
-#- task 2 retrieves `"t1-ints1"` and stores `"t1-ints1-massaged"`
-
 .image _figs/fwk-ex1-dflow.png 200 200
 
-* go-hep/fwk - Examples
+## go-hep/fwk - Examples
 
-  $ fwk-ex-tuto-1
-  ::: fwk-ex-tuto-1...
-  t2                   INFO configure...
-  t2                   INFO configure... [done]
-  t1                   INFO configure ...
-  t1                   INFO configure ... [done]
-  t2                   INFO start...
-  t1                   INFO start...
-  app                  INFO >>> running evt=0...
-  t1                   INFO proc... (id=0|0) => [10, 20]
-  t2                   INFO proc... (id=0|0) => [10 -> 100]
-  [...]
-  app                  INFO >>> running evt=9...
-  t1                   INFO proc... (id=9|0) => [10, 20]
-  t2                   INFO proc... (id=9|0) => [10 -> 100]
-  t2                   INFO stop...
-  t1                   INFO stop...
-  app                  INFO cpu: 654.064us
-  app                  INFO mem: alloc:             62 kB
-  app                  INFO mem: tot-alloc:         74 kB
-  app                  INFO mem: n-mallocs:        407
-  app                  INFO mem: n-frees:           60
-  app                  INFO mem: gc-pauses:          0 ms
-  ::: fwk-ex-tuto-1... [done] (cpu=788.578us)
+	$ fwk-ex-tuto-1
+	::: fwk-ex-tuto-1...
+	t2                   INFO configure...
+	t2                   INFO configure... [done]
+	t1                   INFO configure ...
+	t1                   INFO configure ... [done]
+	t2                   INFO start...
+	t1                   INFO start...
+	app                  INFO >>> running evt=0...
+	t1                   INFO proc... (id=0|0) => [10, 20]
+	t2                   INFO proc... (id=0|0) => [10 -> 100]
+	[...]
+	app                  INFO >>> running evt=9...
+	t1                   INFO proc... (id=9|0) => [10, 20]
+	t2                   INFO proc... (id=9|0) => [10 -> 100]
+	t2                   INFO stop...
+	t1                   INFO stop...
+	app                  INFO cpu: 654.064us
+	app                  INFO mem: alloc:             62 kB
+	app                  INFO mem: tot-alloc:         74 kB
+	app                  INFO mem: n-mallocs:        407
+	app                  INFO mem: n-frees:           60
+	app                  INFO mem: gc-pauses:          0 ms
+	::: fwk-ex-tuto-1... [done] (cpu=788.578us)
 
+## go-hep/fwk - Concurrency
 
-* go-hep/fwk - Concurrency
-
-[[https://go-hep.org/x/hep/fwk][fwk]] enables:
+[fwk](https://go-hep.org/x/hep/fwk) enables:
 - event-level concurrency
 - tasks-level concurrency
 
-[[https://go-hep.org/x/hep/fwk][fwk]] relies on [[https://golang.org][Go]]'s runtime to properly schedule _goroutines_.
+[fwk](https://go-hep.org/x/hep/fwk) relies on [Go](https://golang.org)'s runtime to properly schedule _goroutines_.
 
-For sub-task concurrency, users are by construction required to use [[https://golang.org][Go]]'s constructs (_goroutines_ and _channels_) so everything is consistent *and* the _runtime_ has the *complete* *picture*.
+For sub-task concurrency, users are by construction required to use [Go](https://golang.org)'s constructs (_goroutines_ and _channels_) so everything is consistent **and** the _runtime_ has the **complete** **picture**.
 
-* go-hep/fads - real world use case
+## go-hep/fads - real world use case
 
-- translated [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]]' ATLAS data-card into Go
-- [[https://github.com/go-hep/hep/blob/master/fads/cmd/fads-app/main.go][go-hep/fads-app]]
-- installation:
+  - translated [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes)' ATLAS data-card into Go
+  - [go-hep/fads-app](https://github.com/go-hep/hep/blob/master/fads/cmd/fads-app/main.go)
+  - installation:
 
-  $ go get go-hep.org/x/hep/fads/cmd/fads-app
-  $ fads-app -help
-  Usage: fads-app [options] <hepmc-input-file>
-  
-  ex:
-   $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
-  
-  options:
-    -cpu-prof=false: enable CPU profiling
-    -evtmax=-1: number of events to process
-    -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
-    -nprocs=0: number of concurrent events to process
+	$ go get go-hep.org/x/hep/fads/cmd/fads-app
+	$ fads-app -help
+	Usage: fads-app [options] <hepmc-input-file>
 
-* go-hep/fads - components
+	ex:
+	 $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
 
-- a `HepMC` converter
-- particle propagator
-- calorimeter simulator
-- energy rescaler, momentum smearer
-- isolation
-- b-tagging, tau-tagging
-- jet-finder (reimplementation of FastJet in Go: [[https://go-hep.org/x/hep/fastjet][go-hep/fastjet]])
-- histogram service (from [[https://go-hep.org/x/hep/fwk][go-hep/fwk]])
+	options:
+	  -cpu-prof=false: enable CPU profiling
+	  -evtmax=-1: number of events to process
+	  -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
+	  -nprocs=0: number of concurrent events to process
+
+## go-hep/fads - components
+
+  - a `HepMC` converter
+  - particle propagator
+  - calorimeter simulator
+  - energy rescaler, momentum smearer
+  - isolation
+  - b-tagging, tau-tagging
+  - jet-finder (reimplementation of FastJet in Go: [go-hep/fastjet](https://go-hep.org/x/hep/fastjet))
+  - histogram service (from [go-hep/fwk](https://go-hep.org/x/hep/fwk))
 
 Caveats:
 
-- jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
+  - jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
 
-
-* 
-
+## 
 
 .image _figs/fads-dflow.png 600 600
 
+## Results - testbenches
 
-* Results - testbenches
+  - Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
+  - MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
+  - Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+  - Linux: Westmere E56xx/L56xx/X56xx (Nehalem-C) (3066.774 MHz), 20-cores, 40Gb RAM
 
-- Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
-- MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
-- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
-- Linux: Westmere E56xx/L56xx/X56xx (Nehalem-C) (3066.774 MHz), 20-cores, 40Gb RAM
-
-* Linux (20 cores) testbench: memory (smaller==better)
+## Linux (20 cores) testbench: memory (smaller==better)
 
 .image _figs/linux-rss.png 550 800
 
-
-* Linux (20 cores) testbench: event throughput (higher==better)
+## Linux (20 cores) testbench: event throughput (higher==better)
 
 .image _figs/linux-cpu.png 550 800
 
+## fads: Results & Conclusions
 
-* fads: Results & Conclusions
+  - good RSS scaling
+  - good CPU scaling
 
-- good RSS scaling
-- good CPU scaling
-
-- bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
-- no need to merge output files, less chaotic I/O, less I/O wait
+  - bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
+  - no need to merge output files, less chaotic I/O, less I/O wait
 
 Also addresses `C++` and `python` deficiencies:
 
-- code distribution
-- code installation
-- compilation/development speed
-- runtime speed
-- simple language
+  - code distribution
+  - code installation
+  - compilation/development speed
+  - runtime speed
+  - simple language
 
+## Go in science
 
-* Go in science
+## Science-y packages
 
-* Science-y packages
+Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [gonum](https://github.com/gonum) community:
 
-Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [[https://github.com/gonum][gonum]] community:
+  - [gonum/blas](https://github.com/gonum/blas), a `go` based implementation of Basic Linear Algebra Subprograms
+  - [gonum/lapack](https://github.com/gonum/lapack), a lapack implementation for `go`
+  - [gonum/matrix](https://github.com/gonum/matrix), to work with matrices
+  - [gonum/graph](https://github.com/gonum/graph), to work with graphs
+  - [gonum/optimize](https://github.com/gonum/optimize), for finding the optimum value of functions
+  - [gonum/integrate](https://github.com/gonum/integrate), provides routines for numerical integration
+  - [gonum/diff](https://github.com/gonum/diff), for computing derivatives of a function
+  - [gonum/stat](https://github.com/gonum/stat), for statistics and distributions
+  - ...
 
-- [[https://github.com/gonum/blas][gonum/blas]], a `go` based implementation of Basic Linear Algebra Subprograms
-- [[https://github.com/gonum/lapack][gonum/lapack]], a lapack implementation for `go`
-- [[https://github.com/gonum/matrix][gonum/matrix]], to work with matrices
-- [[https://github.com/gonum/graph][gonum/graph]], to work with graphs
-- [[https://github.com/gonum/optimize][gonum/optimize]], for finding the optimum value of functions
-- [[https://github.com/gonum/integrate][gonum/integrate]], provides routines for numerical integration
-- [[https://github.com/gonum/diff][gonum/diff]], for computing derivatives of a function
-- [[https://github.com/gonum/stat][gonum/stat]], for statistics and distributions
-- ...
-
-
-* I/O & Making plots
+## I/O & Making plots
 
 Plotting data is also rather easy:
 
-- [[http://github.com/gonum/plot][gonum/plot]] (most of the plots seen earlier are made w/ `gonum/plot`)
-- [[https://github.com/sbinet/go-gnuplot][github.com/sbinet/go-gnuplot]]
+  - [gonum/plot](http://github.com/gonum/plot) (most of the plots seen earlier are made w/ `gonum/plot`)
+  - [github.com/sbinet/go-gnuplot](https://github.com/sbinet/go-gnuplot)
 
 I/O support for some formats:
 
-- [[https://github.com/sbinet/npyio][sbinet/npyio]]: read/write support for [[http://docs.scipy.org/doc/numpy/neps/npy-format.html][NumPy data files]]
-- [[https://github.com/ready-steady/mat][ready-steady/mat]], [[https://github.com/sbinet/matfio][sbinet/matfio]]: r/w support for [[http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf][MATLAB files]]
-- [[https://github.com/sbinet/go-hdf5][sbinet/go-hdf5]]: access to [[https://www.hdfgroup.org/HDF5][HDF5]]
+  - [sbinet/npyio](https://github.com/sbinet/npyio): read/write support for [NumPy data files](http://docs.scipy.org/doc/numpy/neps/npy-format.html)
+  - [ready-steady/mat](https://github.com/ready-steady/mat), [sbinet/matfio](https://github.com/sbinet/matfio): r/w support for [MATLAB files](http://www.mathworks.com/help/pdf_doc/matlab/apiext.pdf)
+  - [sbinet/go-hdf5](https://github.com/sbinet/go-hdf5): access to [HDF5](https://www.hdfgroup.org/HDF5)
 
+## Go for Data Science
 
-* Go for Data Science
+A data science community is gathering around [github.com/gopherds](https://github.com/gopherds).
 
-A data science community is gathering around [[https://github.com/gopherds][github.com/gopherds]].
+  - [gopherds/gophernotes](https://github.com/gopherds/gophernotes), a [Jupyter](http://jupyter.org) kernel for [Go](https://golang.org)
+  - [gopherds/mybinder-go](https://github.com/gopherds/mybinder-go), a web-based Jupyter kernel for [Go](https://golang.org)
+  - [gopherds/resources](https://github.com/gopherds/resources/tree/master/tooling): many resources for machine learning, classifiers, neural networks, ...
 
-- [[https://github.com/gopherds/gophernotes][gopherds/gophernotes]], a [[http://jupyter.org][Jupyter]] kernel for [[https://golang.org][Go]]
-- [[https://github.com/gopherds/mybinder-go][gopherds/mybinder-go]], a web-based Jupyter kernel for [[https://golang.org][Go]]
-- [[https://github.com/gopherds/resources/tree/master/tooling][gopherds/resources]]: many resources for machine learning, classifiers, neural networks, ...
-
-* Go for data acquisition (DAQ) & monitoring
+## Go for data acquisition (DAQ) & monitoring
 
 Community is just starting to gather:
 
-- [[https://github.com/go-daq/canbus][go-daq/canbus]]: CAN bus via `SocketCAN`
-- [[https://github.com/go-daq/smbus][go-daq/smbus]]: SMBus (I2C)
-- [[https://gitlab.in2p3.fr/avirm/analysis-go][avirm/analysis-go]]: DAQ+monitoring s/w for a medical application
-- [[https://github.com/go-lsst/fcs-lpc-motor-ctl][go-lsst/fcs-lpc-motor-ctl]]: a slow control application for LSST (telescope in Chile)
-- [[https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf][SoLiD DAQ (PDF)]]
-- [[https://github.com/sbinet-solid/solid-mon-rpi][sbinet-solid/solid-mon-rpi]]: a sensor monitoring (Humidity, Pressure, Temperature, Lux) application for RaspBerryPI-3 (LPC SoLid)
+  - [go-daq/canbus](https://github.com/go-daq/canbus): CAN bus via `SocketCAN`
+  - [go-daq/smbus](https://github.com/go-daq/smbus): SMBus (I2C)
+  - [avirm/analysis-go](https://gitlab.in2p3.fr/avirm/analysis-go): DAQ+monitoring s/w for a medical application
+  - [go-lsst/fcs-lpc-motor-ctl](https://github.com/go-lsst/fcs-lpc-motor-ctl): a slow control application for LSST (telescope in Chile)
+  - [SoLiD DAQ (PDF)](https://users.physics.ox.ac.uk/~ryder/talks/ryder-soliddaq-ieeenss-01Nov16.pdf)
+  - [sbinet-solid/solid-mon-rpi](https://github.com/sbinet-solid/solid-mon-rpi): a sensor monitoring (Humidity, Pressure, Temperature, Lux) application for RaspBerryPI-3 (LPC SoLid)
 
-* Go in HEP & Astro
+## Go in HEP & Astro
 
-[[https://go-hep.org][go-hep.org]] gathers a few HEP-oriented packages, [[https://github.com/astrogo][astrogo]] for Astro/Cosmo:
+[go-hep.org](https://go-hep.org) gathers a few HEP-oriented packages, [astrogo](https://github.com/astrogo) for Astro/Cosmo:
 
-- [[https://go-hep.org/x/hep/fads][hep/fads]]: a fast detector simulation toolkit, built on top of [[https://go-hep.org/x/hep/fwk][hep/fwk]]
-- [[https://go-hep.org/x/hep/fit][hep/fit]]: a WIP package for fitting data
-- [[https://go-hep.org/x/hep/fmom][hep/fmom]]: a 4-vectors library
-- [[https://go-hep.org/x/hep/hbook][hep/hbook]]: histograms and n-tuples (WIP)
-- [[https://go-hep.org/x/hep/hplot][hep/hplot]]: interactive plotting (WIP)
-- [[https://go-hep.org/x/hep/hepmc][hep/hepmc]]: HepMC in pure Go (EDM + I/O)
-- [[https://go-hep.org/x/hep/hepevt][hep/hepevt]],[[https://go-hep.org/x/hep/heppdt][hep/heppdt]]: HEPEVT bindings and HEP particle data table
-- [[https://go-hep.org/x/hep/lhef][hep/lhef]], [[https://go-hep.org/x/hep/slha][hep/slha]]: Les Houches Event File format and SUSY Les Houches Accord I/O
-- [[https://go-hep.org/x/hep/rootio][hep/rootio]]: pure-Go implementation of ROOT I/O (WIP)
-- [[https://go-hep.org/x/hep/rio][hep/rio]], [[https://go-hep.org/x/hep/sio][hep/sio]]: go-hep record oriented I/O and LCIO I/O
-- [[https://github.com/astrogo/fitsio][astrogo/fitsio]]: r/w access to `FITS` files
+  - [hep/fads](https://go-hep.org/x/hep/fads): a fast detector simulation toolkit, built on top of [hep/fwk](https://go-hep.org/x/hep/fwk)
+  - [hep/fit](https://go-hep.org/x/hep/fit): a WIP package for fitting data
+  - [hep/fmom](https://go-hep.org/x/hep/fmom): a 4-vectors library
+  - [hep/hbook](https://go-hep.org/x/hep/hbook): histograms and n-tuples (WIP)
+  - [hep/hplot](https://go-hep.org/x/hep/hplot): interactive plotting (WIP)
+  - [hep/hepmc](https://go-hep.org/x/hep/hepmc): HepMC in pure Go (EDM + I/O)
+  - [hep/hepevt](https://go-hep.org/x/hep/hepevt),[hep/heppdt](https://go-hep.org/x/hep/heppdt): HEPEVT bindings and HEP particle data table
+  - [hep/lhef](https://go-hep.org/x/hep/lhef), [hep/slha](https://go-hep.org/x/hep/slha): Les Houches Event File format and SUSY Les Houches Accord I/O
+  - [hep/rootio](https://go-hep.org/x/hep/rootio): pure-Go implementation of ROOT I/O (WIP)
+  - [hep/rio](https://go-hep.org/x/hep/rio), [hep/sio](https://go-hep.org/x/hep/sio): go-hep record oriented I/O and LCIO I/O
+  - [astrogo/fitsio](https://github.com/astrogo/fitsio): r/w access to `FITS` files
 
-* Go in science
+## Go in science
 
-- Biology: [[https://github.com/biogo/biogo][biogo]]
-- Chemistry: [[http://gochem.org/][gochem]]
+  - Biology: [biogo](https://github.com/biogo/biogo)
+  - Chemistry: [gochem](http://gochem.org/)
 
-* Conclusions
+## Conclusions
 
-[[https://golang.org][Go]] improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
+[Go](https://golang.org) improves on `C/C++/Java/...` and addresses `C/C++` and `python` deficiencies:
 
-- code distribution
-- code installation
-- compilation/development speed
-- runtime speed
-- simple language
+  - code distribution
+  - code installation
+  - compilation/development speed
+  - runtime speed
+  - simple language
 
 and:
 
-- serviceable standard library ([[https://golang.org/pkg][stdlib doc]])
-- builtin facilities to tackle concurrency programming
+  - serviceable standard library ([stdlib doc](https://golang.org/pkg))
+  - builtin facilities to tackle concurrency programming
 
-* Conclusions
+## Conclusions
 
 Don't communicate by sharing memory, share memory by communicating.
 
 Go is great at writing small and large (concurrent) programs.
-Also true for *science-y* programs, even if the amount of libraries can still be improved.
+Also true for **science-y** programs, even if the amount of libraries can still be improved.
 
 .image _figs/funfast.svg 320 _
 
-Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]?
+Write your next tool/analysis/simulation/software in [Go](https://golang.org/)?
 
-* Acknowledgements / resources
+## Acknowledgements / resources
 
 .link https://tour.golang.org
 .link https://talks.golang.org/2012/splash.slide
@@ -814,4 +780,3 @@ Write your next tool/analysis/simulation/software in [[https://golang.org/][Go]]
 .link https://talks.golang.org/2015/simplicity-is-complicated.slide
 .link https://talks.golang.org/2016/applicative.slide
 .link https://agenda.infn.it/getFile.py/access?contribId=24&sessionId=3&resId=0&materialId=slides&confId=11680
-

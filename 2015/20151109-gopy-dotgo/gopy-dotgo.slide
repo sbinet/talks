@@ -1,4 +1,4 @@
-gopy: extend CPython with Go
+# gopy: extend CPython with Go
 DotGo, 2015/11/09
 
 Sebastien Binet
@@ -8,113 +8,111 @@ https://github.com/sbinet
 
 
 
-* github.com/go-python/gopy
+## github.com/go-python/gopy
 
-[[https://github.com/go-python/gopy][gopy]] automates the drudgery work of
+[gopy](https://github.com/go-python/gopy) automates the drudgery work of
 creating a `python` C-extension module out of a `Go` package:
 
-- inspects a `Go` package
-- extracts the exported `types`, `funcs`, `vars` and `consts`
-- creates a `Go` package that `cgo` exports the exported entities
-- creates a `C` extension module, using the `CPython` API, calling these `cgo` exported entities
-- compiles everything together into a `.so` shared object
+  - inspects a `Go` package
+  - extracts the exported `types`, `funcs`, `vars` and `consts`
+  - creates a `Go` package that `cgo` exports the exported entities
+  - creates a `C` extension module, using the `CPython` API, calling these `cgo` exported entities
+  - compiles everything together into a `.so` shared object
 
-* gopy - hello world
+## gopy - hello world
 
 Consider this simple package `github.com/me/hello`:
 
 .code _code/hello.go
 
-* gopy - hello world - II
+## gopy - hello world - II
 
 To create a `CPython` C-extension module out of it:
 
- $ cd somewhere # anywhere in $PYTHONPATH
- $ gopy bind github.com/me/hello
- 2015/09/28 15:12:44 work: /tmp/gopy-655556935
+	$ cd somewhere # anywhere in $PYTHONPATH
+	$ gopy bind github.com/me/hello
+	2015/09/28 15:12:44 work: /tmp/gopy-655556935
 
- $ ls
- hello.so
+	$ ls
+	hello.so
 
- $ python2
- >>> import hello
- >>> dir(hello)
- ['Hello', '__doc__', '__file__', '__name__', '__package__']
- 
- >>> print hello.Hello("dotgo.io")
- hello "dotgo.io" from Go
+	$ python2
+	>>> import hello
+	>>> dir(hello)
+	['Hello', '__doc__', '__file__', '__name__', '__package__']
 
- >>> print hello.__doc__
- hello is a simple package
+	>>> print hello.Hello("dotgo.io")
+	hello "dotgo.io" from Go
 
-  
-* gopy - hello world - III
+	>>> print hello.__doc__
+	hello is a simple package
 
-- extracts the `Go` doc-strings, attachs them onto their `python` counterpart
-- creates a function, translates the `Go` native types into their `python` counterpart
+	 
+
+## gopy - hello world - III
+
+  - extracts the `Go` doc-strings, attachs them onto their `python` counterpart
+  - creates a function, translates the `Go` native types into their `python` counterpart
 
 Let's see what `gopy` has  actually generated:
 
-#.code _code/hello-cgo.go
+	$ ls /tmp/gopy-655556935
+	hello.c  hello.go  hello.h
 
- $ ls /tmp/gopy-655556935
- hello.c  hello.go  hello.h
- 
- $ cat /tmp/gopy-655556935/hello.go
- package main
+	$ cat /tmp/gopy-655556935/hello.go
+	package main
 
- [...]
+	[...]
 
- //export cgo_func_hello_Hello
- // cgo_func_hello_Hello wraps hello.Hello
- func cgo_func_hello_Hello(name string) (string) {
- 	_gopy_000 := hello.Hello(name)
- 	return _gopy_000
- }
+	//export cgo_func_hello_Hello
+	// cgo_func_hello_Hello wraps hello.Hello
+	func cgo_func_hello_Hello(name string) (string) {
+		_gopy_000 := hello.Hello(name)
+		return _gopy_000
+	}
 
-* gopy - hello world - IV
+## gopy - hello world - IV
 
- $ cat /tmp/gopy-655556935/hello.c
- [...]
+	$ cat /tmp/gopy-655556935/hello.c
+	[...]
 
- /* pythonization of: hello.Hello */
- static PyObject*
- cpy_func_hello_Hello(PyObject *self, PyObject *args) {
-        GoString c_name;
-        GoString c_gopy_ret;
-        
-        if (!PyArg_ParseTuple(args, "O&", cgopy_cnv_py2c_string, &c_name)) {
-                return NULL;
-        }
-        
-        c_gopy_ret = cgo_func_hello_Hello(c_name);
-        
-        return Py_BuildValue("O&", cgopy_cnv_c2py_string, &c_gopy_ret);
- }
+	/* pythonization of: hello.Hello */
+	static PyObject*
+	cpy_func_hello_Hello(PyObject *self, PyObject *args) {
+	       GoString c_name;
+	       GoString c_gopy_ret;
+	       
+	       if (!PyArg_ParseTuple(args, "O&", cgopy_cnv_py2c_string, &c_name)) {
+	               return NULL;
+	       }
+	       
+	       c_gopy_ret = cgo_func_hello_Hello(c_name);
+	       
+	       return Py_BuildValue("O&", cgopy_cnv_c2py_string, &c_gopy_ret);
+	}
 
+## gopy - other features (and missing features)
 
-* gopy - other features (and missing features)
+  - wraps named types (+ methods) into `python` classes
+  - translates the comma-error `Go` idiom into the equivalent `python` idiom (raises an `Exception`)
+  - slices and arrays implement the sequence protocol (but not yet subslices assignment)
+  - implements the buffer protocol for slices and arrays
 
-- wraps named types (+ methods) into `python` classes
-- translates the comma-error `Go` idiom into the equivalent `python` idiom (raises an `Exception`)
-- slices and arrays implement the sequence protocol (but not yet subslices assignment)
-- implements the buffer protocol for slices and arrays
+**Missing** **features:**
 
-*Missing* *features:*
+  - `maps` and `interfaces` aren't supported yet (except for `error`)
+  - functions/methods taking pointers to values are not supported yet
+  - implementing a `Go` interface from `python` isn't supported yet either
+  - channels are not supported yet
+  - packages exposing other packages in their API are not supported (yet?)
 
-- `maps` and `interfaces` aren't supported yet (except for `error`)
-- functions/methods taking pointers to values are not supported yet
-- implementing a `Go` interface from `python` isn't supported yet either
-- channels are not supported yet
-- packages exposing other packages in their API are not supported (yet?)
-
-* Conclusions
+## Conclusions
 
 Thanks to the simple rules and formalism of `Go` it is reasonnably easy to
 automate:
 
-- the extraction of the exported API
-- the generation of bindings to a (number of) language(s)
+  - the extraction of the exported API
+  - the generation of bindings to a (number of) language(s)
 
 `gopy` is released under `BSD-3` and accepts pull requests (eagerly!)
 Come join the fun of the complete world "Gomination" via `CPython`.
@@ -123,5 +121,4 @@ Come join the fun of the complete world "Gomination" via `CPython`.
 .link https://github.com/go-python/gopy/issues
 .link https://github.com/go-python/gopy/pulls
 
-A longer version of this talk is available [[http://talks.godoc.org/github.com/sbinet/talks/2015/20150929-gopy-lyon/gopy-lyon.slide][here]].
-
+A longer version of this talk is available [here](http://talks.godoc.org/github.com/sbinet/talks/2015/20150929-gopy-lyon/gopy-lyon.slide).

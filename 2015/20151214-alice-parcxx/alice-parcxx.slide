@@ -1,69 +1,69 @@
-Introduction to parallel programming
+# Introduction to parallel programming
 MRRTF, 2015/12/14
 
 Sebastien Binet
 CNRS/IN2P3/LPC
 binet@cern.ch
 
-* Disclaimer
+## Disclaimer
 
 I used to be a `C++` programmer, then a `python` programmer.
 
-Nowadays, I am a [[https://golang.org][Go]] programmer at heart, enjoying blazing fast compilation time, builtin concurrency constructs, easy installation and deployment, etc...
+Nowadays, I am a [Go](https://golang.org) programmer at heart, enjoying blazing fast compilation time, builtin concurrency constructs, easy installation and deployment, etc...
 
 I really learned parallel/concurrent programming with `Go`.
 My views on parallel programming with `C++` are thus somewhat skewed.
 
 .image figs/gopher.png
-.caption The Go mascott: a gopher
+The Go mascott: a gopher
 
-* Parallel programming
+## Parallel programming
 
 Parallel programming is hard.
 Parallel programming is harder in `C++`.
 
-Actually, why do we have to do *parallel* programming ?
+Actually, why do we have to do **parallel** programming ?
 
-* Moore's law
+## Moore's law
 
 .image figs/cpu-free-lunch.png _ 550
 
-* The hardware/software contract
+## The hardware/software contract
 
 .image figs/par-prog-old-days.png _ 850
 
-* 
+## 
 
 .image figs/par-prog-power.png _ 850
 
-* 
+## 
 
 .image figs/par-prog-cores.png _ 850
 
-* Many cores: we are all doing it
+## Many cores: we are all doing it
 
 .image figs/par-prog-hw.png _ 800
 
-* Hardware diversity: basic building blocks
+## Hardware diversity: basic building blocks
 
 .image figs/par-prog-building-blocks.png
 
-* Hardware diversity: combining building blocks
+## Hardware diversity: combining building blocks
 
 .image figs/par-prog-heterogeneous.png
 
-* Hardware diversity: CPUs
+## Hardware diversity: CPUs
 
 .image figs/par-prog-cpu.png _ 800
 
-* Parallel programming
+## Parallel programming
 
 Ok, so we have to do parallel programming to properly utilize our new
 hardware...
 
-Actually, are we really sure we want to do *parallel* programming ?
+Actually, are we really sure we want to do **parallel** programming ?
 
-* Concurrency vs Parallelism
+## Concurrency vs Parallelism
 
 _Concurrency:_ programming as the composition of independently executing processes/tasks.
 
@@ -71,144 +71,144 @@ _Parallelism:_ programming as the simultaneous execution of (possibly related) c
 
 .image figs/conc-vs-par.png 350 _
 
-* Concurrency vs Parallelism
+## Concurrency vs Parallelism
 
 Concurrency is about dealing with lots of things at once.
 Parallelism is about doing lots of things at once.
 
-Concurrency is about (program) *structure*.
-Parallelism is about (program) *execution*.
+Concurrency is about (program) **structure**.
+Parallelism is about (program) **execution**.
 
 .image figs/conc-vs-par-prog.png 350 _
 
-* Concurrency vs Parallelism
+## Concurrency vs Parallelism
 
 Concurrency and parallelism are related.
 Concurrency isn't parallelism (it's better!)
 
 Parallelizing an application is done by:
 
-- finding concurrency in the problem
-- exposing the concurrency in the source code
-- exploiting the exposed concurrency to complete the job in less time.
+  - finding concurrency in the problem
+  - exposing the concurrency in the source code
+  - exploiting the exposed concurrency to complete the job in less time.
 
 .image figs/conc-vs-par-decomp.png
 
-* Decomposition in parallel programs
+## Decomposition in parallel programs
 
 Every parallel program is based on concurrency
 i.e: tasks defined by an application that can run at the same time.
 
-*EVERY* parallel program requires a _task_decomposition_ and a _data_decomposition_:
+**EVERY** parallel program requires a _task decomposition_ and a _data decomposition_:
 
-- Task decomposition: break the application down into a set of tasks that can execute concurrently.
-- Data decomposition: How must the data be broken down into chunks and associated with threads/processes to make the parallel program run efficiently.
+  - Task decomposition: break the application down into a set of tasks that can execute concurrently.
+  - Data decomposition: How must the data be broken down into chunks and associated with threads/processes to make the parallel program run efficiently.
 
-* Goldilocks
+## Goldilocks
 
 Parallel approaches have to find the "sweet spot" between two extremes.
 
 Too fine grained:
 
-- Data: computation dominated by overhead
-- Tasks: context switching overhead
+  - Data: computation dominated by overhead
+  - Tasks: context switching overhead
 
 Too coarse grained:
 
-- Data: load balancing problems
-- Tasks: insufficient items to keep processes busy
+  - Data: load balancing problems
+  - Tasks: insufficient items to keep processes busy
 
-* Parallel programming: multi-process vs multi-threaded
+## Parallel programming: multi-process vs multi-threaded
 
 Multi-process:
 
-- resource requirements are multiplied w/ nbr of process instances
-- (clever) use of `fork(2)` can mitigate this issue (but not in a `MT` environment)
-- one process can not corrupt the memory of another process
-- overhead of pushing data from one process to the other
+  - resource requirements are multiplied w/ nbr of process instances
+  - (clever) use of `fork(2)` can mitigate this issue (but not in a `MT` environment)
+  - one process can not corrupt the memory of another process
+  - overhead of pushing data from one process to the other
 
 Multi-threaded:
 
-- small context switch times (wrt an OS' process)
-- automatic sharing of many hardware resources (memory, fds, sockets...)
-- thread-safety of external libraries?
-- one thread can corrupt another thread
+  - small context switch times (wrt an OS' process)
+  - automatic sharing of many hardware resources (memory, fds, sockets...)
+  - thread-safety of external libraries?
+  - one thread can corrupt another thread
 
 `FairRoot` design can cater for both (`MP` _via_ `ZeroMQ` or `NanoMQ` message queues)
 
-* Multi-threading & Multi-processing in a C++ world
+## Multi-threading & Multi-processing in a C++ world
 
 Modern architectures impose massive challenges on programmability in the context of performance portability.
 
-- massive increase in on-node parallelism
-- deep memory hierarchies
+  - massive increase in on-node parallelism
+  - deep memory hierarchies
 
-Only *portable* parallelization solution for `C++` programmers (today?): *OpenMP* & *MPI*
+Only **portable** parallelization solution for `C++` programmers (today?): **OpenMP** & **MPI**
 
-- hugely successful for years
-- widely used and supported
-- simple use for simple cases
-- very portable
-- highly optimized
+  - hugely successful for years
+  - widely used and supported
+  - simple use for simple cases
+  - very portable
+  - highly optimized
 
 _Which_ `C++` BTW ?
 
-* C++ timeline
+## C++ timeline
 
 `C++` is a wide and complex language.
-Know your `C++` and the (subset of?) `C++` you are *allowed* to write!
+Know your `C++` and the (subset of?) `C++` you are **allowed** to write!
 
-- `C++03`?
-- `C++11`?
-- `C++14`?
+  - `C++03`?
+  - `C++11`?
+  - `C++14`?
 
 .image figs/wg21-timeline.png 300 _
 
-* Parallelism in C++
+## Parallelism in C++
 
 `C++11` introduced lower level abstractions:
 
-- `std::thread`, `std::mutex`, `std::future`, ...
-- fairly limited, more is needed
-- `C++` needs stronger support for higher-level parallelism
+  - `std::thread`, `std::mutex`, `std::future`, ...
+  - fairly limited, more is needed
+  - `C++` needs stronger support for higher-level parallelism
 
 Several proposals to the Standardization Committee are accepted or under consideration:
 
-- Technical Specification: Concurrency
-- Technical Specification: Parallelism
-- Other smaller proposals: resumable functions, task regions, executors
+  - Technical Specification: Concurrency
+  - Technical Specification: Parallelism
+  - Other smaller proposals: resumable functions, task regions, executors
 
-* Parallelism in C++
+## Parallelism in C++
 
 Currently, there is no overarching vision related to higher-level parallelism
 
-- goal is to standardize on a "big story" by 2020
-- no need for OpenMP, OpenACC, OpenCL, etc...
+  - goal is to standardize on a "big story" by 2020
+  - no need for OpenMP, OpenACC, OpenCL, etc...
 
 But for the moment, `C++` programmers are stuck with `C++11/14`...
 
-* Interlude: memory model & tools
+## Interlude: memory model & tools
 
-* Memory model
+## Memory model
 
 With `C++11`, finally `C++` has a memory model that contemplates a multi-threaded execution of a program.
 
 A thread is a single flow of control within a program
 
-- Every thread can potentially access every object and function in the program
-- The interleaving of each thread's instructions is undefined
+  - Every thread can potentially access every object and function in the program
+  - The interleaving of each thread's instructions is undefined
 
 .image figs/thread-exec-race.png
 
-* Memory model
+## Memory model
 
-`C++` guarantees that two threads can update and access *separate* memory locations without interfering with each other.
+`C++` guarantees that two threads can update and access **separate** memory locations without interfering with each other.
 
-- For all other situations updates and accesses have to be properly synchronized (_ie:_ atomics, locks, memory fences)
-- If updates and accesses to the same location by multiple threads are not properly synchronized, there is a data race (_ie:_ undefined behavior)
-- Data races can be made visible by transformations applied by the compiler or by the processor for performance reasons
+  - For all other situations updates and accesses have to be properly synchronized (_ie:_ atomics, locks, memory fences)
+  - If updates and accesses to the same location by multiple threads are not properly synchronized, there is a data race (_ie:_ undefined behavior)
+  - Data races can be made visible by transformations applied by the compiler or by the processor for performance reasons
 
-* Tools to support parallel programming development/debugging
+## Tools to support parallel programming development/debugging
 
 .link http://valgrind.org/docs/manual/drd-manual.html
 .link http://valgrind.org/docs/manual/hg-manual.html
@@ -216,248 +216,247 @@ A thread is a single flow of control within a program
 
 Detect races at runtime:
 
-- needs a test case and workload that triggers a race
-- no false positive, but can not detect all possible races
+  - needs a test case and workload that triggers a race
+  - no false positive, but can not detect all possible races
 
 Needs a recompilation (`TSan`), (dramatic) increase of resources requirements at
 runtime (CPU, VMem) b/c of code instrumentation and bookkeeping.
 
-* C++ parallel programming: building blocks
+## C++ parallel programming: building blocks
 
-* C++11 std::thread
+## C++11 std::thread
 
 `C++11` (finally!) standardized threads
 
-- `std::thread` is now part of the standard `C++` library
-- `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
+  - `std::thread` is now part of the standard `C++` library
+  - `std::thread` is an abstraction and maps to local platform threads (`POSIX`, `Windows(TM)`, ...)
 
-* C++11 std::thread
+## C++11 std::thread
 
 .code code/hello-par.cxx
 
- $> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
- $> ./hello-par
- ** inside thread 139800850654976!
- 
-* C++11 std::thread - avoiding errors
+	$> g++ -o hello-par --std=c++11 -pthread hello-par.cxx
+	$> ./hello-par
+	** inside thread 139800850654976!
+
+## C++11 std::thread - avoiding errors
 
 .code code/hello-2.cxx
 
-*(1)* Thread function must do *exception*handling*: unhandled exception => program termination
+**(1)** Thread function must do **exception handling**: unhandled exception => program termination
 
-*(2)* Must join with _thread_ *before* handle goes out of scope, otherwise:
+**(2)** Must join with _thread_ **before** handle goes out of scope, otherwise:
 program termination.
 
-* Programming style
+## Programming style
 
-- Old school: thread functions (what we just saw)
-- Middle school: function objects (functors)
+  - Old school: thread functions (what we just saw)
+  - Middle school: function objects (functors)
 
 .code code/par-functors.cxx
 
-* Programming style
+## Programming style
 
-- New school: `C++11` lambda functions (aka anonymous functions)
+  - New school: `C++11` lambda functions (aka anonymous functions)
 
 It's all about trade-offs...
 
-*Lambda*functions:*
+**Lambda functions:**
 
-- easier and more readable (once your brained has been trained)
-- code remains inline
-- potentially more *dangerous* (`[&]` captures everything by reference)
+  - easier and more readable (once your brained has been trained)
+  - code remains inline
+  - potentially more **dangerous** (`[&]` captures everything by reference)
 
-*Functions:*
+**Functions:**
 
-- more efficient: lambdas involve class, function objects
-- potentially *safer*: requires explicit variable scoping
-- more cumbersome
+  - more efficient: lambdas involve class, function objects
+  - potentially **safer**: requires explicit variable scoping
+  - more cumbersome
 
-* Example: matrix multiply
+## Example: matrix multiply
 
 .image figs/matrix-multiply.png
 
-* Sequential version
+## Sequential version
 
 .image figs/matrix-multiply-seq.png
 
-* Structured (fork-join) parallelism
+## Structured (fork-join) parallelism
 
 A common pattern when creating multiple threads 
 
 .image figs/matrix-multiply-fork-join.png
 
-* Parallel solution
+## Parallel solution
 
 .image figs/matrix-multiply-par.png _ 850
 
-* Types of parallelism
+## Types of parallelism
 
 Most common types:
 
-- Data
-- Task
-- Embarrassingly parallel
-- Dataflow
+  - Data
+  - Task
+  - Embarrassingly parallel
+  - Dataflow
 
-* Data parallelism 
+## Data parallelism
 
 .image figs/par-types-data.png
 
-* Task parallelism
+## Task parallelism
 
 .image figs/par-types-task.png
 
-* Embarrassingly parallel
+## Embarrassingly parallel
 
 .image figs/par-types-emb-par.png
 
-* Dataflow
+## Dataflow
 
 .image figs/par-types-dataflow.png
 
-* C++ concurrency features
+## C++ concurrency features
 
 .image figs/cxx-features.png
 
-* Futures
+## Futures
 
-*Futures* provide a higher level of abstraction
+**Futures** provide a higher level of abstraction
 
-- you start an asynchronous/parallel operation
-- you are returned a handle to wait for the result
-- thread creation, join and exceptions are handled for you
+  - you start an asynchronous/parallel operation
+  - you are returned a handle to wait for the result
+  - thread creation, join and exceptions are handled for you
 
-* std::async + std::future
+## std::async + std::future
 
 .image figs/future-async.png
 
-* async operations
+## async operations
 
 .image figs/future-async-2.png
 
-* (no) Conclusions
+## (no) Conclusions
 
 That's all for today.
 Many more to cover, though:
 
-- SIMD
-- Thread Building Blocks (`Intel` `TBB`)
-- `FPGA`
-- (auto-)vectorization
-- `OpenCL`/`OpenMP`/`OpenACC`
-- ...
+  - SIMD
+  - Thread Building Blocks (`Intel` `TBB`)
+  - `FPGA`
+  - (auto-)vectorization
+  - `OpenCL / OpenMP / OpenACC`
+  - ...
 
-* Parallel programming: references
+## Parallel programming: references
 
 .link https://web2.infn.it/esc15
 .link http://concur.rspace.googlecode.com/hg/talk/concur.html
 .link http://sc13.supercomputing.org/sites/default/files/prog105/prog105.pdf
 
-
-* FairMQ + docker
+## FairMQ + docker
 
 Running the `FairMQ` example 2 with `docker` (you need 3 terminals):
 
- term-1> docker run -it --rm --name=ex2-fair hepsw/alice-fair bash
- term-2> docker exec -it ex2-fair bash
- term-3> docker exec -it ex2-fair bash
+	term-1> docker run -it --rm --name=ex2-fair hepsw/alice-fair bash
+	term-2> docker exec -it ex2-fair bash
+	term-3> docker exec -it ex2-fair bash
 
-In `term-1`, create `/data/ex2-sample-process-sink.json` from [[https://github.com/FairRootGroup/FairRoot/blob/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json][ex2-sample-process-sink.json]]:
+In `term-1`, create `/data/ex2-sample-process-sink.json` from [ex2-sample-process-sink.json](https://github.com/FairRootGroup/FairRoot/blob/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json):
 
- term-1> curl -L \
-  https://raw.githubusercontent.com/FairRootGroup/FairRoot/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json \
-  > /data/ex2-sampler-processor-sink.json
+	term-1> curl -L \
+	 https://raw.githubusercontent.com/FairRootGroup/FairRoot/master/examples/MQ/2-sampler-processor-sink/ex2-sampler-processor-sink.json \
+	 > /data/ex2-sampler-processor-sink.json
 
 Then:
 
- term-1> ex2-sampler --id sampler1 \
-         --config-json-file /data/ex2-sampler-processor-sink.json
- term-2> ex2-sink --id sink1 \
-         --config-json-file /data/ex2-sampler-processor-sink.json
- term-3> ex2-processor --id processor2
-         --config-json-file /data/ex2-sampler-processor-sink.json
+	term-1> ex2-sampler --id sampler1 \
+	        --config-json-file /data/ex2-sampler-processor-sink.json
+	term-2> ex2-sink --id sink1 \
+	        --config-json-file /data/ex2-sampler-processor-sink.json
+	term-3> ex2-processor --id processor2
+	        --config-json-file /data/ex2-sampler-processor-sink.json
 
-* FairMQ - term-1
+## FairMQ - term-1
 
- term-1> ex2-sampler --id sampler1 \
-         --config-json-file /data/ex2-sampler-processor-sink.json 
- [16:22:24][STATE] Entering FairMQ state machine
- [...]
- [16:22:24][STATE] Entering INITIALIZING DEVICE state
- [16:22:24][DEBUG] Validating channel "data-out[0]"... VALID
- [16:22:24][DEBUG] Initializing channel data-out[0] (push)
- [16:22:24][DEBUG] Binding channel data-out[0] on tcp://*:5555
- [16:22:25][STATE] Entering DEVICE READY state
- [16:22:25][STATE] Entering INITIALIZING TASK state
- [16:22:25][STATE] Entering READY state
- [16:22:25][STATE] Entering RUNNING state
- [16:22:25][INFO] DEVICE: Running...
- [16:22:26][INFO] Sending "Hello"
-  
-* FairMQ - term-2
+	term-1> ex2-sampler --id sampler1 \
+	        --config-json-file /data/ex2-sampler-processor-sink.json 
+	[16:22:24][STATE] Entering FairMQ state machine
+	[...]
+	[16:22:24][STATE] Entering INITIALIZING DEVICE state
+	[16:22:24][DEBUG] Validating channel "data-out[0]"... VALID
+	[16:22:24][DEBUG] Initializing channel data-out[0] (push)
+	[16:22:24][DEBUG] Binding channel data-out[0] on tcp://*:5555
+	[16:22:25][STATE] Entering DEVICE READY state
+	[16:22:25][STATE] Entering INITIALIZING TASK state
+	[16:22:25][STATE] Entering READY state
+	[16:22:25][STATE] Entering RUNNING state
+	[16:22:25][INFO] DEVICE: Running...
+	[16:22:26][INFO] Sending "Hello"
+	 
 
- term-2> ex2-sink --id sink1 --config-json-file /data/ex2-sampler-processor-sink.json 
- [16:24:33][STATE] Entering FairMQ state machine
- [...]
- [16:24:33][STATE] Entering INITIALIZING DEVICE state
- [16:24:33][DEBUG] Validating channel "data-in[0]"... VALID
- [16:24:33][DEBUG] Initializing channel data-in[0] (pull)
- [16:24:33][DEBUG] Binding channel data-in[0] on tcp://*:5556
- [16:24:34][STATE] Entering DEVICE READY state
- [16:24:34][STATE] Entering INITIALIZING TASK state
- [16:24:34][STATE] Entering READY state
- [16:24:34][STATE] Entering RUNNING state
- [16:24:34][INFO] DEVICE: Running...
+## FairMQ - term-2
 
-* FairMQ - term-3
+	term-2> ex2-sink --id sink1 --config-json-file /data/ex2-sampler-processor-sink.json 
+	[16:24:33][STATE] Entering FairMQ state machine
+	[...]
+	[16:24:33][STATE] Entering INITIALIZING DEVICE state
+	[16:24:33][DEBUG] Validating channel "data-in[0]"... VALID
+	[16:24:33][DEBUG] Initializing channel data-in[0] (pull)
+	[16:24:33][DEBUG] Binding channel data-in[0] on tcp://*:5556
+	[16:24:34][STATE] Entering DEVICE READY state
+	[16:24:34][STATE] Entering INITIALIZING TASK state
+	[16:24:34][STATE] Entering READY state
+	[16:24:34][STATE] Entering RUNNING state
+	[16:24:34][INFO] DEVICE: Running...
 
- term-3> ex2-processor --id processor2 --config-json-file /data/ex2-sampler-processor-sink.json 
- [16:26:30][STATE] Entering FairMQ state machine
- [...]
- [16:26:30][STATE] Entering INITIALIZING DEVICE state
- [16:26:30][DEBUG] Validating channel "data-out[0]"... VALID
- [16:26:30][DEBUG] Initializing channel data-out[0] (push)
- [16:26:30][DEBUG] Connecting channel data-out[0] to tcp://localhost:5556
- [16:26:30][DEBUG] Validating channel "data-in[0]"... VALID
- [16:26:30][DEBUG] Initializing channel data-in[0] (pull)
- [16:26:30][DEBUG] Connecting channel data-in[0] to tcp://localhost:5555
- [16:26:31][STATE] Entering DEVICE READY state
- [16:26:31][STATE] Entering INITIALIZING TASK state
- [16:26:31][STATE] Entering READY state
- [16:26:31][STATE] Entering RUNNING state
- [16:26:31][INFO] DEVICE: Running...
- [16:26:31][INFO] Received data, processing...
- [16:26:31][INFO] Received data, processing...
- [16:26:32][INFO] Received data, processing...
- [16:26:33][INFO] Received data, processing...
- [16:26:34][INFO] Received data, processing...
- ^C
- [16:26:35][INFO] Caught signal 2
- [16:26:35][DEBUG] Closed all sockets!
- [16:26:35][INFO] Exiting.
+## FairMQ - term-3
 
-* FairMQ
+	term-3> ex2-processor --id processor2 --config-json-file /data/ex2-sampler-processor-sink.json 
+	[16:26:30][STATE] Entering FairMQ state machine
+	[...]
+	[16:26:30][STATE] Entering INITIALIZING DEVICE state
+	[16:26:30][DEBUG] Validating channel "data-out[0]"... VALID
+	[16:26:30][DEBUG] Initializing channel data-out[0] (push)
+	[16:26:30][DEBUG] Connecting channel data-out[0] to tcp://localhost:5556
+	[16:26:30][DEBUG] Validating channel "data-in[0]"... VALID
+	[16:26:30][DEBUG] Initializing channel data-in[0] (pull)
+	[16:26:30][DEBUG] Connecting channel data-in[0] to tcp://localhost:5555
+	[16:26:31][STATE] Entering DEVICE READY state
+	[16:26:31][STATE] Entering INITIALIZING TASK state
+	[16:26:31][STATE] Entering READY state
+	[16:26:31][STATE] Entering RUNNING state
+	[16:26:31][INFO] DEVICE: Running...
+	[16:26:31][INFO] Received data, processing...
+	[16:26:31][INFO] Received data, processing...
+	[16:26:32][INFO] Received data, processing...
+	[16:26:33][INFO] Received data, processing...
+	[16:26:34][INFO] Received data, processing...
+	^C
+	[16:26:35][INFO] Caught signal 2
+	[16:26:35][DEBUG] Closed all sockets!
+	[16:26:35][INFO] Exiting.
+
+## FairMQ
 
 When `processor2` is run, the chain is complete and processing can start:
 
- [term-1]
- [16:22:25][INFO] DEVICE: Running...
- [16:22:26][INFO] Sending "Hello"
- [16:26:31][INFO] Sending "Hello"
- [16:26:32][INFO] Sending "Hello"
- [16:26:33][INFO] Sending "Hello"
- [16:26:34][INFO] Sending "Hello"
- [16:26:35][INFO] Sending "Hello"
+	[term-1]
+	[16:22:25][INFO] DEVICE: Running...
+	[16:22:26][INFO] Sending "Hello"
+	[16:26:31][INFO] Sending "Hello"
+	[16:26:32][INFO] Sending "Hello"
+	[16:26:33][INFO] Sending "Hello"
+	[16:26:34][INFO] Sending "Hello"
+	[16:26:35][INFO] Sending "Hello"
 
- [term-2]
- [16:26:31][INFO] Received message: "Hello (modified by processor2)"
- [16:26:31][INFO] Received message: "Hello (modified by processor2)"
- [16:26:32][INFO] Received message: "Hello (modified by processor2)"
- [16:26:33][INFO] Received message: "Hello (modified by processor2)"
- [16:26:34][INFO] Received message: "Hello (modified by processor2)"
- 
-- 6 "Hello" data packets are send over the wire
-- 5 packets are processed by `processor2` (before `^C` was hit)
-- 5 packets are displayed by `sink1`
+	[term-2]
+	[16:26:31][INFO] Received message: "Hello (modified by processor2)"
+	[16:26:31][INFO] Received message: "Hello (modified by processor2)"
+	[16:26:32][INFO] Received message: "Hello (modified by processor2)"
+	[16:26:33][INFO] Received message: "Hello (modified by processor2)"
+	[16:26:34][INFO] Received message: "Hello (modified by processor2)"
 
+  - 6 "Hello" data packets are send over the wire
+  - 5 packets are processed by `processor2` (before `^C` was hit)
+  - 5 packets are displayed by `sink1`

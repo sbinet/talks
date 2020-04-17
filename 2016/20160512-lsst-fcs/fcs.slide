@@ -1,4 +1,4 @@
-FCS && Motor's testbench
+# FCS && Motor's testbench
 Meeting LSST-LPC, 2016-05-12
 
 Sébastien Binet
@@ -6,48 +6,47 @@ CNRS/IN2P3/LPC
 binet@clermont.in2p3.fr
 
 
-* FCS - LPC testbench
+
+## FCS - LPC testbench
 
 Original plan: 
 
-- direct integration with `CCS/FCS` `Java` framework,
-- commands to motors issued over `CANbus` via `PC-104`
+  - direct integration with `CCS/FCS` `Java` framework,
+  - commands to motors issued over `CANbus` via `PC-104`
 
 .image figs/orig-ccs-fcs.png
 
-
-* fcs-lpc-motor-ctl
+## fcs-lpc-motor-ctl
 
 New plan:
 
-- small, statically compiled, self-contained, easy to install application: [[https://github.com/go-lsst/fcs-lpc-motor-ctl][fcs-lpc-motor-ctl]]
+  - small, statically compiled, self-contained, easy to install application: [fcs-lpc-motor-ctl](https://github.com/go-lsst/fcs-lpc-motor-ctl)
 
-    $ go get github.com/go-lsst/fcs-lpc-motor-ctl
-    $ ./app-run
-    2016/05/10 09:49:32 server created at 134.158.120.94:5555...
-    2016/05/10 09:49:49 waiting for commands...
-    2016/05/10 09:50:00 received: {type="ctl" token="b8e505b1-1ff5-42a2-bbe1-f16a032910fd" name="ready" value=0 cmds=""}
-    2016/05/10 09:50:00 sending command [00.08.015] to motor...
+	$ go get github.com/go-lsst/fcs-lpc-motor-ctl
+	$ ./app-run
+	2016/05/10 09:49:32 server created at 134.158.120.94:5555...
+	2016/05/10 09:49:49 waiting for commands...
+	2016/05/10 09:50:00 received: {type="ctl" token="b8e505b1-1ff5-42a2-bbe1-f16a032910fd" name="ready" value=0 cmds=""}
+	2016/05/10 09:50:00 sending command [00.08.015] to motor...
 
+  - commands to motors issued over `TCP/IP` via the (industry standard) `ModBus` protocol
+  - `fcs-lpc-motors-ctl` is a web server
+  - browser is the `GUI`
+  - interface is served at [clrbinetsrv.in2p3.fr:5555](http://clrbinetsrv.in2p3.fr:5555) (for production)
 
-- commands to motors issued over `TCP/IP` via the (industry standard) `ModBus` protocol
-- `fcs-lpc-motors-ctl` is a web server
-- browser is the `GUI`
-- interface is served at [[http://clrbinetsrv.in2p3.fr:5555]] (for production)
+## fcs-lpc-motor-ctl -- Features
 
-* fcs-lpc-motor-ctl -- Features
+  - authentication (simple login/passwd)
+  - motors monitoring (db persistency)
+  - basic point-n-click interface for common commands
+  - motor scripting (sending a script of commands)
 
-- authentication (simple login/passwd)
-- motors monitoring (db persistency)
-- basic point-n-click interface for common commands
-- motor scripting (sending a script of commands)
+## fcs-lpc-motor-ctl -- TODO
 
-* fcs-lpc-motor-ctl -- TODO
-
-- test `fcs-lpc-motor-ctl` @ `IRSTEA` (network, commands, heart-beat, ...)
-- re-test webcam video flux (bandwidth OK?)
-- logging users' commands (into another db)
-- monitoring data mining (separate app)
-- implementation of a scripts' toolkit (`move-to`, `calibrate-position`, `go-home`, ...)
-- debugging, debugging, performances, ...
-- polishing (refactorisation of scripts as `GUI` elements/buttons)
+  - test `fcs-lpc-motor-ctl` @ `IRSTEA` (network, commands, heart-beat, ...)
+  - re-test webcam video flux (bandwidth OK?)
+  - logging users' commands (into another db)
+  - monitoring data mining (separate app)
+  - implementation of a scripts' toolkit (`move-to`, `calibrate-position`, `go-home`, ...)
+  - debugging, debugging, performances, ...
+  - polishing (refactorisation of scripts as `GUI` elements/buttons)

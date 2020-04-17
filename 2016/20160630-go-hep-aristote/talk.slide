@@ -1,98 +1,80 @@
-Go in High Energy Physics & Cosmology: computing, monitoring and concurrency
+# Go in High Energy Physics & Cosmology: computing, monitoring and concurrency
 Séminaire Aristote, 2016-06-30
 
 Sébastien Binet
 CNRS/IN2P3/LPC
 
-#* Go in High Energy Physics (HEP)
-#
-#.image _figs/mad-scientist-gopher.jpg
 
 
-* HEP (High Energy Physics)
+## HEP (High Energy Physics)
 
 Field of physics which studies the fundamental laws of Nature and the
 properties of the constituents of matter.
 
 Many labs working on HEP around the world. 
-But, perhaps one of the most famous ones is [[http://cern.ch][CERN]].
+But, perhaps one of the most famous ones is [CERN](http://cern.ch).
 
-* CERN
+## CERN
 
 .image _figs/cernaerial.jpg 500 700
 
-
-* CERN-LHC
+## CERN-LHC
 
 LHC: Large Hadron Collider.
 A proton-proton collider of 27km of circumference.
 
 .image _figs/cernring-l.jpg 450 700
 
-
-* LHC tunnel and one of the ~1200 dipole magnets
+## LHC tunnel and one of the ~1200 dipole magnets
 
 .image _figs/lhc-magnet.jpg 500 700
 
-
-* ATLAS detector (44m x 25m)
+## ATLAS detector (44m x 25m)
 
 .image _figs/atlas-detector.png 600 800
 
-
-* ATLAS installation
+## ATLAS installation
 
 .image _figs/pit.png
 
-
-* Results
+## Results
 
 .image _figs/higgs-to-2e2mu-candidate.png 500 700
 
-
-* High level view of the data pipeline
+## High level view of the data pipeline
 
 Data is collected at the 4 interaction points
 
-- collisions every 25 ns
-- ~1 Mb (compressed) / collision
-- ~10 Pb/year of raw data
+  - collisions every 25 ns
+  - ~1 Mb (compressed) / collision
+  - ~10 Pb/year of raw data
 
 Raw data is then filtered to only keep "interesting" events (collisions of protons)
 
+## Main steps of data analysis/massaging
 
-* Main steps of data analysis/massaging
-
-#Monte-Carlo techniques
-
-- *Generation:* production of a single physics event (_e.g.:_ a collision and its decay products)
-- *Simulation:* modelling interactions between particles and detector material
-- *Reconstruction:* building physics objects (electrons, photons, ...) from the detector signals (energy deposits)
-- *Analysis:* testing hypotheses against the reconstruction output
+  - **Generation:** production of a single physics event (_e.g.:_ a collision and its decay products)
+  - **Simulation:** modelling interactions between particles and detector material
+  - **Reconstruction:** building physics objects (electrons, photons, ...) from the detector signals (energy deposits)
+  - **Analysis:** testing hypotheses against the reconstruction output
 
 .image _figs/schema-general-flux-all-en.png 300 300
 
-#* 
-#
-#.image _figs/data-flux-summary-all.png 400 700
+## Software in HEP
 
+Historically, software in HEP has been written in **FORTRAN-77**.
 
-* Software in HEP
+  - HEP people even wrote compilers
+  - HEP community even defined a few extensions (**MORTRAN**)
 
-Historically, software in HEP has been written in *FORTRAN-77*.
+Mid-90's: migration to **C++**
 
-- HEP people even wrote compilers
-- HEP community even defined a few extensions (*MORTRAN*)
+Mid-2000's: **Python** gained tremendous mindshare 
 
-Mid-90's: migration to *C++*
+  - first thru the steering of **C++** binaries
+  - then as complete analyses gluing **C++** libraries together
 
-Mid-2000's: *Python* gained tremendous mindshare 
-
-- first thru the steering of *C++* binaries
-- then as complete analyses gluing *C++* libraries together
-
-
-* Software in HEP - some numbers
+## Software in HEP - some numbers
 
 An LHC experiment (_e.g._ ATLAS, CMS) is ~3000 physicists but only a
 fraction of those is developing code.
@@ -101,169 +83,152 @@ Reconstruction frameworks grew from ~3M SLOC to ~5M
 
 Summing over all HEP software stack for e.g. ATLAS:
 
-- event generators: ~1.4M SLOC (C++, FORTRAN-77)
-- I/O libraries ~1.7M SLOC (C++)
-- simulation libraries ~1.2M SLOC (C++)
-- reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [[http://acode-browser.usatlas.bnl.gov/lxr/source/][ATLAS code]]? [[https://github.com/cms-sw/cmssw][CMS code]]?)
+  - event generators: ~1.4M SLOC (C++, FORTRAN-77)
+  - I/O libraries ~1.7M SLOC (C++)
+  - simulation libraries ~1.2M SLOC (C++)
+  - reconstruction framework ~5M SLOC (C++) + steering/configuration (~1M SLOC python) (want to have a look at the [ATLAS code](http://acode-browser.usatlas.bnl.gov/lxr/source/)? [CMS code](https://github.com/cms-sw/cmssw)?)
 
+**GCC:** ~7M SLOC
 
+**Linux** **kernel** **3.6:** 15.9M SLOC
 
-
-*GCC:* ~7M SLOC
-
-*Linux* *kernel* *3.6:* 15.9M SLOC
-
-* People committing code to VCS per month
+## People committing code to VCS per month
 
 Wide variety of skill level
 Large amount of churn
 Once the physics data is pouring, people go and do physics instead of software
 
-
 .image _figs/cmssw-commits.png 400 600
 
-
-* Software developers
+## Software developers
 
 ~300 active developers (per experiment)
 
 ~1000 different developers integrated over the lifetime of a single LHC experiment.
 
-- few "real" s/w experts
-- some physicists with strong skill set in s/w
-- many with some experience in s/w development
-- some with *no* experience in s/w development
+  - few "real" s/w experts
+  - some physicists with strong skill set in s/w
+  - many with some experience in s/w development
+  - some with **no** experience in s/w development
 
 A multi-timezone environment
 
-- Europe, North-America, Japan, Russia
+  - Europe, North-America, Japan, Russia
 
 Many communities (core s/w people, generators, simulation, ...)
 
 Development and infrastructures usually CERN-centric
 
-Heavily Linux based ([[http://cern.ch/linux][Scientific Linux CERN]])
+Heavily Linux based ([Scientific Linux CERN](http://cern.ch/linux))
 
-
-* Software development cycle
+## Software development cycle
 
 VCS (CVS, then SVN. GIT: almost there)
 
 Nightlies (Jenkins or homegrown solution)
 
-- need a sizeable cluster of build machines (distcc, ccache, ...)
-- builds the framework stack in ~8h
-- produces ~2000 shared libraries
-- installs them on AFS (also creates RPMs and tarballs)
+  - need a sizeable cluster of build machines (distcc, ccache, ...)
+  - builds the framework stack in ~8h
+  - produces ~2000 shared libraries
+  - installs them on AFS (also creates RPMs and tarballs)
 
 Devs can then test and develop off the nightly _via_ AFS
 
 Every 6 months or so a new production release is cut, validated (then patched) and deployed on the World Wide LHC Computing Grid (WLCG).
 
-Release size: *~5Gb*
+Release size: **~5Gb**
 
-- binaries, libraries (externals+framework stack)
-- extra data (sqlite files, physics processes' modelisation data, ...)
+  - binaries, libraries (externals+framework stack)
+  - extra data (sqlite files, physics processes' modelisation data, ...)
 
-
-* Software runtime ?
+## Software runtime ?
 
 Big science, big data, big software, big numbers
 
-- ~1min to initialize the application
-- loading >500 shared libraries
-- connecting to databases (detector description, geometry, ...)
-- instantiating ~2000 C++ components
-- 2Gb/4Gb memory footprint per process
+  - ~1min to initialize the application
+  - loading >500 shared libraries
+  - connecting to databases (detector description, geometry, ...)
+  - instantiating ~2000 C++ components
+  - 2Gb/4Gb memory footprint per process
 
-* (obligatory xkcd reference)
+## (obligatory xkcd reference)
 
 .image _figs/xkcd-compiling.png 550 550
 
-
-* 
+## 
 
 We learn to love hating our framework. (every step of the way)
 
 And even more so in the future:
 
-- work to make our software stack thread-safe
-- or at least parts of it multithread friendly to harness multicore machines
-- quite a lot of fun ahead
+  - work to make our software stack thread-safe
+  - or at least parts of it multithread friendly to harness multicore machines
+  - quite a lot of fun ahead
 
+## Remember Go ?
 
-* Remember Go ?
+  - compiles quickly (no warnings, imports)
+  - enforces coherent coding rules (across projects)
+  - builtin test/benchmark/documentation facilities
+  - deploys easily, cross-compiles easily
+  - installs easily (also 3rd-party packages: _"go get"_)
+  - fast to pick up, not as complicated as **C++**
+  - builtin reflection system
+  - builtin (de)serialization capabilities
+  - concurrency support
+  - garbage collected
 
-- compiles quickly (no warnings, imports)
-- enforces coherent coding rules (across projects)
-- builtin test/benchmark/documentation facilities
-- deploys easily, cross-compiles easily
-- installs easily (also 3rd-party packages: _"go_get"_)
-- fast to pick up, not as complicated as *C++*
-- builtin reflection system
-- builtin (de)serialization capabilities
-- concurrency support
-- garbage collected
+**Perfect** **match** for many HEP use cases.
 
+## Migrating to Go ? (evil plan for (HEP) world domination)
 
-*Perfect* *match* for many HEP use cases.
+Migrating ~5M SLOC of C++ code to Go, during data taking, **unfortunately**, won't fly.
 
+Creating new applications for data massaging or post-processing **might**.
 
-* Migrating to Go ? (evil plan for (HEP) world domination)
-
-Migrating ~5M SLOC of C++ code to Go, during data taking, *unfortunately*, won't fly.
-
-Creating new applications for data massaging or post-processing *might*.
-
-Creating a new concurrent and parallel framework for the next accelerator *might*.
+Creating a new concurrent and parallel framework for the next accelerator **might**.
 
 Need to build a critical mass of Go HEP enthusiasts
 
-
 So far:
 
-- building the packages to read/write data in HEP formats (see under [[http://github.com/go-hep][go-hep]])
-- built a proof of concept of a concurrent framework: [[http://github.com/go-hep/gaudi-fwk][go-hep/gaudi-fwk]]
-- now building the real thing [[http://github.com/go-hep/fwk][go-hep/fwk]]
-- building a physics simulation detector app on top of go-hep/fwk: [[http://github.com/go-hep/fads][go-hep/fads]]
-- building a package of data analysis facilities
+  - building the packages to read/write data in HEP formats (see under [go-hep](http://github.com/go-hep))
+  - built a proof of concept of a concurrent framework: [go-hep/gaudi-fwk](http://github.com/go-hep/gaudi-fwk)
+  - now building the real thing [go-hep/fwk](http://github.com/go-hep/fwk)
+  - building a physics simulation detector app on top of go-hep/fwk: [go-hep/fads](http://github.com/go-hep/fads)
+  - building a package of data analysis facilities
 
-
-* Experience so far
+## Experience so far
 
 Wrapping `C++` libraries (via a C-shim) with `cgo` is ~OK
 
-- time consuming (no surprise)
-- as with `Python`, you don't want to cross language boundaries too frequently (perfs!)
-- using the `SWIG` support wasn't possible (because of some `C++` constructs not supported by `SWIG` 's parser)
+  - time consuming (no surprise)
+  - as with `Python`, you don't want to cross language boundaries too frequently (perfs!)
+  - using the `SWIG` support wasn't possible (because of some `C++` constructs not supported by `SWIG` 's parser)
 
-
-* Experience so far
+## Experience so far
 
 Experience pre-Go-1.5: No shared libraries.
 
-- plugins system (heavily used in our reconstruction frameworks) use shared libraries
-- no, funneling data through some IPC won't fly (for ATLAS use case)
-- actually not a limitation: re-compile on the fly, fork-exec (and still faster than booting `Python` VM + loading shared libraries, plus you get a static binary)
+  - plugins system (heavily used in our reconstruction frameworks) use shared libraries
+  - no, funneling data through some IPC won't fly (for ATLAS use case)
+  - actually not a limitation: re-compile on the fly, fork-exec (and still faster than booting `Python` VM + loading shared libraries, plus you get a static binary)
 
 now, with `Go` > `1.5` (August-2015): shared libraries are here.
 
-* Experience so far
+## Experience so far
 
 Building small (and not so small) command-line utilities (a la `git`) is fun.
 
-- Wrote a build tool that way ([[http://github.com/hwaf/hwaf][hwaf]])
-
+  - Wrote a build tool that way ([hwaf](http://github.com/hwaf/hwaf))
 
 Building a concurrent framework is also fun and surprisingly easy (thanks to `goroutines` and `channels`.)
 
-- see [[https://indico.fnal.gov/getFile.py/access?contribId=15&sessionId=4&resId=0&materialId=slides&confId=4986][go-fwk]] and [[http://indico.cern.ch/event/93877/session/6/contribution/49/material/slides/0.pdf][go-hep@ACAT-2011]] for more details
+  - see [go-fwk](https://indico.fnal.gov/getFile.py/access?contribId=15&sessionId=4&resId=0&materialId=slides&confId=4986) and [go-hep@ACAT-2011](http://indico.cern.ch/event/93877/session/6/contribution/49/material/slides/0.pdf) for more details
 
-
-* Experience so far
+## Experience so far
 
 No generics/templates, no operator overloading.
-
 
 In my experience, this hasn't been a limitation.
 
@@ -271,367 +236,345 @@ Operator overloading isn't a panacea.
 
 Generics can easily be implemented with:
 
-  $ gofmt -r 'T -> MyType' tmpl.go > mytype.go
-
+	$ gofmt -r 'T -> MyType' tmpl.go > mytype.go
 
 (without the build-time cost that `C++` templates impose)
 (w/o all the benefits of `C++` templates. More of a pain point for framework implementers than users, though.)
 
-
-* What about number crunching ?
+## What about number crunching ?
 
 The `gc` compiler is improving, especially the (yet to be released (in August-2016)) `go-1.7` version:
 
-- brings a SSA backend for `amd64`
-- (more) SSE+AVX instructions
+  - brings a SSA backend for `amd64`
+  - (more) SSE+AVX instructions
 
 Number crunching `Go` programs can outperform `C++` programs though:
 
-- [[https://github.com/sbinet-staging/3photons][3photons]]: a toy Monte-Carlo simulation program of `e+e-=>3photons` collisions
+  - [3photons](https://github.com/sbinet-staging/3photons): a toy Monte-Carlo simulation program of `e+e-=>3photons` collisions
 
-  ## C++ (serial)
-  $ time ./mc
-  real  0m36.733s
-  user  0m36.710s
-  sys   0m0.000s
+	## C++ (serial)
+	$ time ./mc
+	real  0m36.733s
+	user  0m36.710s
+	sys   0m0.000s
 
-  ## Go-1.6.2 (serial)    ## Go-1.7b2 (serial)
-  $ time ./3photons       $ time./3photons-1.7b2
-  real  0m30.075s         real  0m23.832s
-  user  0m30.210s         user  0m23.793s
-  sys   0m0.020s          sys   0m0.037s
+	## Go-1.6.2 (serial)    ## Go-1.7b2 (serial)
+	$ time ./3photons       $ time./3photons-1.7b2
+	real  0m30.075s         real  0m23.832s
+	user  0m30.210s         user  0m23.793s
+	sys   0m0.020s          sys   0m0.037s
 
-#- Compilers will catch up eventually and the performance gap with `C` will lessen
-#- the touted "within 10% of C" doesn't hold (yet) for number crunching applications (more like a 2x against a "gcc -O3" binary)
+## Application to HEP
 
-* Application to HEP
+Using [go-hep/fads](https://github.com/go-hep/fads) as a guinea pig and poster child...
 
-Using [[https://github.com/go-hep/fads][go-hep/fads]] as a guinea pig and poster child...
-
-* fads
+## fads
 
 `fads` is a "FAst Detector Simulation" toolkit.
 
-- morally a translation of [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]] into Go
-- uses [[https://github.com/go-hep/fwk][go-hep/fwk]] to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
-- uses [[https://github.com/go-hep/hbook][go-hep/hbook]] for histogramming, [[htpps://github.com/go-hep/hepmc][go-hep/hepmc]] for `HepMC` input/output
+  - morally a translation of [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes) into Go
+  - uses [go-hep/fwk](https://github.com/go-hep/fwk) to expose, manage and harness concurrency into the usual `HEP` event loop (`initialize` | `process-events` | `finalize`)
+  - uses [go-hep/hbook](https://github.com/go-hep/hbook) for histogramming, [go-hep/hepmc](htpps://github.com/go-hep/hepmc) for `HepMC` input/output
 
 Code is on github (BSD-3):
 
 .link https://github.com/go-hep/fwk
 .link https://github.com/go-hep/fads
 
-Documentation is served by [[https://godoc.org][godoc.org]]:
+Documentation is served by [godoc.org](https://godoc.org):
 
 .link https://godoc.org/github.com/go-hep/fwk
 .link https://godoc.org/github.com/go-hep/fads
 
-* go-hep/fads - Installation
+## go-hep/fads - Installation
 
 As easy as:
 
-  $ go get github.com/go-hep/fads/...
+	$ go get github.com/go-hep/fads/...
 
 Yes, with the ellipsis at the end, to also install sub-packages.
 
-- `go` `get` will recursively download and install all the packages that [[https://github.com/go-hep/fads][go-hep/fads]] depends on. (no `Makefile` needed)
+  - `go` `get` will recursively download and install all the packages that [go-hep/fads](https://github.com/go-hep/fads) depends on. (no `Makefile` needed)
 
+## go-hep/fwk - Examples
 
-* go-hep/fwk - Examples
+	$ fwk-ex-tuto-1 -help
+	Usage: fwk-ex-tuto1 [options]
 
+	ex:
+	 $ fwk-ex-tuto-1 -l=INFO -evtmax=-1
 
-  $ fwk-ex-tuto-1 -help
-  Usage: fwk-ex-tuto1 [options]
-  
-  ex:
-   $ fwk-ex-tuto-1 -l=INFO -evtmax=-1
-  
-  options:
-    -evtmax=10: number of events to process
-    -l="INFO": message level (DEBUG|INFO|WARN|ERROR)
-    -nprocs=0: number of events to process concurrently
+	options:
+	  -evtmax=10: number of events to process
+	  -l="INFO": message level (DEBUG|INFO|WARN|ERROR)
+	  -nprocs=0: number of events to process concurrently
 
 Runs 2 tasks.
 
-#- task 1 stores 2 `int`s under `"t1-ints1"` and `"t2-ints2"`.
-#- task 2 retrieves `"t1-ints1"` and stores `"t1-ints1-massaged"`
-
 .image _figs/fwk-ex1-dflow.png 200 200
 
-* go-hep/fwk - Examples
+## go-hep/fwk - Examples
 
-  $ fwk-ex-tuto-1
-  ::: fwk-ex-tuto-1...
-  t2                   INFO configure...
-  t2                   INFO configure... [done]
-  t1                   INFO configure ...
-  t1                   INFO configure ... [done]
-  t2                   INFO start...
-  t1                   INFO start...
-  app                  INFO >>> running evt=0...
-  t1                   INFO proc... (id=0|0) => [10, 20]
-  t2                   INFO proc... (id=0|0) => [10 -> 100]
-  [...]
-  app                  INFO >>> running evt=9...
-  t1                   INFO proc... (id=9|0) => [10, 20]
-  t2                   INFO proc... (id=9|0) => [10 -> 100]
-  t2                   INFO stop...
-  t1                   INFO stop...
-  app                  INFO cpu: 654.064us
-  app                  INFO mem: alloc:             62 kB
-  app                  INFO mem: tot-alloc:         74 kB
-  app                  INFO mem: n-mallocs:        407
-  app                  INFO mem: n-frees:           60
-  app                  INFO mem: gc-pauses:          0 ms
-  ::: fwk-ex-tuto-1... [done] (cpu=788.578us)
+	$ fwk-ex-tuto-1
+	::: fwk-ex-tuto-1...
+	t2                   INFO configure...
+	t2                   INFO configure... [done]
+	t1                   INFO configure ...
+	t1                   INFO configure ... [done]
+	t2                   INFO start...
+	t1                   INFO start...
+	app                  INFO >>> running evt=0...
+	t1                   INFO proc... (id=0|0) => [10, 20]
+	t2                   INFO proc... (id=0|0) => [10 -> 100]
+	[...]
+	app                  INFO >>> running evt=9...
+	t1                   INFO proc... (id=9|0) => [10, 20]
+	t2                   INFO proc... (id=9|0) => [10 -> 100]
+	t2                   INFO stop...
+	t1                   INFO stop...
+	app                  INFO cpu: 654.064us
+	app                  INFO mem: alloc:             62 kB
+	app                  INFO mem: tot-alloc:         74 kB
+	app                  INFO mem: n-mallocs:        407
+	app                  INFO mem: n-frees:           60
+	app                  INFO mem: gc-pauses:          0 ms
+	::: fwk-ex-tuto-1... [done] (cpu=788.578us)
 
+## go-hep/fwk - Concurrency
 
-* go-hep/fwk - Concurrency
-
-[[https://github.com/go-hep/fwk][fwk]] enables:
+[fwk](https://github.com/go-hep/fwk) enables:
 - event-level concurrency
 - tasks-level concurrency
 
-[[https://github.com/go-hep/fwk][fwk]] relies on [[https://golang.org][Go]]'s runtime to properly schedule _goroutines_.
+[fwk](https://github.com/go-hep/fwk) relies on [Go](https://golang.org)'s runtime to properly schedule _goroutines_.
 
-For sub-task concurrency, users are by construction required to use [[https://golang.org][Go]]'s constructs (_goroutines_ and _channels_) so everything is consistent *and* the _runtime_ has the *complete* *picture*.
+For sub-task concurrency, users are by construction required to use [Go](https://golang.org)'s constructs (_goroutines_ and _channels_) so everything is consistent **and** the _runtime_ has the **complete** **picture**.
 
-- *Note:* [[https://golang.org][Go]]'s runtime isn't yet _NUMA-aware_. A proposal _(June-2015)_ is in the [[https://docs.google.com/document/d/1d3iI2QWURgDIsSR6G2275vMeQ_X7w-qxM2Vp7iGwwuM/pub][works]].
+  - **Note:** [Go](https://golang.org)'s runtime isn't yet _NUMA-aware_. A proposal _(June-2015)_ is in the [works](https://docs.google.com/document/d/1d3iI2QWURgDIsSR6G2275vMeQ_X7w-qxM2Vp7iGwwuM/pub).
 
+## go-hep/fads - real world use case
 
-* go-hep/fads - real world use case
+  - translated [C++-Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes)' ATLAS data-card into Go
+  - [go-hep/fads-app](https://github.com/go-hep/fads/blob/master/cmd/fads-app/main.go)
+  - installation:
 
-- translated [[https://cp3.irmp.ucl.ac.be/projects/delphes][C++-Delphes]]' ATLAS data-card into Go
-- [[https://github.com/go-hep/fads/blob/master/cmd/fads-app/main.go][go-hep/fads-app]]
-- installation:
+	$ go get github.com/go-hep/fads/cmd/fads-app
+	$ fads-app -help
+	Usage: fads-app [options] <hepmc-input-file>
 
-  $ go get github.com/go-hep/fads/cmd/fads-app
-  $ fads-app -help
-  Usage: fads-app [options] <hepmc-input-file>
-  
-  ex:
-   $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
-  
-  options:
-    -cpu-prof=false: enable CPU profiling
-    -evtmax=-1: number of events to process
-    -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
-    -nprocs=0: number of concurrent events to process
+	ex:
+	 $ fads-app -l=INFO -evtmax=-1 ./testdata/hepmc.data
 
-* go-hep/fads - components
+	options:
+	  -cpu-prof=false: enable CPU profiling
+	  -evtmax=-1: number of events to process
+	  -l="INFO": log level (DEBUG|INFO|WARN|ERROR)
+	  -nprocs=0: number of concurrent events to process
 
-- a `HepMC` converter
-- particle propagator
-- calorimeter simulator
-- energy rescaler, momentum smearer
-- isolation
-- b-tagging, tau-tagging
-- jet-finder (reimplementation of FastJet in Go: [[https://github.com/go-hep/fastjet][go-hep/fastjet]])
-- histogram service (from [[https://github.com/go-hep/fwk][go-hep/fwk]])
+## go-hep/fads - components
+
+  - a `HepMC` converter
+  - particle propagator
+  - calorimeter simulator
+  - energy rescaler, momentum smearer
+  - isolation
+  - b-tagging, tau-tagging
+  - jet-finder (reimplementation of FastJet in Go: [go-hep/fastjet](https://github.com/go-hep/fastjet))
+  - histogram service (from [go-hep/fwk](https://github.com/go-hep/fwk))
 
 Caveats:
 
-- no battle-tested persistency (`JSON`, `ASCII`, `Gob`, [[https://github.com/go-hep/rio][rio]])
-- jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
+  - no battle-tested persistency (`JSON`, `ASCII`, `Gob`, [rio](https://github.com/go-hep/rio))
+  - jet clustering limited to N^3 (slowest and dumbest scheme of `C++-FastJet`)
 
-
-* 
-
+## 
 
 .image _figs/fads-dflow.png 600 600
 
+## Results - testbenches
 
-* Results - testbenches
+  - Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
+  - MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
+  - Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
+  - Linux: Westmere E56xx/L56xx/X56xx (Nehalem-C) (3066.774 MHz), 20-cores, 40Gb RAM
 
-- Linux: Intel(R) Core(TM)2 Duo CPU @ 2.53GHz, 4GB RAM, 2 cores
-- MacOSX-10.6: Intel(R) Xeon(R) CPU @ 2.27GHz, 172GB RAM, 16 cores
-- Linux: Intel(R) Xeon(R) CPU E5-2660 v2 @ 2.20GHz, 40 cores
-- Linux: Westmere E56xx/L56xx/X56xx (Nehalem-C) (3066.774 MHz), 20-cores, 40Gb RAM
-
-* Linux (20 cores) testbench: memory (smaller==better)
+## Linux (20 cores) testbench: memory (smaller==better)
 
 .image _figs/linux-rss.png 550 800
 
-
-* Linux (20 cores) testbench: event throughput (higher==better)
+## Linux (20 cores) testbench: event throughput (higher==better)
 
 .image _figs/linux-cpu.png 550 800
 
+## fads: Results & Conclusions
 
-* fads: Results & Conclusions
+  - good RSS scaling
+  - good CPU scaling
 
-- good RSS scaling
-- good CPU scaling
-
-- bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
-- no need to merge output files, less chaotic I/O, less I/O wait
+  - bit-by-bit matching physics results wrt `Delphes` (up to calorimetry)
+  - no need to merge output files, less chaotic I/O, less I/O wait
 
 Also addresses `C++` and `python` deficiencies:
 
-- code distribution
-- code installation
-- compilation/development speed
-- runtime speed
-- simple language
+  - code distribution
+  - code installation
+  - compilation/development speed
+  - runtime speed
+  - simple language
 
-* Go in Cosmology
+## Go in Cosmology
 
-* Go in Cosmology
+## Go in Cosmology
 
-Relatively new activity at LPC-Clermont-Ferrand: Large Synoptic Survey Telescope ([[https://www.lsst.org][LSST]])
+Relatively new activity at LPC-Clermont-Ferrand: Large Synoptic Survey Telescope ([LSST](https://www.lsst.org))
 
-- hardware development activities
-- software (analysis, simulation, db) development activities
+  - hardware development activities
+  - software (analysis, simulation, db) development activities
 
 .image _figs/Facility_CutawayMD.jpg 400 _
 
-* Go in Cosmology (and medical applications)
+## Go in Cosmology (and medical applications)
 
-- developed a supernovae fusion simulation (replacing an Excel-based one)
-- developed a control command application (+GUI) to steer a testbench (replacing a Java-based one)
-- developed (not by me, actually) a data acquisition (+GUI) for a medical detector (replacing a `C++03-pthreads` one)
+  - developed a supernovae fusion simulation (replacing an Excel-based one)
+  - developed a control command application (+GUI) to steer a testbench (replacing a Java-based one)
+  - developed (not by me, actually) a data acquisition (+GUI) for a medical detector (replacing a `C++03-pthreads` one)
 
 See bonus slides for more informations.
 
-* Experience so far
+## Experience so far
 
-Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [[https://github.com/gonum][gonum]] community:
+Even if `Go` is relatively new, support for general purpose scientific libraries is there and growing, thanks to the [gonum](https://github.com/gonum) community:
 
-- [[https://github.com/gonum/blas][gonum/blas]], a `go` based implementation of Basic Linear Algebra Subprograms
-- [[https://github.com/gonum/matrix][gonum/matrix]], to work with matrices
-- [[https://github.com/gonum/graph][gonum/graph]], to work with graphs
-- [[https://github.com/gonum/optimize][gonum/optimize]], for finding the optimum value of functions
-- [[https://github.com/gonum/integrate][gonum/integrate]], provides routines for numerical integration
-- [[https://github.com/gonum/stat][gonum/stat]], for statistics and distributions
-- ...
-
+  - [gonum/blas](https://github.com/gonum/blas), a `go` based implementation of Basic Linear Algebra Subprograms
+  - [gonum/matrix](https://github.com/gonum/matrix), to work with matrices
+  - [gonum/graph](https://github.com/gonum/graph), to work with graphs
+  - [gonum/optimize](https://github.com/gonum/optimize), for finding the optimum value of functions
+  - [gonum/integrate](https://github.com/gonum/integrate), provides routines for numerical integration
+  - [gonum/stat](https://github.com/gonum/stat), for statistics and distributions
+  - ...
 
 Plotting data is also rather easy:
 
-- [[http://github.com/gonum/plot][gonum/plot]] (most of the plots seen here were made w/ `gonum/plot`)
-- [[https://github.com/sbinet/go-gnuplot][go-gnuplot]]
+  - [gonum/plot](http://github.com/gonum/plot) (most of the plots seen here were made w/ `gonum/plot`)
+  - [go-gnuplot](https://github.com/sbinet/go-gnuplot)
 
-
-* What's missing ?
+## What's missing ?
 
 The `Go` scientific-oriented ecosystem is slowly bootstrapping itself.
 Other "communities" are gathering too:
 
-- Biology: [[https://github.com/biogo/biogo][biogo]]
-- Chemistry: [[http://gochem.org/][gochem]]
+  - Biology: [biogo](https://github.com/biogo/biogo)
+  - Chemistry: [gochem](http://gochem.org/)
 
 So, what's missing ? (IMHO) not that much.
 
-- a dash of performance (but we are still light years ahead of `CPython`)
-- critical mass
+  - a dash of performance (but we are still light years ahead of `CPython`)
+  - critical mass
 
 the rest is/will-be history :)
 
-* What's missing ? - II
+## What's missing ? - II
 
-- A (native) GUI toolkit?
+  - A (native) GUI toolkit?
+
 Bindings to `Qt`, `GTK`, etc... exist but they break the nice "go-get" install experience.
 
-A (native) GUI toolkit is being built: [[https://godoc.org/golang.org/x/exp/shiny/screen][golang.org/x/exp/shiny]]
+A (native) GUI toolkit is being built: [golang.org/x/exp/shiny](https://godoc.org/golang.org/x/exp/shiny/screen)
 
 Right now, workaround is to create a `Go` web server and serve `JavaScript+HTML`.
 
+Nice to have to help spreading [Go](https://golang.org):
 
-Nice to have to help spreading [[https://golang.org][Go]]:
+  - a robust way to write _e.g._ `Python` extension modules in `Go` (see [go-python/gopy](https://github.com/go-python/gopy))
+  - a `go` interpreter ? (see [igo](https://github.com/sbinet/igo), [go-interpreter](https://github.com/go-interpreter) and/or [Jupyter+Go](https://github.com/gophergala2016/gophernotes))
 
-- a robust way to write _e.g._ `Python` extension modules in `Go` (see [[https://github.com/go-python/gopy][go-python/gopy]])
-- a `go` interpreter ? (see [[https://github.com/sbinet/igo][igo]], [[https://github.com/go-interpreter][go-interpreter]] and/or [[https://github.com/gophergala2016/gophernotes][Jupyter+Go]])
+## Thank you
 
-* Thank you
 Sébastien Binet
 CNRS/IN2P3/LPC
 
-* Bonus
+## Bonus
 
-* Go @LSST: Fusil
+## Go @LSST: Fusil
 
-- replaced an Excel-based (!) supernovae fusion simulation
-- [[https://github.com/astrogo/sn-fusion][astrogo/snfusion (aka FuSil)]]
+  - replaced an Excel-based (!) supernovae fusion simulation
+  - [astrogo/snfusion (aka FuSil)](https://github.com/astrogo/sn-fusion)
 
-- Split into 2 commands: `snfusion-gen` and `snfusion-plot`
+  - Split into 2 commands: `snfusion-gen` and `snfusion-plot`
 
-  $ snfusion-gen -n 30000
-  snfusion-gen: processing...
-  snfusion-gen: composition of 10000 nuclei:
-  Nucleus{A: 12, Z: 6}: 6127
-  Nucleus{A: 16, Z: 8}: 3873
-  snfusion-gen: iter #3000/30000...
-  [...]
-  snfusion-gen: iter #30000/30000...
-  snfusion-gen: composition of 3066 nuclei:
-  Nucleus{A: 12, Z: 6}: 71
-  Nucleus{A: 16, Z: 8}: 63
-  [...]
-  Nucleus{A: 56, Z:28}: 639
-  snfusion-gen: processing... [done]: 10.52320492s
+	$ snfusion-gen -n 30000
+	snfusion-gen: processing...
+	snfusion-gen: composition of 10000 nuclei:
+	Nucleus{A: 12, Z: 6}: 6127
+	Nucleus{A: 16, Z: 8}: 3873
+	snfusion-gen: iter #3000/30000...
+	[...]
+	snfusion-gen: iter #30000/30000...
+	snfusion-gen: composition of 3066 nuclei:
+	Nucleus{A: 12, Z: 6}: 71
+	Nucleus{A: 16, Z: 8}: 63
+	[...]
+	Nucleus{A: 56, Z:28}: 639
+	snfusion-gen: processing... [done]: 10.52320492s
 
-* Go @LSST: Fusil - III
+## Go @LSST: Fusil - III
 
-  $ snfusion-plot -f output.csv -o output.png
-  snfusion-plot: plotting...
-  snfusion-plot: NumIters:   30000
-  snfusion-plot: NumCarbons: 60
-  snfusion-plot: Seed:       1234
-  snfusion-plot: Nuclei:     [Nucleus{A: 12, Z: 6} [...] Nucleus{A: 52, Z:26} Nucleus{A: 56, Z:28}]
+	$ snfusion-plot -f output.csv -o output.png
+	snfusion-plot: plotting...
+	snfusion-plot: NumIters:   30000
+	snfusion-plot: NumCarbons: 60
+	snfusion-plot: Seed:       1234
+	snfusion-plot: Nuclei:     [Nucleus{A: 12, Z: 6} [...] Nucleus{A: 52, Z:26} Nucleus{A: 56, Z:28}]
 
 .image _figs/snfusion-output.png 400 _
 
-* Go @LSST: Fusil - III
+## Go @LSST: Fusil - III
 
-For ease of use, added a simulation web portal [[https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web][snfusion-web]]
+For ease of use, added a simulation web portal [snfusion-web](https://github.com/astrogo/snfusion/tree/master/cmd/snfusion-web)
 
 .image _figs/snfusion-web.png 500 _
 
-* Go @LSST: LSST testbench
+## Go @LSST: LSST testbench
 
 Replaced a `Java` based application to control a set of motors to rotate a (dummy for now) telescope apparatus:
 
-
 .image _figs/Camera_Layout-full.jpg 400 _
 
-* Go @LSST: LSST testbench - II
+## Go @LSST: LSST testbench - II
 
 Replaced a `Java` based application to control a set of motors to rotate a (dummy for now) telescope apparatus:
 
 .image _figs/orig-ccs-fcs.png 400 _
 
+## Go @LSST: LSST testbench - III
 
-* Go @LSST: LSST testbench - III
-
-- a web server written in `Go` (with `net/http`), serves as the GUI (`WebSocket` + [[https://www.polymer-project.org][Polymer]])
-- handles authentication, authorization
-- commands relayed to the motors over [[https://en.wikipedia.org/wiki/Modbus][Modbus]]
-- displays webcam stream, stores motors' status in a database ([[https://github.com/boltdb/bolt][BoltDB]])
+  - a web server written in `Go` (with `net/http`), serves as the GUI (`WebSocket` + [Polymer](https://www.polymer-project.org))
+  - handles authentication, authorization
+  - commands relayed to the motors over [Modbus](https://en.wikipedia.org/wiki/Modbus)
+  - displays webcam stream, stores motors' status in a database ([BoltDB](https://github.com/boltdb/bolt))
 
 .image _figs/fcs-testbench.png 300 _
-.caption The [[https://github.com/go-lsst/fcs-lpc-motor-ctl][fcs-lpc-motor-ctl]] architecture.
+The [[https://github.com/go-lsst/fcs-lpc-motor-ctl][fcs-lpc-motor-ctl]] architecture.
 
-* Go @LSST: LSST testbench - IV
+## Go @LSST: LSST testbench - IV
 
 .image _figs/fcs-lsst.png 550 _
 
-* Go @AVIRM: application of HEP detectors to medical detectors
+## Go @AVIRM: application of HEP detectors to medical detectors
 
 Replaced (not by me) a `C++-03/pthreads` application for data acquisition, with a much improved feature-wise `Go` version:
 
 .image _figs/avirm-godaq.png 150 _
 
-- receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
-- checks binary data integrity (`0xCAFEDECA` control words)
-- writes data to disk
-- launches/stops/pauses monitoring
-- listens for instructions from user
+  - receives data flow from socket (@ 20-100 Hz, limited by VME dead-time)
+  - checks binary data integrity (`0xCAFEDECA` control words)
+  - writes data to disk
+  - launches/stops/pauses monitoring
+  - listens for instructions from user
 
-Available at [[https://gitlab.in2p3.fr/avirm/analysis-go][gitlab.in2p3.fr/avirm/analysis-go]]
+Available at [gitlab.in2p3.fr/avirm/analysis-go](https://gitlab.in2p3.fr/avirm/analysis-go)
 
-* Go @AVIRM - II
+## Go @AVIRM - II
 
 .image _figs/avirm-dpga-1.png 300 _
 .image _figs/avirm-dpga-2.png 300 _
-
-
