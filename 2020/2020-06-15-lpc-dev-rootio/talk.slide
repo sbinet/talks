@@ -1,0 +1,248 @@
+ROOT I/O & groot
+LPC-Dev, 2020-06-15
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* ROOT I/O
+
+* ROOT I/O
+
+ROOT is many things:
+
+- an interpreter
+- a set of libraries to perform data analyses
+- a set of libraries to develop and debug detector geometries
+- a set of libraries to visualize 2D & 3D data
+
+and... a way to write and read user data.
+
+The (most used) ROOT API to read/write user data is through:
+
+- `TFile`
+- `TTree` + `TBranch`
+
+(ROOT-7 will most probably introduce a new API based on `rntuple`)
+
+`ROOT` stores data in binary files, organized into `TDirectories` and `TKeys`.
+
+* Binary files VS text files
+
+There are 2 options when storing data:
+
+- recording it into text files (_e.g.:_ CSV, XML, JSON, ...)
+- recording it into binary files (_e.g.:_ FITS, HBOOK/NTUP, JPEG, HDF5, netCDF, SQLite, ...)
+
+* Text files
+
+Text files are easier to read back and debug for a human (just open your `$EDITOR`).
+They involved a bit more work for a program to interpret back (more CPU/Mem for the lexer+parser) and may also take up more disk space.
+
+  $> cat data.csv
+  # px,py,pz,e
+  10,20,30,40
+  12,-23,-42,600
+
+  $> cat data.json
+  [{"px": 10, "py": 20, "pz": 30, "e": 40},
+   {"px": 12, "py": -23, "pz": -42, "e": 600}]
+
+Text files are easy to inspect and fix-up.
+
+* Binary files
+
+Binary files are harder to debug.
+With a bit of training, some "humans" can read them back w/o help.
+Most of us need an additional program to interpret them.
+Binary files are usually easier for a program to read (less CPU/Mem) and usually take less space on disk than text files.
+
+  $> hexdump -C h1d.png | head
+  00000000  89 50 4e 47 0d 0a 1a 0a  00 00 00 0d 49 48 44 52  |.PNG........IHDR|
+  00000010  00 00 02 40 00 00 01 64  08 02 00 00 00 47 2d 13  |...@...d.....G-.|
+  00000020  dc 00 00 5d d9 49 44 41  54 78 9c ec dd 07 54 13  |...].IDATx....T.|
+  00000030  59 17 00 e0 9b 84 de 2d  08 a2 a0 14 41 8a 65 ed  |Y......-....A.e.|
+   
+  $> hexdump -C data.root | head
+  00000000  72 6f 6f 74 00 00 ec b8  00 00 00 64 00 00 15 ee  |root.......d....|
+  00000010  00 00 15 b7 00 00 00 37  00 00 00 01 00 00 00 3a  |.......7.......:|
+  00000020  04 00 00 00 01 00 00 04  5d 00 00 11 5a 00 01 74  |........]...Z..t|
+  00000030  62 dc 84 ce 85 11 e5 97  17 01 00 00 7f be ef 00  |b...............|
+
+* Binary files - II
+
+Writing text files is easy:
+
+.code _code/write-txt.go
+
+* Binary files - III
+
+Writing binary files is a bit more involved:
+
+.code _code/write-bin.go /START/,/END/
+
+* Binary files - IV
+
+- one needs to decide the [[https://en.wikipedia.org/wiki/Endianness][endianness]] of multi-bytes data (Little-/Big-endian)
+- one needs to know how many bytes to read back
+- one needs to know what those bytes mean (_ie:_ their type+name)
+
+The first and last issues are usually addressed by a document specifying the file format.
+
+- [[https://www.w3.org/TR/PNG/][PNG file format description]]
+- [[https://cbor.io/][CBOR specs]]
+- [[https://fits.gsfc.nasa.gov/standard40/fits_standard40aa-le.pdf][FITS specs]]
+
+Unfortunately, `ROOT` doesn't provide such a clear description of its on-disk format...
+
+* Reading back binary files
+
+Once saved, `float64`, `float32` or your favorite `struct` are all just a sequence of bytes.
+How does one chop and chunkify back this stream into structured data?
+
+_ie:_ how to read back:
+
+ []byte{42, 42,  1, 154,  2, 0,  0,  0, 4,  0,  0,   0,  0, 0,  0, 24,
+        45, 68, 84, 251, 33, 9, 64,
+ }
+
+how does one know that it's a `(uint8,uint16,uint32,int64,float64)` ?
+and not, _e.g._ `23x(uint8)` ? (or any other combination)
+
+This is usually addressed with:
+
+- adding delimiters: special magic values that flank "real" data (_e.g.:_ `\0`, `0xcc`, `0xdeadbeef`, `0xbadcaffe`, ...) (_e.g.:_ a C-string)
+- using a [[https://en.wikipedia.org/wiki/Type-length-value][TLV (tag-length-value)]] encoding scheme (_e.g.:_ a Python string)
+
+One nice property of TLV: allows to skip unknown data.
+
+* 
+
+`ROOT` uses a kind of TLV scheme.
+
+.image _fig/file_layout.gif
+
+* ROOT file
+
+At a very high-level, a `ROOT` file can be seen as:
+
+  [file header]
+  [record1]
+  [record2]
+  [...]
+  [file footer]
+
+The `ROOT` file header encodes:
+
+- the `ROOT` magic word (`"root"`) and the file format (`uint32`)
+- the pointer to the first data record (`uint32`, position on file in bytes)
+- the pointer to the end of the last data record (`uint32/uint64`)
+- the pointer to the `streamers` record (+its length)
+- other metadata (file creation time, compression algorithm+level, ...)
+
+The `ROOT` file footer holds the `streamers` (metadata about types).
+
+* 
+
+A `ROOT` record consists of its key (`TKey`) and its associated data (an opaque binary blob).
+
+.image _fig/file-records.png _ 450
+
+* TKey
+
+The on-disk representation of a `TKey` is:
+
+ | Data Member | Explanation |
+ |-------------|-------------|
+ |  fNbytes    | Number of bytes for the compressed object and key. |
+ |  fObjlen    | Length of uncompressed object. |
+ |  fDatime    | Date/Time when the object was written. |
+ |  fKeylen    | Number of bytes for the key structure. |
+ |  fCycle     | Cycle number of the object. |
+ |  fSeekKey   | Address of the object on file (points to fNbytes).
+ |             | This is a redundant information used to cross-check the
+ |             | data base integrity. |
+ |  fSeekPdir  | Pointer to the directory supporting this object.|
+ |  fClassName | Object class name. |
+ |  fName      | Name of the object. |
+ |  fTitle     | Title of the object. |
+
+- `TKey` knows its length and the length of the associated payload
+- `TKey` knows the type of the associated payload (`fClassName`)
+- `TKey` knows the location on file of the associated payload
+
+* Deserialization
+
+Knowing the position+length of the user data to read, `ROOT` knows what to do to be able to unmarshal/deserialize that user data.
+The "how-to" part is done by cross-referencing the name of the user data class with the `streamers` list (that is stored within the `ROOT` file footer.)
+
+`ROOT` stores metadata about the types that are stored in a `ROOT` file *within* that `ROOT` file.
+_ie:_ `ROOT` files are self-describing. You don't need _a_priori_ to know anything about the data between stored inside a `ROOT` file to be able to correctly interpret all its bytes.
+
+One "just" needs to be able to correctly interpret and decode/encode:
+
+- `TFile` (and `TDirectoryFile`, for hierarchical data)
+- `TKey`
+- `TStreamerInfo` and its `TStreamerElements`
+
+and the bootstrap process is complete.
+
+* TStreamerInfo & TStreamerElement
+
+A `TStreamerInfo` encodes metadata about a class:
+
+- the class name + checksum
+- the version of that class
+- the list of fields (+base classes) that describes that class (`TStreamerElement`)
+
+_e.g.:_ `ROOT` describes the C++ type `P3` below, as:
+
+ struct P3 {
+     int    Px;
+     double Py;
+     int    Pz;
+ };
+
+as:
+
+ StreamerInfo for "P3" version=1 title=""
+  int    Px      offset=  0 type=  3 size=  4  
+  double Py      offset=  4 type=  8 size=  8  
+  int    Pz      offset= 12 type=  3 size=  4  
+
+* 
+
+The `streamer` elements vocabulary is quite exhaustive and allows to represent pretty much all of possible C++ classes:
+
+ StreamerElement              // encodes name, size, shape, min/max, ... 
+ |
+ +-- StreamerBase             // base class
+ +-- StreamerBasicType        // builtin type (char, uint16, ...)
+ +-- StreamerBasicPointer     // pointer to a builtin type
+ +-- StreamerLoop             // repeats of a type
+ +-- StreamerObject           // a TObject
+ +-- StreamerObjectAny        // a user class
+ +-- StreamerObjectAnyPointer // pointer to a user class
+ +-- StreamerObjectPointer    // pointer to a TObject
+ +-- StreamerSTL              // STL container (vector/set/map/pair/unordered_xxx/...)
+ +-- StreamerSTLstring        // std::string
+ +-- StreamerString           // TString
+
+`ROOT` can support reading multiple versions of a type, through this `version` field in the `TStreamerInfo`.
+
+`MyClass` at version 1 may have 2 fields `f1` and `f2` of types `float` and at version 2 have those 2 fields w/ types `float` and `double`.
+
+* Reading ROOT files w/o ROOT
+
+- decode ROOT file structure (`TFile`, `TDirectoryFile`, `TKey`)
+- decode ROOT metadata structure (`TStreamerInfo`, `TStreamerElements`)
+- generate deserialization routines from the `streamers` informations
+- decode builtins and composites (structs, static arrays, dynamic arrays, ...)
+
+Pretty simple, right? right... (w/o having to reverse engineer the file format, it might have been.)
+
+But that doesn't cover the main physicist use case: `TTrees`.
+
+.image _fig/BTTF.jpg _ 400
