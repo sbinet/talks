@@ -1,0 +1,107 @@
+# go-daq/tdaq
+MIM, 2020-01-28
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+## tdaq
+
+[tdaq](https://github.com/go-daq/tdaq) is a pure-[Go](https://golang.org) based implementation of a simple DAQ system.
+
+	$> mkdir tmp && cd tmp
+	$> time go get github.com/go-daq/tdaq/...
+	real  0m15.417s
+	user  0m18.188s
+	sys   0m2.467s
+
+Everything is installed and compiled (including dependencies, recursively) in one go.
+
+License: [BSD-3](https://github.com/go-daq/tdaq/license).
+
+Platforms: tested on Linux/{arm64,amd64,386}, Darwin/amd64.
+
+Documentation:
+
+.link https://godoc.org/github.com/go-daq/tdaq
+
+## Concepts
+
+A `tdaq` system is a set of processes that exchange (framed) messages over the wire.
+
+  - [tdaq.RunControl](https://godoc.org/github.com/go-daq/tdaq#RunControl) is the master process, listening for new tdaq processes to join the system
+  - [tdaq.Servers](https://godoc.org/github.com/go-daq/tdaq#Server) are such processes that connect to the `RunControl` and announce their expected inputs and outputs
+
+`RunControl` accepts commands from the user (_via_ a REPL or _via_ a web UI) and propagates them to all known `Servers`:
+
+  - `/config`, `/init`, `/reset`
+  - `/start`
+  - `/stop`
+  - `/quit`
+  - `/status`
+
+## RunControl
+
+`RunControl` listens on 4 ports:
+
+  - the control server: listen for new `tdaq` processes to join
+  - the heartbeat server (default: 5s): probe `tdaq` processes
+  - the log server: collect logs from all `tdaq` processes
+  - the web server: collect commands from user
+
+When new `tdaq` processes join, `RunControl` collects their expected inputs and outputs (names, types, address+port).
+`RunControl` builds a dependency graph (a DAG) and makes sure all inputs are satisfied when `/init` is hit.
+
+## Servers
+
+`tdaq.Servers` expose 6 (optional) command handlers (but users may hook into those):
+
+  - `/config`
+  - `/init`
+  - `/start`
+  - `/stop`
+  - `/reset` and
+  - `/quit`.
+
+`tdaq.Servers` also expose input and output (optional) handlers.
+
+`tdaq.Servers` expose (optional) `"run"` handlers (code that does not need input to be executed. _e.g.:_ number generator, counter, accumulate internal statistics, etc...).
+
+## Servers - II
+
+	var dev myDeviceType
+
+	srv := tdaq.New(deviceConfig, os.Stdout)
+	srv.CmdHandle("/config", dev.OnConfig)
+	srv.CmdHandle("/init",   dev.OnInit)
+	srv.CmdHandle("/start",  dev.OnStart)
+	srv.CmdHandle("/stop",   dev.OnStop)
+	srv.CmdHandle("/reset",  dev.OnReset)
+	srv.CmdHandle("/quit",   dev.OnQuit)
+
+	srv.InputHandle ("/my-input-data",  dev.Input)
+	srv.OutputHandle("/my-output-data", dev.Output)
+
+	srv.RunHandle(dev.Loop)
+
+	ctx := context.Background()
+	err := srv.Run(ctx)
+	if err != nil {
+		log.Panicf("error: %+v", err)
+	}
+
+## Servers - III
+
+	type myDeviceType { ... }
+
+	func (dev *myDeviceType)
+	  OnConfig(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
+
+	func (dev *myDeviceType)
+	  OnInit(ctx tdaq.Context, resp *tdaq.Frame, req tdaq.Frame) error { ... }
+
+	func (dev *myDeviceType) Input(ctx tdaq.Context, src tdaq.Frame) error { ... }
+	func (dev *myDeviceType) Output(ctx tdaq.Context, dst *tdaq.Frame) error { ... } 
+	func (dev *myDeviceType) Loop(ctx tdaq.Context) error { ... }
