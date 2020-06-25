@@ -1,0 +1,257 @@
+ROOT I/O & groot
+LPC-Dev, 2020-06-26
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* ROOT I/O
+
+* ROOT I/O
+
+ROOT is many things:
+
+- an interpreter
+- a set of libraries to perform data analyses
+- a set of libraries to develop and debug detector geometries
+- a set of libraries to visualize 2D & 3D data
+
+and... a way to write and read user data.
+
+The (most used) ROOT API to read/write user data is through:
+
+- `TFile`
+- `TTree` + `TBranch`
+
+(ROOT-7 will most probably introduce a new API based on `rntuple`)
+
+`ROOT` stores data in binary files, organized into `TDirectories` and `TKeys`.
+
+* Reading ROOT files w/o ROOT
+
+- decode ROOT file structure (`TFile`, `TDirectoryFile`, `TKey`)
+- decode ROOT metadata structure (`TStreamerInfo`, `TStreamerElements`)
+- generate deserialization routines from the `streamers` informations
+- decode builtins and composites (structs, static arrays, dynamic arrays, ...)
+
+Pretty simple, right? right... (w/o having to reverse engineer the file format, it might have been.)
+
+But that doesn't cover the main physicist use case: `TTrees`.
+
+* TFile + TKey
+
+With `TFile` and `TKey`, one could already address the following physicist use-case:
+
+- retrieve data in an incremental fashion (_i.e.:_ event `#1`, `#2`, ...)
+- store it piecewise in the ROOT file.
+
+we could do something like:
+
+ f, err := groot.Create("out.root")
+ if err != nil { panic(err) }
+ defer f.Close()
+
+ for i, evt := range detector.Readout() {
+   log.Printf("recording event %d...", i)
+   key := fmt.Sprintf("evt-%03d", i)
+   err := f.Put(key, evt)
+   if err != nil { panic(err) }
+ }
+
+* TFile + TKey
+
+But:
+
+- reading back + iterating over all the data would be cumbersome
+- one could store the events in an array (so iteration would be addressed), but this would mean writing/reading *all* events in a single step
+- selection of a subset of the event data would be cumbersome
+- missed opportunities for compression and/or data locality
+
+It's doable (that's more or less what [[https://python.org][Python]] guys do with [[https://docs.python.org/3/library/pickle.html][pickles]].)
+But it's no _panacea_.
+
+Enters `TTree`...
+
+* TTree
+
+`TTree` is an API to:
+
+- declare a list of pairs `(name,value)` that are called _"branches"_ (of the tree)
+- "fill" the tree with data for each "entry" in the tree
+
+Once a `TTree` is filled and written to a `TFile`, one can read it back, re-attaching variables to each of its branches (or a subset thereof), to inspect the stored data.
+
+A `TTree` is kind of like a database, where you can store:
+
+- data row-wise or column-wise
+- C-builtins, (static) C-arrays, var-len C-arrays, C-structs
+- `C++` classes (with inheritance, virtual tables, etc...)
+- `C++` STL containers of all the above
+
+* 
+
+.code _code/tree.cxx
+
+* 
+
+.image _figs/ttree.png _ 480
+
+* TTree (x-ray) scan
+
+`TTree` reuses much of the `TKey`+`TStreamers` infrastructure.
+
+When one connects a branch with some user data:
+
+- the type (and shape) of the user data is "introspected" (via C++ templates+overloading)
+- from that type a streamer is associated (via type reflection or via the C++ interpreter `CINT` for ROOT <=v5, `CLing` nowadays)
+
+at that point, the `TTree` knows how to serialize/deserialize the user data into chunks of bytes, *TBasket* in ROOT speak.
+
+To support arbitrarily nested containers/user-data, ROOT introduces the notion of branches with sub-branches with sub-branches, ... that, _in_ _fine_ have leaves.
+
+This is controlled by the _"split_ _level"_ of a tree.
+
+* TTree writing
+
+.code _code/tree-w.cxx
+
+* TTree writing (modes)
+
+- row-wise storage:
+
+  [n, d], [n, d], [n, d], [n, d], ...
+
+- column-wise storage:
+
+  [n, n, n, n, ...], [d, d, d, d, ...]
+
+- column-wise storage, split-level > 1:
+
+  [n, n, n, n, ...], [d.i32, d.i32, d.i32, d.i32, ...], 
+  [d.i64, d.i64, d.i64, d.i64, ...], [d.f64, d.f64, d.f64, d.f64, ...]
+
+All these different ways of storing data are, ultimately, represented as `TBaskets` holding the serialized representation of these `[...]` user data as bytes.
+
+Each `TBasket` associated payload, is compressed (or not).
+A `TBasket` payload may contain data from multiple entries.
+
+* TTree reading
+
+.code _code/tree-r.cxx
+
+* TTree reading
+
+Once a `TTree` is requested, ROOT needs to locate it on disk and then deserialize it (only the "metadata", not the full associated dataset payload) using the usual ROOT machinery (streamers+`TKey`).
+
+A `TTree` knows:
+
+- the number of entries it contains
+- the list of branches (and their associated payload type) it contains
+
+A `TBranch` knows:
+
+- the list of baskets associated to it
+- the entry span of each basket (`[1,` `10],` `[11,` `23],` `...,` `[xxx,` `evtmax]`)
+- the physical location (byte offset, number of bytes) of each basket
+
+* TTree reading
+
+Whenever somebody asks to read entry `n` from disk:
+
+- for each active branch, read entry `n` 
+- find+retrieve the basket containing the entry `n`
+- (possibly uncompress the basket data)
+- store the deserialized data into the pointer captured by `SetBranchAddress`, using the correct streamer
+
+And voilà, you know how (at a very coarse level) `TTrees` read and present data to users.
+
+* Go-HEP/groot
+
+* groot
+
+[[https://go-hep.org/x/hep/groot][groot]] is a pure-Go implementation of (a subset of) ROOT.
+
+- `groot/riofs` provides access to the `TFile` equivalent layer of ROOT
+- `groot/rdict` provides access to the "streamers" layer of ROOT
+- `groot/rtree` provides access to the `TTree` layer of ROOT
+
+.image _figs/groot.jpg _ 600
+
+* groot reading
+
+.code _code/tree-r.go /START/,/END/
+
+* groot reading speed
+
+Reading some ATLAS data, with Go-HEP v0.26, compared to ROOT/C++ 6.20
+
+  5.2 ms/kEvt (3.7 s for 720 kEvts)  [groot v0.26]
+  2.6 ms/kEvt (1.9 s for 720 kEvts)  [ROOT  v6.20]
+
+And that was like that since the inception of `groot`.
+Until, `v0.27` (released May-2020):
+
+  1.6 ms/kEvt (1.1 s for 720 kEvts)  [groot v0.27]
+  2.6 ms/kEvt (1.9 s for 720 kEvts)  [ROOT  v6.20]
+
+*Almost* twice faster than ROOT :)
+
+See, for more informations:
+
+.link https://root-forum.cern.ch/t/gohep-groot-v0-27-0-root-split-groot-faster-than-root/39609
+
+How come `groot` is faster than ROOT to read ROOT data?
+
+Thanks to Go's lightweight goroutines...
+
+* groot & Go
+
+[[https://golang.org][Go]] is known to be very fast to compile and relatively fast to execute.
+But at the moment, Go binaries are usually slower than a C++ one for number crunching.
+
+How could a Go binary be faster than a C++ one?
+
+- better (profiling, diagnostic) tools
+- better architecture
+- better concurrency
+
+Reading a `TTree` is basically:
+
+- locating spans of bytes on disk
+- uncompress those bytes span
+- deserialize those uncompressed bytes into memory locations
+- repeat
+
+* Latency
+
+.code _code/big-o-timings.txt
+
+* groot rtree Reader
+
+With the new re-engineered `rtree.Reader`, `groot` can infer:
+
+- the expected entry span to process
+- the expected list of baskets and their byte spans
+
+and thus, for each requested branch:
+
+- create a goroutine that will serve the baskets in turn
+- pre-fetch the basket bytes on disk
+- pre-launch the uncompression
+
+.image _figs/gophereartrumpet.jpg _ 350
+
+So when one requests entry `N`, everything is already in memory, ready to be used.
+
+* groot rtree
+
+An additional concurrency axis (not yet implemented) would be to have `N` concurrent goroutines each requesting/handling one entry of the tree (and filling in turn the user data)...
+
+but being already `~2x` faster than ROOT isn't too bad.
+
+Now, the same kind of optimization should also be applied to writing...
+
+.image _figs/groot.jpg _ 500
+.caption That's all folks
