@@ -1,0 +1,76 @@
+go-lpc/mim
+MIM, 2020-08-18
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* mim/eda-daq
+
+[[https://github.com/go-lpc/mim][mim/daq]] holds the current effort to migrate the MIM DAQ to a Go-based solution (_a.k.a_ [[https://github.com/go-daq/tdaq][go-daq/tdaq]]).
+
+Current content, on `master`:
+
+- `cmd/dif-dump`: decodes and dumps on-screen, DIF files
+- `cmd/eda2lcio`: converts a DIF data file into an LCIO one
+- `cmd/eda-ctl`: daemon process that drives an EDA acquisition
+- `cmd/eda-spy`: reads and dumps the registers of an EDA board
+- `cmd/eda-srv`: daemon process that fetches files off an EDA board
+- `cmd/lcio2eda`: converts an LCIO raw file into a DIF one
+- `cmd/lcio-rewrite-run`: rewrites an LCIO file, modifying its run number
+- `dif`: encodes/decodes DIF data
+- `eda`: driver for the EDA board
+
+* Status before the summer holidays
+
+- modified C++/DAQ to inject a shim python helper to start/stop `eda` DAQ
+- `python` helper would phone in `eda-ctl` (sitting on `cyclone5`), send simple `JSON` requests (`start`, `stop`, and a couple of configuration parameters (`run`, `threshold`, `rshaper`, `cshaper`, `rfm-mask`, IP address of the `eda-srv` process that fetched raw data off the `cyclone5` board)
+- `Go` based `eda-ctl` would launch a sub-process (Baptiste's `acq_chb_client`) with the provided parameters
+- started to re-implement `acq_chb_client` into Go, as `mim/cmd/eda-daq` + functions/types in `mim/eda`
+- started to integrate `eda-ctl` directly into C++/DAQ, sans the `python` layer (`cxx-eda` branch on [[https://gitlab.in2p3.fr/MIM/mim-framework/][mim-framework]]). This involved writing a `DimEDAServer` class, integrated into the whole `DIM` machinery.
+
+* What happened since then
+
+- finished re-implementing `acq_chb_client` into Go, as `mim/cmd/eda-daq`
+- added handling of `rfm-mask` into `eda-daq` (ie: handling of nRFM>=1)
+- finished basic integration (framework-wise) of EDA into C++/DAQ (all framework calls implemented, except for fetching EDA configuration from database)
+- C++ `DimDaq/DimEDAServer` is making calls (over a "control" socket) to `eda-ctl` on the EDA board, following `DIM` state machine (`DISCOVER`, `INITIALIZE`, `CONFIGURE`, `START`, `STOP`, `DESTROY`)
+- C++ `DimEDAServer` is creating 1 "data" socket per RFM, pulling data from the EDA board, and present that data to the various `DimInfo` services (namely, `/DDS/DIF<id>/DATA`, that holds the DIF data that is then funneled to `dimwriter`)
+- `eda-ctl` receives the `init/config/start/stop` calls from `DimEDAServer` and *directly* configures the EDA board (using the `mim/eda` driver)
+- `eda-ctl` creates and connects the "data" sockets (back to `DimEDAServer`) during the `/CONFIGURE` step
+
+* 
+
+.image _figs/timeline.png _ 780
+
+* Current status
+
+- can take runs w/ 2 RFMs (`rfm-mask=(1<<0)|(1<<1)`)
+- with C++ integrated `DimEDAServer`
+
+`cxx-eda` branch (`mim-framework`) and `eda-svc` branch (`go-lpc/mim`) have not (yet) been merged into `master`.
+
+still a bit of cleaning to apply, and resolve the current issues:
+
+- `eda-daq` had to depart a bit from the `acq_chb_client` blueprint. the overall reason seems to be coming from the "busy-loop" pattern of `acq_chb_client` which doesn't translate well in Go (because, probably of its runtime scheduler, which may interrupt/pause a for-loop for scanning for garbage). this may have happen for the `reset-BCID` issue and for the `run-loop` "missing" state transitions (`acq/ro/cp`). Probably a good fix would be to go to an interrupt-base program.
+
+* Current status
+
+- hardcoded `DTC==GTC` in `eda-ctl` (`EDA` `CNT_hit1` always `0`)
+- hardcoded `DTC+1` in `eda-ctl` (C++ DAQ is expecting a count (starting a 1) instead of a "cycle ID" (starting at 0))
+- `EDA` is starting its Hardroc IDs at 0, C++ DAQ expects they start at 1 (needs to be fixed h/w or s/w-wise)
+- when using `eda-ctl`, there aren't many DIF data slugs with n-frames > 0
+
+* TODO
+
+- check the produced data can be ingested by other tools (_c.f._ hardroc ID)
+- check the produced data is somewhat valid
+- check whether the BCID skew is problematic (or whether it can be fixed h/w-wise)
+- check why there are so many empty frames in DIFs
+- perhaps try an interrupt-based `eda-daq` instead of the busy-loop pattern
+- get EDA configuration from database (instead of files, instead of hard-coding RFM-masks, etc...)
+- something else?
+
+Plan-B: write an `acq_chb_client` with a `discover/initialize/configure/start/stop` state machine? (stopping at each step, waiting on a socket to get the configuration/parameters for the next step)
