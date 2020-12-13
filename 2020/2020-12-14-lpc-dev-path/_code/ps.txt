@@ -1,0 +1,17 @@
+%% PostScript %%         │       // JS+HTML5+Canvas
+/box {                   │       function box() {
+    newpath              │           ctx.beginPath();
+    0 0 moveto           │           ctx.moveTo(0, 0);
+    0 1 lineto           │           ctx.lineTo(0, 1);
+    1 1 lineto           │           ctx.lineTo(1, 1);
+    1 0 lineto           │           ctx.lineTo(1, 0);
+    closepath            │           ctx.closePath();
+} def                    │       }
+                         │        
+gsave                    │       ctx.save();
+72 72 scale              │       ctx.scale(72, 72);
+box fill                 │       box(); ctx.fill();
+2 2 translate            │       ctx.translate(2, 2);
+box fill                 │       box(); ctx.fill();
+grestore                 │       ctx.restore();
+
