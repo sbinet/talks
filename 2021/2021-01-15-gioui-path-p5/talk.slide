@@ -1,0 +1,270 @@
+Gio & st(r)oked paths
+Gio January Community Call, 2020-12-14
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Gio and me
+
+It all started with these 2 "simple" use cases:
+
+- Seb, I'd like to be able to render LaTeX equations into my [[https://pkg.go.dev/go-hep.org/x/hep@v0.28.4/hplot?readme=expanded#section-readme][hplot]] plots (_ie:_ `$\frac{\sqrt{1+x}}{2\pi}$`)
+
+- Seb, it would be great to have an interactive playground to show some physics features, such as a solar system simulation that exercises basic Newtonian mechanics
+
+_"Well,_sure,_how_hard_can_it_be?"_
+
+_(Personal_constraint:_everything_has_to_be_in_Go)_
+
+Ok, this just has to do with drawing things in 2-D...
+How do you do that?
+
+* Drawing in Go
+
+In (scientific) Go, we have [[https://godoc.org/gonum.org/v1/plot][Gonum/plot]] to plot graphs, histograms and such.
+
+`Gonum/plot` exposes the [[https://godoc.org/gonum.org/v1/plot/vg#Canvas][vg.Canvas]] interface that has the same interface than PostScript to move a pen around.
+
+But `gonum/plot` is about rendering "static" plots, without any interactivity (yet) nor animation (yet?).
+For this, there's (obviously) [[https://gioui.org][Gio]].
+That's the toolkit I am using in [[https://github.com/go-p5/p5][Go-P5]], a [[https://processing.org][Processing]] port to Go.
+
+`Processing` is a toolkit (originally in `Java`, now in `JS` (with [[https://p5js.org][p5js]])) to learn programming with graphics.
+(In my days, we had [[https://en.wikipedia.org/wiki/Logo_%28programming_language%29][LOGO]] and `Turtle`. same difference, really.)
+
+That's what we (a group of people at my lab) decided to use for the educational physics problems.
+
+* Drawing w/ Gio
+
+At that time, `Gio` could draw the outline of shapes with some color:
+
+.image _figs/TestPaintArc.png
+
+Problem solved?
+
+Well... no: `Gio` didn't support stroking paths.
+
+* Stroking paths
+
+Naïvely, stroking a path should be easier than (or at least easy once we have) filling a path, right?
+
+Wrong again.
+
+.code _code/gio-path.go
+
+* Stroking paths
+
+A naive approach would be to transform a "stroking path" into an "outline path":
+
+- take the stroking path (in _black_)
+- "expand" it along the path by "drawing" an enveloppe: move a "pen", a perpendicular line of length the desidered width of the path, along the "stroking path",
+- take the contour of such a shape, reuse the "outline path" code and color it accordingly (in _red_).
+
+.image _figs/stroke-line.png
+
+One just "replaces" a line with its rectangle counterpart.
+
+* Stroking paths
+
+That's how the initial "algorithm" was described originally.
+
+Amusingly, that "algorithm" wasn't properly specified with a sound theory and concepts.
+
+Also, it doesn't work very well for:
+
+- paths that aren't lines
+- very sophisticated paths,
+- paths with cusps,
+- paths with sharp angles,
+- probably other cases...
+
+* Stroking paths
+
+The usual way to solve this problem can be applied, though:
+
+- break it into smaller problems
+- tilt your head and squint hard enough so each problem looks like a similar, already solved, problem.
+
+We "know" how to solve for a line? Make each path look like a line.
+
+That's how the reference paper for stroking path actually does it:
+
+  Fast, precise flattening of cubic Bézier path and offset curves
+  Thomas F. Hain, et al.
+
+An electronic version is available here:
+
+.link https://seant23.files.wordpress.com/2010/11/fastpreciseflatteningofbeziercurve.pdf
+
+
+* Stroking paths
+
+Algorithm:
+
+- take a curve
+- break it into a sequence of quadratic Bézier curves (quads)
+- break each quad into a set of smaller quads that can be approximated into lines (with some controled error)
+- turn each resulting line segment into a rectangle of the desired width
+- fill with the desired color.
+
+`Done.` _Done?_ *Nope*
+
+One needs to also handle cusps in the path: this is done by finding inflexion points in the curve (derivatives and second derivatives) to detect when a path changes direction:
+
+- special treatment (joints) is then applied to stitch the two branches of the cusps in a aesthetically pleasing way (`Bevel`-, `Mitter`-, `Round`-joint, ...)
+
+* Stroking paths
+
+Glossing over the implementation details and the minute details of floating point error propagations/precision, I did manage to provide an implementation of stroking a path with Gio (with many thanks for the code review process):
+
+.image _figs/stroke-z.png
+
+* 
+
+.code _code/stroke-z.go /START/,/END/
+* 
+
+There was one final little wrinkle though: for scientific plots, it's also very useful to be able to apply a dash pattern to a stroke:
+
+.image _figs/gonum-line.png 490 _
+
+* Dashed stroking paths
+
+But here again, the same recipe can be applied:
+
+- decompose a path into a set of paths, one for each element of a dash pattern
+- apply the stroking path recipe for each of the resulting "sub-paths"
+
+Ex: cut a line into a dash pattern of 3 dashes, 2 empty dashes, 2 dashes, 2 empty dashes, etc...
+
+ solid line:       ────────────────
+ dashed line:      ───  ──  ───  ── ...
+
+.image _figs/dashed-ellipsis.png 280 _
+
+* Dashed stroking paths
+
+Ok, *now* we are done.
+
+And that's what [[https://github.com/go-p5/p5][go-p5]] does and looks like...
+
+.image _figs/hello-p5.png
+
+* 
+
+.image _figs/bouncing-balls.gif
+
+* 
+
+.image _figs/solar-system.gif 600 _
+
+* Stroking paths
+
+Stroking paths isn't a frozen research domain: it's still vibrant and new algorithms, APIs and implementations are produced "as we speak".
+
+Amusingly, most of this activity is associated with GPUs (and how to leverage them to stroke paths).
+
+See:
+
+.link https://arxiv.org/pdf/2007.00308.pdf
+.link https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html
+.link https://github.com/linebender/piet-gpu/blob/master/doc/vision.md
+
+for possible improvements to what has been implemented in Gio.
+
+* Stroking paths and new "compute" backend
+
+As you may have noticed (and unsurprisingly), the initial version of stroking paths had a couple of bugs, uncovered by the introduction of the new `compute` backend.
+
+Basically, it all boiled down to the "old" backend being a bit more leniant than the "new" one.
+
+Stroked paths consisting of, say, a straight line, because of (32b) floating point error propagation, would result in a not completely closed rectangle.
+
+The "old" backend was more or less ok with that (and provided the "expected" visual rendering in most cases.)
+
+The "new" one was stricter and gave "unexpected" visual rendering results.
+
+This is *fixed* now. (please file bug reports otherwise.) 
+
+* go-p5
+
+* go-p5
+
+As introduced earlier on, [[https://github.com/go-p5/p5][Go-p5]], a [[https://processing.org][Processing]] port to Go.
+
+`Processing` is a toolkit (originally in `Java`, now also available from `JS` (with [[https://p5js.org][p5js]])) to learn programming with graphics.
+
+I've started `go-p5` based off `Gio` with an eye on the original `p5js` API, without too much departing from that (yet.)
+
+That API is full of globals, so the idea is to eventually lift it in an `ezp5` package, and provide a cleaner API in `p5`.
+
+* 
+
+.code _code/p5-api.go /START/,/END/
+
+* go-p5
+
+`p5` works like this:
+
+- a main `Run` function that takes 2 `funcs`
+- `setup` is called once
+- `draw` is called each time a new frame is requested (default: every 15ms)
+
+Within `draw`, one can retrieve the mouse position, mouse buttons clicked (from `Gio`) and the previous mouse position (from the previous frame).
+This allows some amount of nice visual effects and interactivity.
+
+Already got a couple of interested parties providing a few PRs.
+
+* go-p5: future developments
+
+For the physics simulation stuff, a couple of things will need to be implemented:
+
+- drag & drop (_e.g.:_ of charged particles in a field to see the effects on the EM-field isolines)
+- view port (_e.g.:_ to zoom in/out, pan, in the solar system view)
+- some GUI widgets (file selection, drop-down menus, ...)
+
+and continue to provide more of the `p5js` API.
+
+* How to draw LaTeX equations
+
+* How to draw LaTeX equations
+
+At a low level, this is essentially the same than what we did: drawing an equation with a squared root is just like stroking a path.
+
+.image _figs/sqrt.png 100 _
+
+Symbols, letters, ..., well, glyphs of a font's package are actually described in the TTF/OTF format as segments (lines, Bézier curves, circles, etc...).
+
+So once a LaTeX has been properly parsed, displaying it (or any piece of text, really) can be seen as just drawing paths.
+
+* How to display text
+
+.image _figs/glyphterms_2x.png 550 _
+
+* mtex-render + Liberation fonts
+
+.image _figs/go-latex-liberation.png _ 600
+
+* mtex-render + Latin-Modern fonts
+
+.image _figs/go-latex-lm.png _ 600
+
+* mtex-render
+
+As can be seen, it's still a work in progress :)
+
+`go-latex` uses the same algorithm than what is done in [[https://matplotlib.org][matplotlib]], to have the look and feel of LaTeX without having to shell out to `latex` (which can be rather slow, and needs a complete LaTeX environment).
+
+.link https://github.com/go-latex/latex
+.link https://matplotlib.org/3.2.1/tutorials/text/mathtext.html
+
+* Biblio
+
+.link https://blog.mecheye.net/2019/05/why-is-2d-graphics-is-harder-than-3d-graphics/
+.link https://seant23.files.wordpress.com/2010/11/fastpreciseflatteningofbeziercurve.pdf
+.link https://arxiv.org/pdf/2007.00308.pdf
+.link https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html
+
