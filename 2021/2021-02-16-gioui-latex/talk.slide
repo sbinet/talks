@@ -1,0 +1,100 @@
+Drawing LaTeX equations with Gio
+Gio February Community Call, 2021-02-16
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Gio and me
+
+It all started with these 2 "simple" use cases:
+
+- Seb, I'd like to be able to render LaTeX equations into my [[https://pkg.go.dev/go-hep.org/x/hep@v0.28.4/hplot?readme=expanded#section-readme][hplot]] plots (_ie:_ `$\frac{\sqrt{1+x}}{2\pi}$`)
+
+- Seb, it would be great to have an interactive playground to show some physics features, such as a solar system simulation that exercises basic Newtonian mechanics
+
+_"Well,_sure,_how_hard_can_it_be?"_
+
+_(Personal_constraint:_everything_has_to_be_in_Go)_
+
+Ok, this just has to do with drawing things in 2-D...
+How do you do that?
+
+* How to draw LaTeX equations
+
+* How to draw LaTeX equations
+
+At a low level, this is essentially the same than what we did previously with Gio: drawing an equation with a squared root is just like stroking a path.
+
+.image _figs/sqrt.png 100 _
+
+Symbols, letters, ..., well, glyphs of a font's package are actually described in the TTF/OTF format as segments (lines, Bézier curves, circles, etc...).
+
+So once a LaTeX equation has been properly parsed, displaying it (or any piece of text, really) can be seen as just drawing paths.
+
+* How to display text
+
+.image _figs/glyphterms_2x.png 550 _
+
+* github.com/go-latex/latex
+
+- `mtex`: parse a `LaTeX` equation, produce an AST of `tex.Node`
+
+  package mtex // import "github.com/go-latex/latex/mtex"
+  
+  // Parse parses a LaTeX math expression and returns the TeX-like box model and
+  // an error if any.
+  func Parse(expr string, fontSize, DPI float64, backend font.Backend) (tex.Node, error)
+
+- `tex`: analyze an AST and applies the `TeX` formulae for typesetting (boxes, alignment, etc...)
+- `mtex`: render an AST to a `drawtex.Canvas`
+
+  func Render(dst Renderer, expr string, size, dpi float64, fonts *ttf.Fonts) error
+  
+- `drawtex/drawimg`: render an AST as an `image.Image`
+- `drawtex/drawpdf`: render an AST as a PDF document
+- `cmd/mtex-render`: render a LaTeX equation to a `drawtex.Canvas` or to Gio.
+
+* mtex-render + Liberation fonts
+
+.image _figs/go-latex-liberation.png _ 600
+
+* mtex-render + Latin-Modern fonts
+
+.image _figs/go-latex-lm.png _ 600
+
+* mtex-render
+
+As can be seen, it's still a work in progress :)
+
+`go-latex` uses the same algorithm than what is done in [[https://matplotlib.org][matplotlib]], to have the look and feel of LaTeX without having to shell out to `latex` (which can be rather slow, and needs a complete LaTeX environment).
+
+.link https://github.com/go-latex/latex
+.link https://matplotlib.org/3.2.1/tutorials/text/mathtext.html
+
+* star-tex
+
+* star-tex: a TeX engine in Go
+
+Implementing the `TeX` parser and its mathematical equation parser was fun but:
+
+- it's not a complete TeX engine
+- it has numerous (parsing) bugs
+- it implements "by hand" a subset of the "real" LaTeX math equation language
+
+_"Solution":_ implement a real TeX engine in Go.
+
+.link https://sr.ht/~sbinet/star-tex
+
+The aim is to have a complete, pure-Go, `tex-live` compatible TeX engine.
+
+* 
+
+ $> star-tex ./testdata/hello.tex o.dvi
+ $> dvipdf o.dvi
+ $> pdf o.pdf
+
+.image _figs/star-tex.png
+
