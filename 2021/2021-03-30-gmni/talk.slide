@@ -1,0 +1,197 @@
+Gemini protocol
+LPC-dev info, 2021-03-30
+
+Sebastien Binet
+CNRS/IN2P3/LPC-Clermont
+https://github.com/sbinet
+@0xbins
+sebastien.binet@clermont.in2p3.fr
+
+* Gemini: why?
+
+_Authoritative_statements:_
+
+- the Web (`www`, `http{,s}`, `HTML`) is *too*heavy*
+- browsing w/ JS disabled is an "interesting" experience
+- browsing w/ JS enabled is an attack vector
+- implementing a web browser is a multi-hundred developers endeavour (only big companies can afford it
+
+"Sophistication" brings endless new ways for bugs or attack vectors.
+Its footprint isn't completely eco-friendly either.
+
+_Time_for_something_new?_
+
+.link https://gemini.circumlunar.space/docs/faq.html
+
+* Gemini
+
+From the official web site (but also available on the Gemini space):
+
+  Gemini is a new internet protocol which:
+  
+  - Is heavier than gopher
+  - Is lighter than the web
+  - Will not replace either
+  - Strives for maximum power to weight ratio
+  - Takes user privacy very seriously
+
+.link https://gemini.circumlunar.space
+
+In a nutshell, it's a protocol for serving and receiving hypertext documents (called `text/gemini` like `text/html` for the web), via [[https://en.wikipedia.org/wiki/Transport_Layer_Security][TLS]].
+
+Gemini resources are served via _URIs_ behind the `gemini://` scheme.
+There are not equivalent of `http{,s}`: everything is served via `TLS` using self-signed certificates (`TOFU` -- _Trust_on_first_use_).
+
+_Default_port:_ `1965` "for some reason".
+
+* Gemini - specs
+
+.link https://gemini.circumlunar.space/docs/specification.html
+
+Typical session:
+
+  C: Opens connection
+  S: Accepts connection
+  C/S: Complete TLS handshake
+  C: Validates server certificate
+  C: Sends request (one CRLF terminated line)
+  S: Sends response header (one CRLF terminated line), closes connection
+     under non-success conditions
+  S: Sends response body (text or binary data)
+  S: Closes connection
+  C: Handles response
+
+Example:
+
+  C: gemini://example.com/
+  S: 20 text/gemini
+  S: # Example Title
+  S:
+  S: Welcome to my Gemini capsule. [etc]
+
+* Simplicity
+
+A Gemini client can just be implemented via `openssl+awk`:
+
+  $> openssl s_client -quiet -crlf           \
+      -servername gemini.circumlunar.space   \
+      -connect gemini.circumlunar.space:1965 \
+    | awk '{ print "response: " $0 }'
+  
+  depth=0 CN = gemini.circumlunar.space
+  verify error:num=18:self signed certificate
+  verify return:1
+  depth=0 CN = gemini.circumlunar.space
+  verify return:1
+  
+  > gemini://gemini.circumlunar.space/capcom/
+  response: 20 text/gemini
+  response: # CAPCOM Geminispace aggregator
+  response: 
+  response: CAPCOM is an aggregator for Atom feeds of Gemini content.  It was inspired by:
+  response: => gopher://i-logout.cz:70/1/bongusta/	The Bongusta aggregator for Gopherspace
+  response: 
+  response: Each month, CAPCOM randomly selects 100 distinct URLs from its list of known feeds, and includes their content in its output.  This makes it a nice way to discover new content in Geminispace.  If you're enjoying content from one feed, you should subscribe to it yourself in some way, because that feed is not guaranteed to be one of the 100 feeds chosen next month!
+  response: => submit	Submit your Atom feed's URL for inclusion in CAPCOM's list
+  response: => feeds.txt	See this month's active feeds
+  [...]
+
+
+* Gemini clients
+
+.link https://github.com/makeworld-the-better-one/amfora Amfora (TUI, Go)
+.link https://git.sr.ht/~acdw/bollux/ Bollux (term, bash)
+.link https://bombadillo.colorfield.space/ Bombadillo (term, Go)
+.link https://git.sr.ht/~julienxx/castor Castor (GUI, GTK+Rust)
+.link https://play.google.com/store/apps/details?id=ca.snoe.deedum Deedum (Android,iOS, GUI)
+.link https://git.sr.ht/~sircmpwn/gmni Gmni (term, C)
+.link https://gmi.skyjake.fi/lagrange/ Lagrange (GUI, C)
+
+(I am using `Lagrange` and `deedum`.)
+
+* Gemini servers
+
+.link https://github.com/spc476/GLV-1.12556 The first Gemini server (Lua)
+.link https://sr.ht/~sircmpwn/gmnisrv/ gmnisrv (C)
+.link https://sr.ht/~adnano/go-gemini/ go-gemini (Go)
+.link https://git.sr.ht/~julienxx/pollux Pollux (Rust)
+.link https://gitlab.com/lambdatronic/space-age space-age (Clojure)
+.link https://coding.openguide.co.uk/git/gemini-php/ Gemini-PHP (PHP)
+.link https://github.com/jfmcbrayer/germinal Germinal (Common Lisp)
+
+(not surprisingly, I use `go-gemini`.)
+
+* text/gemini
+
+The markup language of Gemini documents is `text/gemini` (like `text/html`, `text/plain`, etc...).
+
+It can be viewed as a "line oriented" subset of [[https://en.wikipedia.org/wiki/Markdown][Markdown]]:
+
+- text lines
+- link lines
+- pre-formatted text lines
+- headings lines
+- unordered list items
+- quote lines
+
+* text/gemini example
+
+.code _code/hello-1.gmni
+
+* text/gemini example - II
+
+.code _code/hello-2.gmni
+
+* text/gemini example - III
+
+[[gemini://blog.sbinet.org/2021-03-15-hello-world.gmi][gemini://blog.sbinet.org/2021-03-15-hello-world.gmi]]
+
+.image _figs/lagrange.png 500 _
+
+* Web server
+
+.code _code/web.go
+
+  $> go run ./main.go
+  $> curl http://localhost:8080/web/is/great/but/heavy
+  Hello, you've requested: /web/is/great/but/heavy
+
+* Gemini server - generate certificates
+
+.code _code/gen-cert.go
+
+* Gemini server
+
+.code _code/gmni.go /^func main/,/^}/
+
+* (My opinionated) Conclusions
+
+_Pros:_
+
+- fun to develop with and for
+- very simple to bootstrap (generating self-signed certificates is rather easy)
+- `text/gemini` is easy to learn
+- no more tracking from web sites
+- attack surface drastically shrinked
+
+_Cons:_
+
+- no way to serve simple images (_e.g._ how to display a blueprint, a plot? "solution" is to put a link-line to that image)
+- no way to display `LaTeX` equations (same "solution" or just "display" it "raw")
+
+* 
+
+_Own_TODO_list:_
+
+- serve the [[https://golang.org][Go]] documentation on `Gemini`
+- write a little [[https://gioui.org][Gio-based]] GUI client
+- add support for displaying `LaTeX` equations to that mock-Gemini client
+
+* Bibliography
+
+.link https://en.wikipedia.org/wiki/Gemini_(protocol)
+.link https://gemini.circumlunar.space/
+.link https://www.bortzmeyer.org/gemini.html
+.link https://linuxfr.org/users/hellpe/journaux/gemini-et-solid-deux-alternatives-au-web-qu-il-faut-qu-on-m-explique
+.link https://drewdevault.com/2020/11/01/What-is-Gemini-anyway.html
+.link https://en.wikipedia.org/wiki/Trust_on_first_use
